@@ -7,14 +7,16 @@ import { Button } from '@/components/ui/button';
 import { BellRing, Download, PartyPopper } from "lucide-react";
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
-import { DISCORD_TOKEN } from '@/lib/discord-config';
+// import { DISCORD_TOKEN } from '@/lib/discord-config'; // LIGNE SUPPRIMÉE !
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
-// --- Constantes (ID de Guilde) ---
+// --- Constantes (ID de Guilde et Token lu directement de Vercel) ---
 const GUILD_ID = '1422806103267344416';
+// CORRECTION: Lit le token directement depuis process.env (Vercel)
+const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
 
 // --- Interfaces (Types de Données) ---
 interface DiscordChannel {
@@ -47,12 +49,25 @@ interface DiscordWidgetData {
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
     
-    if (!DISCORD_TOKEN || DISCORD_TOKEN === 'your_discord_bot_token_here') {
-        console.error("DISCORD_TOKEN is not set or is invalid in the configuration.");
+    // Vérification du Token
+    if (!DISCORD_TOKEN) {
+        console.error("DISCORD_BOT_TOKEN est manquant ou non défini dans les variables d'environnement Vercel.");
+        // Si le token manque, on retourne des données vides pour éviter le crash
+        const emptyData: DiscordWidgetData = {
+            id: GUILD_ID,
+            name: 'Fais Ta Sortie à Toulouse',
+            instant_invite: null,
+            channels: [],
+            members: [],
+            presence_count: 0,
+            events: []
+        };
+        // Rendre la page avec une alerte d'erreur si vous voulez
+        // ... (Ou continuez avec les données vides)
     }
 
     // --- Récupération des Événements (API REST sécurisée) ---
-    const eventsData: DiscordEvent[] = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
         headers: {
             // Utilisation sécurisée de la variable d'environnement
             Authorization: `Bot ${DISCORD_TOKEN}`, 
@@ -71,10 +86,11 @@ export default async function DashboardPage() {
     .catch(err => {
         console.error('Error fetching Discord events:', err);
         return []; 
-    });
-
+    }) : []; // Si le Token manque, retourne un tableau vide
+    
     // --- Récupération des Salons et Membres (Widget API) ---
-    // Note : Cette API est moins fiable pour les événements et les salons complets.
+    // REMARQUE : Cette API n'est pas sécurisée par Token, elle ne voit que les salons publics.
+    // Elle reste utilisée ici pour le compte de présence.
     const widgetData = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
@@ -161,7 +177,7 @@ export default async function DashboardPage() {
                     <AlertTitle>Notifications Discord</AlertTitle>
                     <AlertDescription>
                         Les alertes pour les nouveaux événements et annonces importantes seront bientôt disponibles.
-                    </AlertDescription>
+                    </Alertcription>
                 </Alert>
             </section>
         </div>
