@@ -56,7 +56,6 @@ export default async function DashboardPage() {
     }
     
     // --- Récupération des Salons (API REST sécurisée) ---
-    // NOVEAUTÉ : Utilise le Bot Token pour voir TOUS les salons (publics et privés)
     const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
@@ -77,7 +76,6 @@ export default async function DashboardPage() {
 
     
     // --- Récupération des Événements (API REST sécurisée) ---
-    // (Cette section reste inchangée, elle utilise le Token et fonctionne)
     const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
@@ -98,15 +96,25 @@ export default async function DashboardPage() {
     }) : []; 
 
 
+    // --- Calcul du Compteur d'Événements à Venir (la "Notification") ---
+    const now = new Date();
+    // 7 jours en millisecondes pour filtrer les événements proches
+    const oneWeek = 7 * 24 * 60 * 60 * 1000; 
+    
+    const upcomingEventsCount = eventsData.filter(event => {
+        const startTime = new Date(event.scheduled_start_time);
+        // L'événement doit être dans le futur ET dans les 7 prochains jours
+        return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
+    }).length;
+
+
     // --- Récupération des Membres (Widget API) ---
-    // Cette API est gardée pour le count des membres, car elle est plus simple.
     const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
 
 
     // --- Combinaison des Données ---
-    // NOVEAUTÉ : Nous utilisons channelsData (la liste complète) au lieu de widgetData.channels.
     const discordData: DiscordWidgetData | null = widgetData ? {
         ...widgetData,
         channels: channelsData, // Utilise les salons complets, lus par le Bot Admin
@@ -182,15 +190,23 @@ export default async function DashboardPage() {
                 </div>
             </section>
 
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
             <section>
                 <Alert>
                     <BellRing className="h-4 w-4" />
-                    <AlertTitle>Notifications Discord</AlertTitle>
+                    <AlertTitle>Événements à Venir (7 Jours)</AlertTitle>
                     <AlertDescription>
-                        Les alertes pour les nouveaux événements et annonces importantes seront bientôt disponibles.
+                        {upcomingEventsCount > 0 ? (
+                            <p className="font-bold text-lg text-primary">
+                                Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
+                            </p>
+                        ) : (
+                            'Aucun événement n’est prévu cette semaine. Consultez la liste ci-dessous pour organiser une sortie !'
+                        )}
                     </AlertDescription>
                 </Alert>
             </section>
+            {/* ------------------------------------- */}
         </div>
     );
 }
