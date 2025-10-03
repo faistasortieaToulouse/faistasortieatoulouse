@@ -55,18 +55,37 @@ export default async function DashboardPage() {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    // --- Récupération des Événements (API REST sécurisée) ---
-    // Utilise le Token uniquement s'il est présent.
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+    // --- Récupération des Salons (API REST sécurisée) ---
+    // NOVEAUTÉ : Utilise le Bot Token pour voir TOUS les salons (publics et privés)
+    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
-            // Utilisation sécurisée de la variable d'environnement
             Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
         next: { revalidate: 300 } // Cache for 5 minutes
     })
     .then(async res => {
         if (!res.ok) {
-            // Loggez l'erreur pour le débogage (votre Bot Admin devrait résoudre le 403)
+            console.error(`Failed to fetch Discord channels: ${res.status} ${res.statusText}`);
+            return []; 
+        }
+        return res.json();
+    })
+    .catch(err => {
+        console.error('Error fetching Discord channels:', err);
+        return []; 
+    }) : []; // Si le Token manque, retourne un tableau vide
+
+    
+    // --- Récupération des Événements (API REST sécurisée) ---
+    // (Cette section reste inchangée, elle utilise le Token et fonctionne)
+    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+        headers: {
+            Authorization: `Bot ${DISCORD_TOKEN}`, 
+        },
+        next: { revalidate: 300 } 
+    })
+    .then(async res => {
+        if (!res.ok) {
             const errorBody = await res.text().catch(() => 'No error body available');
             console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody}`);
             return []; 
@@ -76,25 +95,28 @@ export default async function DashboardPage() {
     .catch(err => {
         console.error('Error fetching Discord events:', err);
         return []; 
-    }) : []; // Si le Token manque, retourne un tableau vide
-    
-    // --- Récupération des Salons et Membres (Widget API) ---
-    // Ceci est gardé pour la compatibilité du Widget, mais n'affiche que les salons publics.
-    const widgetData = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
+    }) : []; 
+
+
+    // --- Récupération des Membres (Widget API) ---
+    // Cette API est gardée pour le count des membres, car elle est plus simple.
+    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
 
 
     // --- Combinaison des Données ---
+    // NOVEAUTÉ : Nous utilisons channelsData (la liste complète) au lieu de widgetData.channels.
     const discordData: DiscordWidgetData | null = widgetData ? {
         ...widgetData,
-        events: eventsData // Remplace les événements du widget par les événements complets de l'API REST
+        channels: channelsData, // Utilise les salons complets, lus par le Bot Admin
+        events: eventsData
     } : {
         // Fallback en cas d'échec de widget.json
         id: GUILD_ID,
         name: 'Fais Ta Sortie à Toulouse',
         instant_invite: null,
-        channels: [],
+        channels: channelsData, // Utilise les salons complets
         members: [],
         presence_count: 0,
         events: eventsData
