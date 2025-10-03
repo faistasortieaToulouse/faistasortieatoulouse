@@ -11,8 +11,7 @@ import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 
-// Nous laissons revalidate: 300 ici, mais nous le remplaçons dans les fetch pour le débogage.
-export const revalidate = 300; 
+export const revalidate = 300; // Revalidate at most every 5 minutes
 
 // --- Constantes (ID de Guilde) ---
 const GUILD_ID = '1422806103267344416';
@@ -57,13 +56,12 @@ export default async function DashboardPage() {
     }
     
     // --- Récupération des Salons (API REST sécurisée) ---
-    // MODIFICATION CLÉ : Utilise cache: 'no-store'
+    // NOVEAUTÉ : Utilise le Bot Token pour voir TOUS les salons (publics et privés)
     const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
-        // TEMPORAIREMENT : Désactive le cache pour forcer la mise à jour des données (cache: 'no-store')
-        cache: 'no-store' 
+        next: { revalidate: 300 } // Cache for 5 minutes
     })
     .then(async res => {
         if (!res.ok) {
@@ -79,13 +77,12 @@ export default async function DashboardPage() {
 
     
     // --- Récupération des Événements (API REST sécurisée) ---
-    // MODIFICATION CLÉ : Utilise cache: 'no-store'
+    // (Cette section reste inchangée, elle utilise le Token et fonctionne)
     const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
-        // TEMPORAIREMENT : Désactive le cache pour forcer la mise à jour des données (cache: 'no-store')
-        cache: 'no-store' 
+        next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
@@ -102,14 +99,14 @@ export default async function DashboardPage() {
 
 
     // --- Récupération des Membres (Widget API) ---
-    // Cette API est gardée pour le count des membres, mais nous désactivons aussi son cache temporairement pour être sûr.
-    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { cache: 'no-store' })
+    // Cette API est gardée pour le count des membres, car elle est plus simple.
+    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
 
 
     // --- Combinaison des Données ---
-    // Nous utilisons channelsData (la liste complète) au lieu de widgetData.channels.
+    // NOVEAUTÉ : Nous utilisons channelsData (la liste complète) au lieu de widgetData.channels.
     const discordData: DiscordWidgetData | null = widgetData ? {
         ...widgetData,
         channels: channelsData, // Utilise les salons complets, lus par le Bot Admin
