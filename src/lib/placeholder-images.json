@@ -1,0 +1,138 @@
+{
+  "placeholderImages": [
+    {
+      "id": "fts-logo",
+      "description": "Fais Ta Sortie Toulouse Logo",
+      "imageUrl": "http://bilingue31.free.fr/logoNewSortiraToulouse105.jpg",
+      "imageHint": "logo"
+    }
+  ],
+  "carouselImages": [
+    {
+      "id": "carousel-bar",
+      "description": "Sortie dans un bar",
+      "imageUrl": "http://bilingue31.free.fr/ftsbar600.jpg",
+      "imageHint": "bar"
+    },
+    {
+      "id": "carousel-baton",
+      "description": "Marche avec bâtons",
+      "imageUrl": "http://bilingue31.free.fr/ftsbaton600.jpg",
+      "imageHint": "walking"
+    },
+    {
+      "id": "carousel-cinema",
+      "description": "Sortie au cinéma",
+      "imageUrl": "http://bilingue31.free.fr/ftscinema600.jpg",
+      "imageHint": "cinema"
+    },
+    {
+      "id": "carousel-concert",
+      "description": "Concert",
+      "imageUrl": "http://bilingue31.free.fr/ftsconcert600.jpg",
+      "imageHint": "concert"
+    },
+    {
+      "id": "carousel-covoiturage",
+      "description": "Covoiturage",
+      "imageUrl": "http://bilingue31.free.fr/ftscovoiturage600.jpg",
+      "imageHint": "carpool"
+    },
+    {
+      "id": "carousel-danse",
+      "description": "Cours de danse",
+      "imageUrl": "http://bilingue31.free.fr/ftsdanse600.jpg",
+      "imageHint": "dancing"
+    },
+    {
+      "id": "carousel-emploi",
+      "description": "Recherche d'emploi",
+      "imageUrl": "http://bilingue31.free.fr/ftsemploi600.jpg",
+      "imageHint": "job search"
+    },
+    {
+      "id": "carousel-jeu",
+      "description": "Soirée jeux de société",
+      "imageUrl": "http://bilingue31.free.fr/ftsjeu600.jpg",
+      "imageHint": "board games"
+    },
+    {
+      "id": "carousel-lecture",
+      "description": "Club de lecture",
+      "imageUrl": "http://bilingue31.free.fr/ftslecture600.jpg",
+      "imageHint": "reading club"
+    },
+    {
+      "id": "carousel-logement",
+      "description": "Recherche de logement",
+      "imageUrl": "http://bilingue31.free.fr/ftslogement600.jpg",
+      "imageHint": "housing"
+    },
+    {
+      "id": "carousel-musee",
+      "description": "Visite de musée",
+      "imageUrl": "http://bilingue31.free.fr/ftsmusee600.jpg",
+      "imageHint": "museum"
+    },
+    {
+      "id": "carousel-peinture",
+      "description": "Cours de peinture",
+      "imageUrl": "http://bilingue31.free.fr/ftspeinture600.jpg",
+      "imageHint": "painting class"
+    },
+    {
+      "id": "carousel-photo",
+      "description": "Atelier photo",
+      "imageUrl": "http://bilingue31.free.fr/ftsphoto600.jpg",
+      "imageHint": "photography"
+    },
+    {
+      "id": "carousel-piquenique",
+      "description": "Pique-nique",
+      "imageUrl": "http://bilingue31.free.fr/ftspiquenique600.jpg",
+      "imageHint": "picnic"
+    },
+    {
+      "id": "carousel-plage",
+      "description": "Sortie à la plage",
+      "imageUrl": "http://bilingue31.free.fr/ftsplage600.jpg",
+      "imageHint": "beach"
+    },
+    {
+      "id": "carousel-rando",
+      "description": "Randonnée",
+      "imageUrl": "http://bilingue31.free.fr/ftsrando600.jpg",
+      "imageHint": "hiking"
+    },
+    {
+      "id": "carousel-restaurant",
+      "description": "Sortie au restaurant",
+      "imageUrl": "http://bilingue31.free.fr/ftsrestaurant600.jpg",
+      "imageHint": "restaurant"
+    },
+    {
+      "id": "carousel-salondethe",
+      "description": "Salon de thé",
+      "imageUrl": "http://bilingue31.free.fr/ftssalondethe600.jpg",
+      "imageHint": "tea room"
+    },
+    {
+      "id": "carousel-theatre",
+      "description": "Pièce de théâtre",
+      "imageUrl": "http://bilingue31.free.fr/ftstehatre600.jpg",
+      "imageHint": "theater"
+    },
+    {
+      "id": "carousel-yoga",
+      "description": "Cours de yoga",
+      "imageUrl": "http://bilingue31.free.fr/ftsyoga600.jpg",
+      "imageHint": "yoga"
+    },
+    {
+      "id": "carousel-zumba",
+      "description": "Cours de zumba",
+      "imageUrl": "http://bilingue31.free.fr/ftszumba600.jpg",
+      "imageHint": "zumba"
+    }
+  ]
+}
