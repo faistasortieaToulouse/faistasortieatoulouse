@@ -4,7 +4,7 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper } from "lucide-react";
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain } from "lucide-react"; // Import des icônes météo
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -43,12 +43,25 @@ interface DiscordWidgetData {
     events: DiscordEvent[]; // Contient les événements de l'API dédiée
 }
 
+// Interface pour la réponse simple de l'API Open-Meteo
+interface WeatherData {
+    current: {
+        time: string;
+        temperature_2m: number;
+        weather_code: number;
+        // ... autres champs
+    };
+    current_units: {
+        temperature_2m: string;
+    };
+}
+
+
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
     
     // --- Calcul de la Date et de l'Heure Locales ---
     const now = new Date();
-    
     const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
         weekday: 'long', 
         year: 'numeric', 
@@ -65,13 +78,48 @@ export default async function DashboardPage() {
     const currentTime = timeFormatter.format(now);
     // -----------------------------------------------------------
 
-    const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
 
+    // --- NOUVEAU : Récupération des Données Météo pour Toulouse ---
+    const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
+    
+    let weatherData: WeatherData | null = null;
+    let weatherDisplay = 'Météo indisponible 😕';
+    let WeatherIcon = Cloud; // Icône par défaut
+
+    try {
+        const res = await fetch(weatherUrl, { next: { revalidate: 3600 } }); // Revalider toutes les heures
+        weatherData = await res.json();
+
+        if (weatherData && weatherData.current) {
+            const temp = Math.round(weatherData.current.temperature_2m);
+            const unit = weatherData.current_units.temperature_2m;
+            const code = weatherData.current.weather_code;
+            
+            weatherDisplay = `${temp}${unit} à Toulouse`;
+            
+            // Logique simple pour l'icône basée sur le code météo (WMO)
+            if (code >= 0 && code <= 1) {
+                WeatherIcon = Sun; // Temps clair/ensoleillé
+            } else if (code >= 2 && code <= 3) {
+                WeatherIcon = Cloud; // Nuageux/partiellement nuageux
+            } else if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
+                WeatherIcon = CloudRain; // Pluie ou averses
+            } else {
+                WeatherIcon = Cloud; // Par défaut : Nuage
+            }
+        }
+    } catch (e) {
+        console.error('Erreur lors de la récupération de la météo:', e);
+    }
+    // ----------------------------------------------------------------
+
+
+    const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
+    // ... (Récupération des données Discord inchangée) ...
     if (!DISCORD_TOKEN) {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    // ... (Logique de récupération des données Discord inchangée) ...
     const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
@@ -142,11 +190,11 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* NOUVELLE BARRE DE STATUT (Date/Heure + Google Translate (simulé)) */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-black text-white shadow-lg">
-                <p className="font-semibold text-base">
-                    {/* Placeholder pour Google Translate ou autre élément d'information */}
-                    🌐 Google Translate
+            {/* BARRE DE STATUT MISE À JOUR : Fond Violet et Météo */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-700 text-white shadow-lg">
+                <p className="font-semibold text-base flex items-center gap-2">
+                    <WeatherIcon className="h-5 w-5" />
+                    {weatherDisplay}
                 </p>
                 <p className="text-sm font-light">
                     {currentDate} à **{currentTime}**
@@ -155,7 +203,6 @@ export default async function DashboardPage() {
             {/* ------------------------------------------- */}
 
             <header>
-                {/* Le titre est restauré sous la barre d'information */}
                 <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
                 <p className="mt-2 text-accent">
                     Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
@@ -168,6 +215,8 @@ export default async function DashboardPage() {
             <section>
               <ImageCarousel />
             </section>
+            
+            {/* ... Reste du JSX inchangé ... */}
 
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
