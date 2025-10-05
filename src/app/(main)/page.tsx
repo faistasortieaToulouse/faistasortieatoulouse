@@ -5,7 +5,7 @@ import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 // AJOUT de Calendar et Clock aux imports de lucide-react
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react";
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar'; // NOTE: Ceci doit être remplacé par ToggleInMainButton si vous utilisez le code de RootLayout.jsx
@@ -97,7 +97,8 @@ export default async function DashboardPage() {
             const unit = weatherData.current_units.temperature_2m;
             const code = weatherData.current.weather_code;
             
-            weatherDisplay = ${temp}${unit} à Toulouse;
+            // CORRECTION: Utilisation des backticks (template literal)
+            weatherDisplay = `${temp}${unit} à Toulouse`;
             
             // Logique simple pour l'icône basée sur le code météo (WMO)
             if (code >= 0 && code <= 1) {
@@ -121,15 +122,17 @@ export default async function DashboardPage() {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(https://discord.com/api/v10/guilds/${GUILD_ID}/channels, {
+    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
+    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
-            Authorization: Bot ${DISCORD_TOKEN}, 
+            // CORRECTION: Utilisation des backticks (template literal) pour le header
+            Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
         next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
-            console.error(Failed to fetch Discord channels: ${res.status} ${res.statusText});
+            console.error(`Failed to fetch Discord channels: ${res.status} ${res.statusText}`);
             return []; 
         }
         return res.json();
@@ -140,16 +143,18 @@ export default async function DashboardPage() {
     }) : []; 
 
     
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events, {
+    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
+    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
         headers: {
-            Authorization: Bot ${DISCORD_TOKEN}, 
+            // CORRECTION: Utilisation des backticks (template literal) pour le header
+            Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
         next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
             const errorBody = await res.text().catch(() => 'No error body available');
-            console.error(Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody});
+            console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody}`);
             return []; 
         }
         return res.json();
@@ -166,7 +171,8 @@ export default async function DashboardPage() {
         return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
     }).length;
 
-    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(https://discord.com/api/guilds/${GUILD_ID}/widget.json, { next: { revalidate: 300 } })
+    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
+    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
 
@@ -188,10 +194,10 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées /}
+            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
-                {/ 1. Date */}
+                {/* 1. Date */}
                 <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium">{currentDate}</span>
@@ -203,30 +209,28 @@ export default async function DashboardPage() {
                     <span className="font-medium">{currentTime}</span>
                 </div>
 
-                {/* 3. Météo /}
+                {/* 3. Météo */}
                 <div className="flex items-center gap-2">
                     <WeatherIcon className="h-4 w-4" />
                     <span className="font-medium">{weatherDisplay}</span>
                 </div>
             </div>
-            {/ ------------------------------------------- */}
+            {/* ------------------------------------------- */}
 
         {/* NOUVELLE STRUCTURE D'EN-TÊTE DU TABLEAU DE BORD AVEC LE BOUTON TOGGLE ET LE LOGO */}
 
             <div className="flex flex-col gap-2">
-{/* Ligne Titre + Bouton + Logo /}
+{/* Ligne Titre + Bouton + Logo */}
 <header className="flex items-center justify-between border-b pb-2">
-{/ Conteneur pour le bouton de bascule et le titre /}
+{/* Conteneur pour le titre et le bouton de bascule (Burger) */}
 <div className="flex items-center gap-4">
-{/ Le composant SidebarTrigger (ou ToggleInMainButton du RootLayout)
-sert ici de bouton "Menu Burger" pour ouvrir/fermer le menu.
-*/}
-<SidebarTrigger
-className="flex"
-/>
-
-                    <h1 className="font-headline text-4xl font-bold text-gray-800">Tableau de bord</h1>
-                </div>
+    <h1 className="font-headline text-4xl font-bold text-gray-800">Tableau de bord</h1>
+    
+    {/* DÉPLACÉ: Le bouton Menu Burger est juste à droite du titre */}
+    <SidebarTrigger
+        className="flex"
+    />
+</div>
                 
                 {/* Logo à droite du titre */}
                 <img
@@ -254,11 +258,10 @@ className="flex"
               <ImageCarousel />
             </section>
             
-            {/* ... Reste du JSX inchangé ... */}
-
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
-                    <Link href={https://discord.com/channels/${GUILD_ID}/1422806103904882842} target="_blank" rel="noopener noreferrer">
+                    {/* CORRECTION: Utilisation des backticks (template literal) pour l'URL */}
+                    <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
                         Pour commencer, clique ici :
                     </Link>
                 </Button>
@@ -268,9 +271,7 @@ className="flex"
                         Télécharger Discord
                     </Link>
                 </Button>
-                {/* J'ai laissé SidebarTrigger ici comme rappel. Si vous avez un composant ToggleInMainButton,
-il doit être utilisé ici et importé correctement. */}
-                <SidebarTrigger className="md:hidden" />
+                {/* Le SidebarTrigger redondant a été retiré. */}
             </section>
 
             <section className="flex flex-wrap justify-center gap-4">
@@ -299,7 +300,7 @@ il doit être utilisé ici et importé correctement. */}
                 </div>
             </section>
 
-            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- /}
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
             <section>
                 <Alert>
                     <BellRing className="h-4 w-4" />
@@ -315,7 +316,7 @@ il doit être utilisé ici et importé correctement. */}
                     </AlertDescription>
                 </Alert>
             </section>
-            {/ ------------------------------------- */}
+            {/* ------------------------------------- */}
         </div>
     );
 }
