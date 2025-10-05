@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { BellRing, Download, PartyPopper } from "lucide-react";
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
-// Supprimé : import { DISCORD_TOKEN } from '@/lib/discord-config';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 
@@ -47,6 +46,25 @@ interface DiscordWidgetData {
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
     
+    // --- NOUVEAU : Calcul de la Date et de l'Heure Locales ---
+    const now = new Date();
+    
+    const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    const timeFormatter = new Intl.DateTimeFormat('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        timeZoneName: 'short' // Affiche l'abréviation du fuseau horaire (ex: GMT+2)
+    });
+
+    const currentDate = dateFormatter.format(now);
+    const currentTime = timeFormatter.format(now);
+    // -----------------------------------------------------------
+
     // CORRECTION MAJEURE : Lit le token directement depuis l'environnement Vercel
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
 
@@ -97,7 +115,8 @@ export default async function DashboardPage() {
 
 
     // --- Calcul du Compteur d'Événements à Venir (la "Notification") ---
-    const now = new Date();
+    // La variable now est déjà définie ci-dessus
+    // const now = new Date(); // Commenté car déjà calculé plus haut
     // 7 jours en millisecondes pour filtrer les événements proches
     const oneWeek = 7 * 24 * 60 * 60 * 1000; 
     
@@ -135,6 +154,11 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-8 p-4 md:p-8">
             <header className="flex items-center justify-between">
                 <div>
+                    {/* NOUVEAU : Affichage de la Date et de l'Heure */}
+                    <p className="mb-2 text-sm font-semibold text-secondary-foreground">
+                        {currentDate} à {currentTime}
+                    </p>
+                    {/* ------------------------------------------- */}
                     <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
                     <p className="mt-2 text-accent">
                         Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
