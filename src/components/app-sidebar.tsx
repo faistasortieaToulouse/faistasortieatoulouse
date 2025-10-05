@@ -41,12 +41,12 @@ const navItems = [
     { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
-// --- Composant AppSidebar EXPORTÉ ---
+// --- Composant AppSidebar EXPORTÉ (NOMMÉ) ---
 /**
  * Composant de la barre latérale de navigation de l'application.
  * Il est utilisé par le MainLayout.
  */
-export function AppSidebar() { // AJOUT de `export` ici
+export function AppSidebar() { // Exportation nommée pour l'importation dans MainLayout.tsx
     // URL du logo réel de l'application (CORRIGÉ avec le jeton fourni par l'utilisateur)
     const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2" }; 
 
@@ -93,7 +93,7 @@ export function AppSidebar() { // AJOUT de `export` ici
                         </div>
                     </a>
                     
-                    {/* Bouton Menu Burger - Reste inchangé car il est géré par le contexte externe */}
+                    {/* Bouton Menu Burger */}
                     <button 
                         className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none`}
                         // Vous devrez ajouter la logique de gestion d'état ici pour ouvrir/fermer le menu
@@ -168,5 +168,30 @@ export function AppSidebar() { // AJOUT de `export` ici
 }
 // --- Fin du Composant AppSidebar intégré ---
 
-// NOTE: Le RootLayout a été retiré de ce fichier car il ne s'agit que d'un composant de barre latérale.
-// Il doit être défini dans src/app/layout.tsx ou un autre fichier de layout approprié.
+
+// --- Composant RootLayout EXPORTÉ (PAR DÉFAUT) ---
+// Ceci permet à ce fichier d'être visualisé dans la démo et fournit un export par défaut.
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="font-sans antialiased">
+            <div className="flex min-h-screen">
+                {/* 1. La Barre Latérale */}
+                <AppSidebar /> 
+                
+                {/* 2. Le Contenu de la Page (children) est à côté */}
+                <main className="flex-1 overflow-y-auto">
+                    {/* Ajout d'un contenu de démo pour remplir le Layout */}
+                    <div className="p-8">
+                        <h1 className="text-4xl font-bold text-gray-800">Contenu Principal</h1>
+                        <p className="mt-4 text-gray-600">Le contenu de vos pages s'affichera ici.</p>
+                    </div>
+                    {children} 
+                </main>
+            </div>
+        </div>
+    );
+}
