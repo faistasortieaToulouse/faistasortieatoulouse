@@ -69,13 +69,18 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
         transition: 'background-color 150ms ease-in-out'
     }; 
 
-    // Classes conditionnelles pour l'ouverture/fermeture sur mobile ET desktop.
-    // L'ajout de 'lg:z-10' et 'top-0' sur desktop assure qu'elle reste dans la vue verticale.
-    // Le 'translate-x' gère le masquage/affichage.
-    const sidebarStateClasses = `transform transition-transform duration-300 
+    // Classes conditionnelles pour l'ouverture/fermeture.
+    // NOTE IMPORTANTE: Nous utilisons 'fixed' sur mobile (par défaut) et 'sticky' sur desktop (lg:sticky).
+    // Sur desktop, nous utilisons la largeur conditionnelle 'w-0' ou 'w-64' au lieu de la translation
+    // pour garantir qu'elle est toujours dans le flux du flexbox lorsque le menu est ouvert.
+    // L'ancienne propriété 'translate-x' est conservée pour l'effet sur mobile.
+    const sidebarStateClasses = `transform transition-[width,transform] duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-        lg:z-10 lg:top-0 lg:h-screen lg:flex-shrink-0 
-        ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full'}`; 
+        lg:translate-x-0 lg:sticky lg:top-0 lg:flex-shrink-0 
+        ${isOpen ? 'lg:w-64' : 'lg:w-0'}`; 
+    
+    // Définir la largeur de manière fixe pour que le conteneur principal puisse compenser.
+    // Nous allons utiliser la classe de largeur dans l'aside ci-dessous.
 
     return (
         <>
@@ -89,106 +94,108 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
             )}
 
             {/* Barre Latérale */}
+            {/* CORRECTION : L'utilisation de lg:relative dans le RootLayout et lg:w-64/lg:w-0 dans l'aside est la solution. */}
+            {/* La barre latérale est toujours rendue, mais sa largeur est fixée à 0 sur desktop si elle est fermée. */}
             <aside 
-                // Utilisation de 'absolute' sur mobile et 'fixed' pour qu'elle soit toujours visible.
-                // NOTE : Sur desktop, nous utilisons 'fixed' pour maintenir la position latérale
-                // et nous gérons le déplacement du contenu principal via la marge dans RootLayout.
-                className={`w-64 h-screen p-4 flex flex-col shadow-2xl fixed lg:relative ${sidebarStateClasses}`}
+                className={`h-screen p-0 flex flex-col shadow-2xl fixed lg:relative ${sidebarStateClasses} overflow-hidden`}
                 style={{ backgroundColor: sidebarBg }}
             >
-                {/* SidebarHeader */}
-                <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
-                    {/* UTILISATION DE flex justify-between POUR ALIGNER LE LOGO À GAUCHE ET LE BOUTON À DROITE */}
-                    <div className="flex items-center justify-between gap-3">
-                        <a href="/" className="flex items-center gap-3 no-underline">
-                            {ftsLogo && (
-                                <img
-                                    src={ftsLogo.imageUrl}
-                                    alt="FTS Logo"
-                                    width={40}
-                                    height={40}
-                                    className="rounded-full"
-                                />
-                            )}
-                            <div className="flex flex-col">
-                                <h2 className={`text-lg font-semibold ${textPrimary}`}>Fais ta Sortie</h2>
-                                <p className={`text-xs ${textSecondary}`}>à Toulouse</p>
-                            </div>
-                        </a>
-                        
-                        {/* Bouton de bascule du menu (Menu Burger/X)
-                            Visible sur toutes les tailles d'écran pour permettre de plier/déplier. */}
-                        <button 
-                            className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none`}
-                            onClick={onToggle}
-                            aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
-                        >
-                            {/* Affiche X si ouvert, Menu si fermé */}
-                            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                        </button>
-                    </div>
-                </div>
-                
-                {/* SidebarContent (Menu) */}
-                <nav className="flex-1 overflow-y-auto pt-4">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        // Simuler le bouton de menu
-                        const ButtonContent = (
-                            <>
-                                <Icon className="h-5 w-5 mr-3" />
-                                <span>{item.label}</span>
-                            </>
-                        );
-
-                        // Définir si le lien est actif (simplifié pour la démo)
-                        const isActive = item.href === '/'; 
-
-                        const linkClasses = `w-full flex items-center p-3 rounded-lg transition duration-150 ${
-                            isActive 
-                                ? `${activeBg} ${activeText} shadow-lg` 
-                                : `${textPrimary} ${hoverBg} hover:text-gray-900`
-                        }`;
-
-                        return (
-                            <div key={item.label} className="mb-1">
-                                {item.external ? (
-                                    <a 
-                                        href={item.href} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        className={linkClasses}
-                                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                                    >
-                                        {ButtonContent}
-                                    </a>
-                                ) : (
-                                    <a 
-                                        href={item.href}
-                                        className={linkClasses}
-                                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                                    >
-                                        {ButtonContent}
-                                    </a>
+                {/* Un div interne pour maintenir le padding de 64px de large, même si l'aside devient w-0 */}
+                <div className="min-w-[256px] w-64 h-full flex flex-col p-4">
+                    
+                    {/* SidebarHeader */}
+                    <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
+                        {/* UTILISATION DE flex justify-between POUR ALIGNER LE LOGO À GAUCHE ET LE BOUTON À DROITE */}
+                        <div className="flex items-center justify-between gap-3">
+                            <a href="/" className="flex items-center gap-3 no-underline">
+                                {ftsLogo && (
+                                    <img
+                                        src={ftsLogo.imageUrl}
+                                        alt="FTS Logo"
+                                        width={40}
+                                        height={40}
+                                        className="rounded-full"
+                                    />
                                 )}
-                            </div>
-                        );
-                    })}
-                </nav>
-                
-                {/* SidebarFooter */}
-                <div className={`p-4 border-t ${borderSecondary} mt-auto`}>
-                    <a
-                        href="https://discord.com/channels/1422806103267344416/1422806103904882842"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full flex items-center justify-center p-2 rounded-lg text-white transition hover:brightness-110" 
-                        style={discordBgStyle}
-                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                    >
-                        <MessageSquare className="h-5 w-5 mr-2" />
-                        Rejoindre Discord
-                    </a>
+                                <div className="flex flex-col">
+                                    <h2 className={`text-lg font-semibold ${textPrimary}`}>Fais ta Sortie</h2>
+                                    <p className={`text-xs ${textSecondary}`}>à Toulouse</p>
+                                </div>
+                            </a>
+                            
+                            {/* Bouton de bascule du menu (Menu Burger/X) */}
+                            <button 
+                                className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none`}
+                                onClick={onToggle}
+                                aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                            >
+                                {/* Affiche X si ouvert, Menu si fermé */}
+                                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* SidebarContent (Menu) */}
+                    <nav className="flex-1 overflow-y-auto pt-4">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            // Simuler le bouton de menu
+                            const ButtonContent = (
+                                <>
+                                    <Icon className="h-5 w-5 mr-3" />
+                                    <span>{item.label}</span>
+                                </>
+                            );
+
+                            // Définir si le lien est actif (simplifié pour la démo)
+                            const isActive = item.href === '/'; 
+
+                            const linkClasses = `w-full flex items-center p-3 rounded-lg transition duration-150 ${
+                                isActive 
+                                    ? `${activeBg} ${activeText} shadow-lg` 
+                                    : `${textPrimary} ${hoverBg} hover:text-gray-900`
+                            }`;
+
+                            return (
+                                <div key={item.label} className="mb-1">
+                                    {item.external ? (
+                                        <a 
+                                            href={item.href} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className={linkClasses}
+                                            onClick={onToggle} // Fermer le menu après un clic (sur mobile)
+                                        >
+                                            {ButtonContent}
+                                        </a>
+                                    ) : (
+                                        <a 
+                                            href={item.href}
+                                            className={linkClasses}
+                                            onClick={onToggle} // Fermer le menu après un clic (sur mobile)
+                                        >
+                                            {ButtonContent}
+                                        </a>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </nav>
+                    
+                    {/* SidebarFooter */}
+                    <div className={`p-4 border-t ${borderSecondary} mt-auto`}>
+                        <a
+                            href="https://discord.com/channels/1422806103267344416/1422806103904882842"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center p-2 rounded-lg text-white transition hover:brightness-110" 
+                            style={discordBgStyle}
+                            onClick={onToggle} // Fermer le menu après un clic (sur mobile)
+                        >
+                            <MessageSquare className="h-5 w-5 mr-2" />
+                            Rejoindre Discord
+                        </a>
+                    </div>
                 </div>
             </aside>
         </>
@@ -230,9 +237,10 @@ export default function RootLayout({
                 />
                 
                 {/* 2. Le Contenu de la Page (children) est à côté */}
-                {/* CORRECTION : Sur desktop, nous ajustons la marge pour laisser l'espace, que la sidebar soit fermée (0) ou ouverte (64).
-                Nous devons définir que sur desktop, la sidebar est RELATIVE pour qu'elle occupe l'espace dans le flux Flexbox. */}
-                <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}> 
+                {/* CORRECTION : L'élément 'main' n'a pas besoin de marge pour le positionnement relatif
+                   car la sidebar est maintenant dans le flux Flexbox. 
+                   L'utilisation de 'lg:ml-64' ou 'lg:ml-0' était correcte pour l'effet 'fixed' mais nous simplifions. */}
+                <main className="flex-1 overflow-y-auto transition-all duration-300"> 
                     {/* Bouton Menu Burger (visible uniquement sur les petits écrans pour OUVRIR la sidebar)
                         Ce bloc est masqué si la sidebar est ouverte et visible sur mobile/tablette si elle est fermée. */}
                     {!isSidebarOpen && (
