@@ -69,10 +69,13 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
         transition: 'background-color 150ms ease-in-out'
     }; 
 
-    // Classes conditionnelles pour l'ouverture/fermeture sur mobile
-    const mobileClasses = `fixed top-0 left-0 z-40 transform transition-transform duration-300 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-    } lg:translate-x-0 lg:sticky`; // Toujours visible sur grand écran
+    // Classes conditionnelles pour l'ouverture/fermeture sur mobile ET desktop.
+    // CORRECTION: Nous conditionnons la translation pour les grandes tailles d'écran (lg)
+    // afin que la sidebar se cache correctement lorsque isOpen est false.
+    const mobileClasses = `fixed top-0 left-0 z-40 transform transition-transform duration-300 
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
+        ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full'} 
+        lg:sticky`; 
 
     return (
         <>
@@ -91,9 +94,8 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                 style={{ backgroundColor: sidebarBg }}
             >
                 {/* SidebarHeader */}
-                {/* CORRECTION : Suppression de la classe Tailwind dynamique 'bg-[${sidebarBg}]' de className. 
-                   Le style est maintenant appliqué uniquement via la prop 'style'. */}
                 <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
+                    {/* UTILISATION DE flex justify-between POUR ALIGNER LE LOGO À GAUCHE ET LE BOUTON À DROITE */}
                     <div className="flex items-center justify-between gap-3">
                         <a href="/" className="flex items-center gap-3 no-underline">
                             {ftsLogo && (
@@ -111,13 +113,15 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                             </div>
                         </a>
                         
-                        {/* Bouton Fermer (visible uniquement sur les petits écrans) */}
+                        {/* Bouton de bascule du menu (Menu Burger/X)
+                            Visible sur toutes les tailles d'écran pour permettre de plier/déplier. */}
                         <button 
-                            className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none lg:hidden`}
+                            className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none`}
                             onClick={onToggle}
-                            aria-label="Fermer le menu"
+                            aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
                         >
-                            <X className="h-6 w-6" />
+                            {/* Affiche X si ouvert, Menu si fermé */}
+                            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
                     </div>
                 </div>
@@ -196,7 +200,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     // État pour la barre latérale mobile
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Changé à TRUE par défaut
 
     // Fonction pour basculer l'état
     const toggleSidebar = () => {
@@ -206,9 +210,7 @@ export default function RootLayout({
     // Fermer la sidebar si la taille de l'écran passe de mobile à desktop
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth >= 1024 && isSidebarOpen) {
-                setIsSidebarOpen(false); // Ferme l'état mobile quand on passe en desktop (lg:1024px)
-            }
+            // Pas de gestion de la taille pour permettre la bascule sur desktop
         };
 
         window.addEventListener('resize', handleResize);
@@ -225,17 +227,20 @@ export default function RootLayout({
                 />
                 
                 {/* 2. Le Contenu de la Page (children) est à côté */}
-                <main className="flex-1 overflow-y-auto lg:ml-64"> 
-                    {/* Bouton Menu Burger (visible uniquement sur les petits écrans) */}
-                    <div className="p-4 lg:hidden sticky top-0 bg-white shadow-md z-20">
-                        <button 
-                            className="p-2 rounded-lg text-gray-900 hover:bg-gray-100 transition focus:outline-none"
-                            onClick={toggleSidebar}
-                            aria-label="Ouvrir le menu"
-                        >
-                            <Menu className="h-6 w-6" />
-                        </button>
-                    </div>
+                <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}> 
+                    {/* Bouton Menu Burger (visible uniquement sur les petits écrans pour OUVRIR la sidebar)
+                        Ce bloc est masqué si la sidebar est ouverte et visible sur mobile/tablette si elle est fermée. */}
+                    {!isSidebarOpen && (
+                        <div className="p-4 lg:hidden sticky top-0 bg-white shadow-md z-20">
+                            <button 
+                                className="p-2 rounded-lg text-gray-900 hover:bg-gray-100 transition focus:outline-none"
+                                onClick={toggleSidebar}
+                                aria-label="Ouvrir le menu"
+                            >
+                                <Menu className="h-6 w-6" />
+                            </button>
+                        </div>
+                    )}
 
                     {/* Contenu principal */}
                     <div className="p-8">
