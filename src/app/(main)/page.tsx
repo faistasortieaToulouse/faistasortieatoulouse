@@ -8,13 +8,15 @@ import { Button } from '@/components/ui/button';
 import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar'; // NOTE: Ceci doit être remplacé par ToggleInMainButton si vous utilisez le code de RootLayout.jsx
+
 import { ImageCarousel } from '@/components/image-carousel';
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
-// --- Constantes (ID de Guilde) ---
+// --- Constantes (ID de Guilde et URL du Logo) ---
 const GUILD_ID = '1422806103267344416';
+const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
 
 // --- Interfaces (Types de Données) ---
 interface DiscordChannel {
@@ -31,7 +33,6 @@ interface DiscordEvent {
     description: string;
     scheduled_start_time: string;
     channel_id: string;
-    // Ajoutez d'autres champs si votre composant DiscordEvents les utilise
 }
 
 interface DiscordWidgetData {
@@ -41,7 +42,7 @@ interface DiscordWidgetData {
     channels: DiscordChannel[];
     members: any[];
     presence_count: number;
-    events: DiscordEvent[]; // Contient les événements de l'API dédiée
+    events: DiscordEvent[];
 }
 
 // Interface pour la réponse simple de l'API Open-Meteo
@@ -50,13 +51,11 @@ interface WeatherData {
         time: string;
         temperature_2m: number;
         weather_code: number;
-        // ... autres champs
     };
     current_units: {
         temperature_2m: string;
     };
 }
-
 
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
@@ -82,7 +81,6 @@ export default async function DashboardPage() {
     const currentTime = timeFormatter.format(now);
     // -----------------------------------------------------------
 
-
     // --- Récupération des Données Météo pour Toulouse (inchangée) ---
     const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
     
@@ -99,7 +97,7 @@ export default async function DashboardPage() {
             const unit = weatherData.current_units.temperature_2m;
             const code = weatherData.current.weather_code;
             
-            weatherDisplay = `${temp}${unit} à Toulouse`;
+            weatherDisplay = ${temp}${unit} à Toulouse;
             
             // Logique simple pour l'icône basée sur le code météo (WMO)
             if (code >= 0 && code <= 1) {
@@ -117,22 +115,21 @@ export default async function DashboardPage() {
     }
     // ----------------------------------------------------------------
 
-
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
     
     if (!DISCORD_TOKEN) {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
+    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(https://discord.com/api/v10/guilds/${GUILD_ID}/channels, {
         headers: {
-            Authorization: `Bot ${DISCORD_TOKEN}`, 
+            Authorization: Bot ${DISCORD_TOKEN}, 
         },
         next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
-            console.error(`Failed to fetch Discord channels: ${res.status} ${res.statusText}`);
+            console.error(Failed to fetch Discord channels: ${res.status} ${res.statusText});
             return []; 
         }
         return res.json();
@@ -143,16 +140,16 @@ export default async function DashboardPage() {
     }) : []; 
 
     
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events, {
         headers: {
-            Authorization: `Bot ${DISCORD_TOKEN}`, 
+            Authorization: Bot ${DISCORD_TOKEN}, 
         },
         next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
             const errorBody = await res.text().catch(() => 'No error body available');
-            console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody}`);
+            console.error(Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody});
             return []; 
         }
         return res.json();
@@ -162,7 +159,6 @@ export default async function DashboardPage() {
         return []; 
     }) : []; 
 
-
     const oneWeek = 7 * 24 * 60 * 60 * 1000; 
     
     const upcomingEventsCount = eventsData.filter(event => {
@@ -170,11 +166,9 @@ export default async function DashboardPage() {
         return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
     }).length;
 
-
-    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
+    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(https://discord.com/api/guilds/${GUILD_ID}/widget.json, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
-
 
     const discordData: DiscordWidgetData | null = widgetData ? {
         ...widgetData,
@@ -194,10 +188,10 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées */}
+            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées /}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
-                {/* 1. Date */}
+                {/ 1. Date */}
                 <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium">{currentDate}</span>
@@ -209,23 +203,52 @@ export default async function DashboardPage() {
                     <span className="font-medium">{currentTime}</span>
                 </div>
 
-                {/* 3. Météo */}
+                {/* 3. Météo /}
                 <div className="flex items-center gap-2">
                     <WeatherIcon className="h-4 w-4" />
                     <span className="font-medium">{weatherDisplay}</span>
                 </div>
             </div>
-            {/* ------------------------------------------- */}
+            {/ ------------------------------------------- */}
 
-            <header>
-                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
-                <p className="mt-2 text-accent">
-                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                </p>
-                <p className="mt-2 text-accent">
-                    tout est gratuit et sans limite !
-                </p>
+        {/* NOUVELLE STRUCTURE D'EN-TÊTE DU TABLEAU DE BORD AVEC LE BOUTON TOGGLE ET LE LOGO */}
+
+            <div className="flex flex-col gap-2">
+{/* Ligne Titre + Bouton + Logo /}
+<header className="flex items-center justify-between border-b pb-2">
+{/ Conteneur pour le bouton de bascule et le titre /}
+<div className="flex items-center gap-4">
+{/ Le composant SidebarTrigger (ou ToggleInMainButton du RootLayout)
+sert ici de bouton "Menu Burger" pour ouvrir/fermer le menu.
+*/}
+<SidebarTrigger
+className="flex"
+/>
+
+                    <h1 className="font-headline text-4xl font-bold text-gray-800">Tableau de bord</h1>
+                </div>
+                
+                {/* Logo à droite du titre */}
+                <img
+                    src={ftsLogoUrl} 
+                    alt="FTS Logo Dashboard"
+                    width={40}
+                    height={40}
+                    className="rounded-full shadow-lg"
+                />
             </header>
+            
+            {/* Description sous le titre */}
+            <div>
+
+                    <p className="mt-2 text-accent">
+                        Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                    </p>
+                    <p className="mt-2 text-accent">
+                        tout est gratuit et sans limite !
+                    </p>
+</div>
+</div>
 
             <section>
               <ImageCarousel />
@@ -235,7 +258,7 @@ export default async function DashboardPage() {
 
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
-                    <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
+                    <Link href={https://discord.com/channels/${GUILD_ID}/1422806103904882842} target="_blank" rel="noopener noreferrer">
                         Pour commencer, clique ici :
                     </Link>
                 </Button>
@@ -245,6 +268,8 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
+                {/* J'ai laissé SidebarTrigger ici comme rappel. Si vous avez un composant ToggleInMainButton,
+il doit être utilisé ici et importé correctement. */}
                 <SidebarTrigger className="md:hidden" />
             </section>
 
@@ -274,7 +299,7 @@ export default async function DashboardPage() {
                 </div>
             </section>
 
-            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- /}
             <section>
                 <Alert>
                     <BellRing className="h-4 w-4" />
@@ -282,7 +307,7 @@ export default async function DashboardPage() {
                     <AlertDescription>
                         {upcomingEventsCount > 0 ? (
                             <p className="font-bold text-lg text-primary">
-                                Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
+                                Il y a actuellement {upcomingEventsCount} événements prévus cette semaine !
                             </p>
                         ) : (
                             'Aucun événement n’est prévu cette semaine. Consultez la liste ci-dessous pour organiser une sortie !'
@@ -290,7 +315,7 @@ export default async function DashboardPage() {
                     </AlertDescription>
                 </Alert>
             </section>
-            {/* ------------------------------------- */}
+            {/ ------------------------------------- */}
         </div>
     );
 }
