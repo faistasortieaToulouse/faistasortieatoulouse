@@ -37,9 +37,6 @@ const navItems = [
         external: true,
     },
     
-    // --- VOS NOUVEAUX LIENS (placés logiquement avant les liens externes) ---
-    { href: '/calendar', icon: Calendar, label: 'Calendrier' },
-    { href: '/mobility', icon: Car, label: 'Mobilité' },
     // ------------------------------------------------------------------------
 
     { href: '/meetup', icon: Users, label: 'Événements Meetup' },
@@ -50,6 +47,9 @@ const navItems = [
     // { href: '/calendar', icon: Calendar, label: '🗓️ Calendrier' }, 
     // { href: '/mobility', icon: Bus, label: '📍 Déplacements' },
 
+    // --- VOS NOUVEAUX LIENS (placés logiquement avant les liens externes) ---
+    { href: '/calendar', icon: Calendar, label: 'Calendrier' },
+    { href: '/mobility', icon: Car, label: 'Mobilité' },
     { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
