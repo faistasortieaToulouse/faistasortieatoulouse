@@ -43,8 +43,8 @@ const navItems = [
 
 // --- Composant AppSidebar intégré ---
 function AppSidebar() {
-    // URL du logo réel de l'application (corrigé)
-    const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d03b-403c-8cff-049c5943c0e2" }; 
+    // URL du logo réel de l'application (CORRIGÉ avec le jeton fourni par l'utilisateur)
+    const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2" }; 
 
     // Définition des couleurs pour la nouvelle palette (F7DEEF est très clair)
     const sidebarBg = '#F7DEEF';
@@ -57,21 +57,13 @@ function AppSidebar() {
     const activeText = 'text-gray-900';
     const hoverBg = 'hover:bg-purple-200';
     
-    // --- Nouvelle Couleur Discord (Nous allons les injecter via des variables CSS pour Tailwind) ---
-    // Note: Pour cet environnement, nous allons utiliser des classes utilitaires personnalisées 
-    // en passant directement la couleur HEX pour simuler le comportement du hover sans handlers.
-    // Cependant, dans l'environnement Next.js, il est plus sûr d'utiliser un composant client ou d'éviter les handlers.
-    // L'erreur étant due aux handlers, je les supprime et j'utilise une couleur de base.
-
+    // --- Nouvelle Couleur Discord ---
     // Nous définissons la couleur de base directement sur le bouton
     const discordBgStyle = { 
         backgroundColor: '#D02F9D', // Magenta
         transition: 'background-color 150ms ease-in-out' // Ajout de la transition CSS
     }; 
     
-    // Pour le survol, nous utilisons une classe Tailwind simulant un effet de profondeur ou de changement de couleur
-    // Comme nous ne pouvons pas définir un 'hover:bg-custom' facilement ici, nous allons utiliser un filtre d'opacité.
-
     return (
         <aside 
             className="w-64 h-screen p-4 flex flex-col shadow-2xl sticky top-0"
