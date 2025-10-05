@@ -9,12 +9,8 @@ import {
   Facebook,
   Map,
   MessageSquare,
-  // Info, // Supprimé : À Propos
-  // FileText, // Supprimé : Mentions Légales
-  // BookText, // Supprimé : Charte d'utilisation
-  // Mail, // Supprimé : Nous contacter
+  // Les icônes pour les liens supprimés ont été commentées/supprimées
   LifeBuoy,
-  // Shield, // Supprimé : Politique de confidentialité
 } from 'lucide-react';
 
 import {
@@ -27,9 +23,15 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { placeholderImages } from '@/lib/placeholder-images';
+// REMPLACÉ : On n'importe plus les images de substitution (placeholderImages)
+// import { placeholderImages } from '@/lib/placeholder-images'; 
 
-const ftsLogo = placeholderImages.find((img) => img.id === 'fts-logo');
+// NOUVEAU LOGO : Définition directe de l'objet avec l'URL Firebase
+const ftsLogo = {
+  imageUrl: 'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2',
+  alt: 'FTS Logo',
+};
+
 
 const navItems = [
   { href: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -48,11 +50,12 @@ const navItems = [
   { href: '/meetup', icon: Users, label: 'Événements Meetup' },
   { href: '/facebook', icon: Facebook, label: 'Groupes Facebook' },
   { href: '/map', icon: Map, label: 'Carte Interactive' },
-  // { href: '/about', icon: Info, label: 'À Propos' }, // Supprimé
-  // { href: '/contact', icon: Mail, label: 'Nous contacter' }, // Supprimé
-  // { href: '/legal', icon: FileText, label: 'Mentions Légales' }, // Supprimé
-  // { href: '/terms', icon: BookText, label: "Charte d'utilisation" }, // Supprimé
-  // { href: '/privacy', icon: Shield, label: 'Politique de confidentialité' }, // Supprimé
+  // Liens supprimés
+  // { href: '/about', icon: Info, label: 'À Propos' }, 
+  // { href: '/contact', icon: Mail, label: 'Nous contacter' },
+  // { href: '/legal', icon: FileText, label: 'Mentions Légales' },
+  // { href: '/terms', icon: BookText, label: "Charte d'utilisation" },
+  // { href: '/privacy', icon: Shield, label: 'Politique de confidentialité' },
   { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
@@ -66,11 +69,12 @@ export function AppSidebar() {
           <Link href="/" className="flex items-center gap-3 no-underline">
             {ftsLogo && (
               <Image
-                src={ftsLogo.imageUrl}
+                src={ftsLogo.imageUrl} // C'est ici que l'image est utilisée
                 alt="FTS Logo"
                 width={40}
                 height={40}
-                className="rounded-full"
+                // Optionnel : Si votre nouveau logo n'est pas censé être rond, vous pouvez enlever `className="rounded-full"`
+                className="rounded-full" 
               />
             )}
             <div className="flex flex-col">
