@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 // --- Importer les dépendances pour la Sidebar ---
@@ -89,7 +91,9 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                 style={{ backgroundColor: sidebarBg }}
             >
                 {/* SidebarHeader */}
-                <div className={`p-4 border-b ${borderSecondary} sticky top-0 bg-[${sidebarBg}] z-10`} style={{ backgroundColor: sidebarBg }}>
+                {/* CORRECTION : Suppression de la classe Tailwind dynamique 'bg-[${sidebarBg}]' de className. 
+                   Le style est maintenant appliqué uniquement via la prop 'style'. */}
+                <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
                     <div className="flex items-center justify-between gap-3">
                         <a href="/" className="flex items-center gap-3 no-underline">
                             {ftsLogo && (
