@@ -68,13 +68,13 @@ export default async function DashboardPage() {
         year: 'numeric', 
         month: 'long', 
         day: 'numeric',
-        timeZone: 'Europe/Paris' // Assure que la date est correcte pour Paris/Toulouse
+        timeZone: 'Europe/Paris' 
     });
     const timeFormatter = new Intl.DateTimeFormat('fr-FR', { 
         hour: '2-digit', 
         minute: '2-digit', 
         timeZoneName: 'short',
-        timeZone: 'Europe/Paris' // IMPORTANT : Force le fuseau horaire de Paris
+        timeZone: 'Europe/Paris' 
     });
 
     const currentDate = dateFormatter.format(now);
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
     
     let weatherData: WeatherData | null = null;
     let weatherDisplay = 'Météo indisponible 😕';
-    let WeatherIcon = Cloud; // Icône par défaut
+    let WeatherIcon = Cloud; 
 
     try {
         const res = await fetch(weatherUrl, { next: { revalidate: 3600 } }); 
@@ -193,15 +193,15 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* BARRE DE STATUT INVERSÉE : Date/Heure à gauche, Météo à droite */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-700 text-white shadow-lg">
+            {/* BARRE DE STATUT MISE À JOUR : Couleur de fond #A020F0 */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#A020F0] text-white shadow-lg">
                 
-                {/* 1. Date et Heure (maintenant à gauche) */}
+                {/* 1. Date et Heure (à gauche) */}
                 <p className="text-sm font-light">
                     {currentDate} à **{currentTime}**
                 </p>
 
-                {/* 2. Météo (maintenant à droite) */}
+                {/* 2. Météo (à droite) */}
                 <p className="font-semibold text-base flex items-center gap-2">
                     <WeatherIcon className="h-5 w-5" />
                     {weatherDisplay}
