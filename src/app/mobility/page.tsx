@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bus, Car, Bike, ChevronRight, MapPin, ExternalLink, CalendarDays, Zap } from "lucide-react";
+import { Bus, Car, Bike, ChevronRight, MapPin, ExternalLink, Zap } from "lucide-react";
 // Les imports Button, Card, CardHeader, CardContent, etc. seraient nécessaires ici,
 // mais pour assurer la compilation, nous utiliserons des divs stylisés Tailwind.
 
