@@ -40,6 +40,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // NOUVELLE ENTRÉE : Ajout du domaine Firebase pour autoriser le logo
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
