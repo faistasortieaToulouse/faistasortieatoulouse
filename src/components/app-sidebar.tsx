@@ -57,9 +57,20 @@ function AppSidebar() {
     const activeText = 'text-gray-900';
     const hoverBg = 'hover:bg-purple-200';
     
-    // --- Nouvelle Couleur Discord ---
-    const discordBg = '#D02F9D'; // Magenta
-    const discordHover = '#B32684'; // Un peu plus foncé pour le survol
+    // --- Nouvelle Couleur Discord (Nous allons les injecter via des variables CSS pour Tailwind) ---
+    // Note: Pour cet environnement, nous allons utiliser des classes utilitaires personnalisées 
+    // en passant directement la couleur HEX pour simuler le comportement du hover sans handlers.
+    // Cependant, dans l'environnement Next.js, il est plus sûr d'utiliser un composant client ou d'éviter les handlers.
+    // L'erreur étant due aux handlers, je les supprime et j'utilise une couleur de base.
+
+    // Nous définissons la couleur de base directement sur le bouton
+    const discordBgStyle = { 
+        backgroundColor: '#D02F9D', // Magenta
+        transition: 'background-color 150ms ease-in-out' // Ajout de la transition CSS
+    }; 
+    
+    // Pour le survol, nous utilisons une classe Tailwind simulant un effet de profondeur ou de changement de couleur
+    // Comme nous ne pouvons pas définir un 'hover:bg-custom' facilement ici, nous allons utiliser un filtre d'opacité.
 
     return (
         <aside 
@@ -148,13 +159,9 @@ function AppSidebar() {
                     href="https://discord.com/channels/1422806103267344416/1422806103904882842"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center p-2 rounded-lg text-white transition"
-                    style={{ 
-                        backgroundColor: discordBg,
-                        '--tw-bg-opacity': 1, // Assure que la couleur est bien appliquée
-                    }}
-                    onMouseOver={e => e.currentTarget.style.backgroundColor = discordHover}
-                    onMouseOut={e => e.currentTarget.style.backgroundColor = discordBg}
+                    // Suppression des gestionnaires d'événements React pour la compatibilité SSR
+                    className="w-full flex items-center justify-center p-2 rounded-lg text-white transition hover:brightness-110" 
+                    style={discordBgStyle} 
                 >
                     <MessageSquare className="h-5 w-5 mr-2" />
                     Rejoindre Discord
