@@ -9,12 +9,12 @@ import {
   Facebook,
   Map,
   MessageSquare,
-  Info,
-  FileText,
-  BookText,
-  Mail,
+  // Info, // Supprimé : À Propos
+  // FileText, // Supprimé : Mentions Légales
+  // BookText, // Supprimé : Charte d'utilisation
+  // Mail, // Supprimé : Nous contacter
   LifeBuoy,
-  Shield,
+  // Shield, // Supprimé : Politique de confidentialité
 } from 'lucide-react';
 
 import {
@@ -48,11 +48,11 @@ const navItems = [
   { href: '/meetup', icon: Users, label: 'Événements Meetup' },
   { href: '/facebook', icon: Facebook, label: 'Groupes Facebook' },
   { href: '/map', icon: Map, label: 'Carte Interactive' },
-  { href: '/about', icon: Info, label: 'À Propos' },
-  { href: '/contact', icon: Mail, label: 'Nous contacter' },
-  { href: '/legal', icon: FileText, label: 'Mentions Légales' },
-  { href: '/terms', icon: BookText, label: "Charte d'utilisation" },
-  { href: '/privacy', icon: Shield, label: 'Politique de confidentialité' },
+  // { href: '/about', icon: Info, label: 'À Propos' }, // Supprimé
+  // { href: '/contact', icon: Mail, label: 'Nous contacter' }, // Supprimé
+  // { href: '/legal', icon: FileText, label: 'Mentions Légales' }, // Supprimé
+  // { href: '/terms', icon: BookText, label: "Charte d'utilisation" }, // Supprimé
+  // { href: '/privacy', icon: Shield, label: 'Politique de confidentialité' }, // Supprimé
   { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
