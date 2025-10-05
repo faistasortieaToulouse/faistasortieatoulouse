@@ -70,12 +70,12 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
     }; 
 
     // Classes conditionnelles pour l'ouverture/fermeture sur mobile ET desktop.
-    // CORRECTION: Nous conditionnons la translation pour les grandes tailles d'écran (lg)
-    // afin que la sidebar se cache correctement lorsque isOpen est false.
-    const mobileClasses = `fixed top-0 left-0 z-40 transform transition-transform duration-300 
+    // L'ajout de 'lg:z-10' et 'top-0' sur desktop assure qu'elle reste dans la vue verticale.
+    // Le 'translate-x' gère le masquage/affichage.
+    const sidebarStateClasses = `transform transition-transform duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-        ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full'} 
-        lg:sticky`; 
+        lg:z-10 lg:top-0 lg:h-screen lg:flex-shrink-0 
+        ${isOpen ? 'lg:translate-x-0' : 'lg:-translate-x-full'}`; 
 
     return (
         <>
@@ -90,7 +90,10 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
 
             {/* Barre Latérale */}
             <aside 
-                className={`w-64 h-screen p-4 flex flex-col shadow-2xl ${mobileClasses}`}
+                // Utilisation de 'absolute' sur mobile et 'fixed' pour qu'elle soit toujours visible.
+                // NOTE : Sur desktop, nous utilisons 'fixed' pour maintenir la position latérale
+                // et nous gérons le déplacement du contenu principal via la marge dans RootLayout.
+                className={`w-64 h-screen p-4 flex flex-col shadow-2xl fixed lg:relative ${sidebarStateClasses}`}
                 style={{ backgroundColor: sidebarBg }}
             >
                 {/* SidebarHeader */}
@@ -227,6 +230,8 @@ export default function RootLayout({
                 />
                 
                 {/* 2. Le Contenu de la Page (children) est à côté */}
+                {/* CORRECTION : Sur desktop, nous ajustons la marge pour laisser l'espace, que la sidebar soit fermée (0) ou ouverte (64).
+                Nous devons définir que sur desktop, la sidebar est RELATIVE pour qu'elle occupe l'espace dans le flux Flexbox. */}
                 <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}> 
                     {/* Bouton Menu Burger (visible uniquement sur les petits écrans pour OUVRIR la sidebar)
                         Ce bloc est masqué si la sidebar est ouverte et visible sur mobile/tablette si elle est fermée. */}
@@ -244,7 +249,8 @@ export default function RootLayout({
 
                     {/* Contenu principal */}
                     <div className="p-8">
-                        <h1 className="text-4xl font-bold text-gray-800">Contenu Principal</h1>
+                        {/* Ceci est votre titre /src/app/(main)/page.tsx */}
+                        <h1 className="text-4xl font-bold text-gray-800">Tableau de bord</h1> 
                         <p className="mt-4 text-gray-600">Le contenu de vos pages s'affichera ici.</p>
                     </div>
                     {children} 
