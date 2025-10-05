@@ -46,7 +46,7 @@ interface DiscordWidgetData {
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
     
-    // --- NOUVEAU : Calcul de la Date et de l'Heure Locales ---
+    // --- Calcul de la Date et de l'Heure Locales ---
     const now = new Date();
     
     const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
@@ -58,27 +58,25 @@ export default async function DashboardPage() {
     const timeFormatter = new Intl.DateTimeFormat('fr-FR', { 
         hour: '2-digit', 
         minute: '2-digit', 
-        timeZoneName: 'short' // Affiche l'abréviation du fuseau horaire (ex: GMT+2)
+        timeZoneName: 'short' 
     });
 
     const currentDate = dateFormatter.format(now);
     const currentTime = timeFormatter.format(now);
     // -----------------------------------------------------------
 
-    // CORRECTION MAJEURE : Lit le token directement depuis l'environnement Vercel
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
 
-    // Avertissement de sécurité si le jeton n'est pas défini.
     if (!DISCORD_TOKEN) {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    // --- Récupération des Salons (API REST sécurisée) ---
+    // ... (Logique de récupération des données Discord inchangée) ...
     const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
-        next: { revalidate: 300 } // Cache for 5 minutes
+        next: { revalidate: 300 } 
     })
     .then(async res => {
         if (!res.ok) {
@@ -90,10 +88,9 @@ export default async function DashboardPage() {
     .catch(err => {
         console.error('Error fetching Discord channels:', err);
         return []; 
-    }) : []; // Si le Token manque, retourne un tableau vide
+    }) : []; 
 
     
-    // --- Récupération des Événements (API REST sécurisée) ---
     const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
         headers: {
             Authorization: `Bot ${DISCORD_TOKEN}`, 
@@ -114,36 +111,28 @@ export default async function DashboardPage() {
     }) : []; 
 
 
-    // --- Calcul du Compteur d'Événements à Venir (la "Notification") ---
-    // La variable now est déjà définie ci-dessus
-    // const now = new Date(); // Commenté car déjà calculé plus haut
-    // 7 jours en millisecondes pour filtrer les événements proches
     const oneWeek = 7 * 24 * 60 * 60 * 1000; 
     
     const upcomingEventsCount = eventsData.filter(event => {
         const startTime = new Date(event.scheduled_start_time);
-        // L'événement doit être dans le futur ET dans les 7 prochains jours
         return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
     }).length;
 
 
-    // --- Récupération des Membres (Widget API) ---
     const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
         .then(res => res.json())
         .catch(() => null);
 
 
-    // --- Combinaison des Données ---
     const discordData: DiscordWidgetData | null = widgetData ? {
         ...widgetData,
-        channels: channelsData, // Utilise les salons complets, lus par le Bot Admin
+        channels: channelsData, 
         events: eventsData
     } : {
-        // Fallback en cas d'échec de widget.json
         id: GUILD_ID,
         name: 'Fais Ta Sortie à Toulouse',
         instant_invite: null,
-        channels: channelsData, // Utilise les salons complets
+        channels: channelsData, 
         members: [],
         presence_count: 0,
         events: eventsData
@@ -152,21 +141,28 @@ export default async function DashboardPage() {
     // --- Rendu ---
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
-            <header className="flex items-center justify-between">
-                <div>
-                    {/* NOUVEAU : Affichage de la Date et de l'Heure */}
-                    <p className="mb-2 text-sm font-semibold text-secondary-foreground">
-                        {currentDate} à {currentTime}
-                    </p>
-                    {/* ------------------------------------------- */}
-                    <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
-                    <p className="mt-2 text-accent">
-                        Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                    </p>
-                    <p className="mt-2 text-accent">
-                        tout est gratuit et sans limite !
-                    </p>
-                </div>
+            
+            {/* NOUVELLE BARRE DE STATUT (Date/Heure + Google Translate (simulé)) */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-black text-white shadow-lg">
+                <p className="font-semibold text-base">
+                    {/* Placeholder pour Google Translate ou autre élément d'information */}
+                    🌐 Google Translate
+                </p>
+                <p className="text-sm font-light">
+                    {currentDate} à **{currentTime}**
+                </p>
+            </div>
+            {/* ------------------------------------------- */}
+
+            <header>
+                {/* Le titre est restauré sous la barre d'information */}
+                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
+                <p className="mt-2 text-accent">
+                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                </p>
+                <p className="mt-2 text-accent">
+                    tout est gratuit et sans limite !
+                </p>
             </header>
 
             <section>
