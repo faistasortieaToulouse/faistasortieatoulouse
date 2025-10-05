@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-// Remplacement des imports Next.js par des balises a standards
-import { Button } from '@/components/ui/button'; 
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"; 
-import { BellRing, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Plus, BellRing, Calendar as CalendarIcon } from 'lucide-react';
 
-// --- Définition des types ---
 interface Event {
     id: number;
     title: string;
@@ -45,26 +43,26 @@ export default function CalendarPage() {
         <div className="flex flex-col gap-8 p-4 md:p-8">
             <header className="flex justify-between items-center">
                 <div>
-                    <h1 className="font-headline text-4xl font-bold text-gray-800 dark:text-gray-100">
+                    <h1 className="font-headline text-4xl font-bold text-primary">
                         Calendrier des Sorties
                     </h1>
-                    <p className="mt-1 text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-muted-foreground">
                         Organisez vos événements et consultez les prochaines activités de la communauté.
                     </p>
                 </div>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg">
+                <Button>
                     <Plus className="h-5 w-5 mr-2" />
                     Ajouter un Événement
                 </Button>
             </header>
 
             {/* Alerte pour les événements à venir */}
-            <Alert className="border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950">
-                <BellRing className="h-5 w-5 text-purple-600" />
-                <AlertTitle className="text-purple-700 dark:text-purple-300">
+            <Alert className="border-l-4 border-primary">
+                <BellRing className="h-5 w-5 text-primary" />
+                <AlertTitle className="text-primary">
                     Prochaines Dates Clés
                 </AlertTitle>
-                <AlertDescription className="text-purple-600 dark:text-purple-400">
+                <AlertDescription>
                     {upcomingEvents.length > 0 ? (
                         <p>
                             **{upcomingEvents.length}** événements prévus. Le prochain est : **{upcomingEvents[0].title}** le {formatEventTime(upcomingEvents[0].date)}.
@@ -79,30 +77,30 @@ export default function CalendarPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {/* 1. Calendrier (Placeholder) */}
-                <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-800">
-                    <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                        <CalendarIcon className="h-6 w-6 text-blue-500" />
+                <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border">
+                    <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
+                        <CalendarIcon className="h-6 w-6 text-primary" />
                         Vue Mensuelle (Intégration future)
                     </h2>
                     {/* Ceci est un grand bloc visuel pour un futur calendrier */}
-                    <div className="h-[400px] w-full bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 text-lg border border-dashed border-gray-300 dark:border-gray-700">
-                        <p>Intégration d'un calendrier interactif ici (ex: React Big Calendar)</p>
+                    <div className="h-[400px] w-full bg-background rounded-lg flex items-center justify-center text-muted-foreground text-lg border border-dashed">
+                        <p>Intégration d'un calendrier interactif ici</p>
                     </div>
                 </div>
 
                 {/* 2. Liste des événements (Sidebar) */}
                 <div className="lg:col-span-1 flex flex-col gap-4">
-                    <h2 className="text-2xl font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                    <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
                         Liste Complète des Sorties
                     </h2>
-                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-4 border border-gray-100 dark:border-gray-800 max-h-[450px] overflow-y-auto">
+                    <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[450px] overflow-y-auto">
                         {mockEvents.map((event) => (
                             <div 
                                 key={event.id} 
-                                className="mb-3 p-3 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                                className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
                             >
-                                <p className="font-bold text-lg text-blue-600 dark:text-blue-400">{event.title}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <p className="font-bold text-lg text-primary">{event.title}</p>
+                                <p className="text-sm text-muted-foreground">
                                     {formatEventTime(event.date)} - {event.location}
                                 </p>
                             </div>
