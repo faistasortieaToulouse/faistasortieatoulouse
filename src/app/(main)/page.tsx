@@ -4,7 +4,7 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain } from "lucide-react"; // Import des icônes météo
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain } from "lucide-react"; 
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -60,18 +60,21 @@ interface WeatherData {
 // --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
     
-    // --- Calcul de la Date et de l'Heure Locales ---
+    // --- Calcul de la Date et de l'Heure Locales (avec TimeZone Paris) ---
     const now = new Date();
+    
     const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
         weekday: 'long', 
         year: 'numeric', 
         month: 'long', 
-        day: 'numeric' 
+        day: 'numeric',
+        timeZone: 'Europe/Paris' // Assure que la date est correcte pour Paris/Toulouse
     });
     const timeFormatter = new Intl.DateTimeFormat('fr-FR', { 
         hour: '2-digit', 
         minute: '2-digit', 
-        timeZoneName: 'short' 
+        timeZoneName: 'short',
+        timeZone: 'Europe/Paris' // IMPORTANT : Force le fuseau horaire de Paris
     });
 
     const currentDate = dateFormatter.format(now);
@@ -79,7 +82,7 @@ export default async function DashboardPage() {
     // -----------------------------------------------------------
 
 
-    // --- NOUVEAU : Récupération des Données Météo pour Toulouse ---
+    // --- Récupération des Données Météo pour Toulouse (inchangée) ---
     const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
     
     let weatherData: WeatherData | null = null;
@@ -87,7 +90,7 @@ export default async function DashboardPage() {
     let WeatherIcon = Cloud; // Icône par défaut
 
     try {
-        const res = await fetch(weatherUrl, { next: { revalidate: 3600 } }); // Revalider toutes les heures
+        const res = await fetch(weatherUrl, { next: { revalidate: 3600 } }); 
         weatherData = await res.json();
 
         if (weatherData && weatherData.current) {
@@ -99,13 +102,13 @@ export default async function DashboardPage() {
             
             // Logique simple pour l'icône basée sur le code météo (WMO)
             if (code >= 0 && code <= 1) {
-                WeatherIcon = Sun; // Temps clair/ensoleillé
+                WeatherIcon = Sun; 
             } else if (code >= 2 && code <= 3) {
-                WeatherIcon = Cloud; // Nuageux/partiellement nuageux
+                WeatherIcon = Cloud; 
             } else if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
-                WeatherIcon = CloudRain; // Pluie ou averses
+                WeatherIcon = CloudRain; 
             } else {
-                WeatherIcon = Cloud; // Par défaut : Nuage
+                WeatherIcon = Cloud; 
             }
         }
     } catch (e) {
@@ -115,7 +118,7 @@ export default async function DashboardPage() {
 
 
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
-    // ... (Récupération des données Discord inchangée) ...
+    
     if (!DISCORD_TOKEN) {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
@@ -190,14 +193,18 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* BARRE DE STATUT MISE À JOUR : Fond Violet et Météo */}
+            {/* BARRE DE STATUT INVERSÉE : Date/Heure à gauche, Météo à droite */}
             <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-700 text-white shadow-lg">
+                
+                {/* 1. Date et Heure (maintenant à gauche) */}
+                <p className="text-sm font-light">
+                    {currentDate} à **{currentTime}**
+                </p>
+
+                {/* 2. Météo (maintenant à droite) */}
                 <p className="font-semibold text-base flex items-center gap-2">
                     <WeatherIcon className="h-5 w-5" />
                     {weatherDisplay}
-                </p>
-                <p className="text-sm font-light">
-                    {currentDate} à **{currentTime}**
                 </p>
             </div>
             {/* ------------------------------------------- */}
