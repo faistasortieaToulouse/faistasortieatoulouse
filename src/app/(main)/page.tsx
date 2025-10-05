@@ -4,7 +4,8 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain } from "lucide-react"; 
+// AJOUT de Calendar et Clock aux imports de lucide-react
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -193,19 +194,26 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             
-            {/* BARRE DE STATUT MISE À JOUR : Couleur de fond #A020F0 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#A020F0] text-white shadow-lg">
+            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
-                {/* 1. Date et Heure (à gauche) */}
-                <p className="text-sm font-light">
-                    {currentDate} à **{currentTime}**
-                </p>
+                {/* 1. Date */}
+                <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span className="font-medium">{currentDate}</span>
+                </div>
 
-                {/* 2. Météo (à droite) */}
-                <p className="font-semibold text-base flex items-center gap-2">
-                    <WeatherIcon className="h-5 w-5" />
-                    {weatherDisplay}
-                </p>
+                {/* 2. Heure */}
+                <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-medium">{currentTime}</span>
+                </div>
+
+                {/* 3. Météo */}
+                <div className="flex items-center gap-2">
+                    <WeatherIcon className="h-4 w-4" />
+                    <span className="font-medium">{weatherDisplay}</span>
+                </div>
             </div>
             {/* ------------------------------------------- */}
 
