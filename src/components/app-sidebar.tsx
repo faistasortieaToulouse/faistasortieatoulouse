@@ -15,11 +15,8 @@ import {
     Map, 
     MessageSquare, 
     LifeBuoy,
-    // NOUVEAU : J'importe l'icône Car pour la Mobilité (comme demandé)
     Car 
 } from 'lucide-react';
-// Les composants Sidebar UI (SidebarHeader, etc.) sont ici remplacés par des balises div/nav simples 
-// car je n'ai pas accès à leur définition exacte (@/components/ui/sidebar).
 
 // Définition des éléments de navigation (avec un chemin simple sans useRouter)
 const navItems = [
@@ -37,28 +34,19 @@ const navItems = [
         external: true,
     },
     
-    // ------------------------------------------------------------------------
-
     { href: '/meetup', icon: Users, label: 'Événements Meetup' },
     { href: '/facebook', icon: Facebook, label: 'Groupes Facebook' },
     { href: '/map', icon: Map, label: 'Carte Interactive' },
 
-    // Les liens Mobilité et Calendrier qui étaient avant sont retirés pour éviter les doublons
-    // { href: '/calendar', icon: Calendar, label: '🗓️ Calendrier' }, 
-    // { href: '/mobility', icon: Bus, label: '📍 Déplacements' },
-
-    // --- VOS NOUVEAUX LIENS (placés logiquement avant les liens externes) ---
     { href: '/calendar', icon: Calendar, label: 'Calendrier' },
     { href: '/mobility', icon: Car, label: 'Mobilité' },
     { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
-// --- Composant AppSidebar intégré ---
-function AppSidebar() {
+// --- Composant AppSidebar : Ajout de l'EXPORT DEFAULT ---
+export default function AppSidebar() { // <--- CORRECTION MAJEURE
     // NOTE: Dans un layout de serveur (RootLayout), nous ne pouvons pas utiliser usePathname().
-    // La logique d'état actif est simplifiée ou doit être passée par props si nécessaire.
-    // Ici, on utilise des classes Tailwind simples pour la démo.
-    const ftsLogo = { imageUrl: "https://placehold.co/40x40/9333ea/ffffff?text=FTS" }; // Placeholder pour le logo
+    const ftsLogo = { imageUrl: "https://placehold.co/40x40/9333ea/ffffff?text=FTS" }; 
 
     return (
         <aside className="w-64 bg-gray-900 h-screen p-4 flex flex-col shadow-2xl sticky top-0">
@@ -107,10 +95,9 @@ function AppSidebar() {
                                     {ButtonContent}
                                 </a>
                             ) : (
-                                <a // Remplacé par <a> pour la compatibilité dans le Layout
+                                <a 
                                     href={item.href}
                                     className="w-full flex items-center p-3 rounded-lg transition duration-150 text-gray-300 hover:bg-gray-700 hover:text-white"
-                                    // Ajoutez ici la logique isActive via usePathname() une fois le code séparé.
                                 >
                                     {ButtonContent}
                                 </a>
@@ -135,32 +122,6 @@ function AppSidebar() {
         </aside>
     );
 }
-// --- Fin du Composant AppSidebar intégré ---
 
-
-// --- Composant RootLayout ---
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <html lang="fr">
-            <head>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            </head>
-            <body className="font-sans antialiased">
-                <div className="flex min-h-screen">
-                    {/* 1. La Barre Latérale est maintenant définie localement */}
-                    <AppSidebar /> 
-                    
-                    {/* 2. Le Contenu de la Page (children) est à côté */}
-                    <main className="flex-1 overflow-y-auto">
-                        {children} {/* C'est ici que app/mobility/page.tsx ou app/calendar/page.tsx est rendu */}
-                    </main>
-                </div>
-            </body>
-        </html>
-    );
-}
+// *** IMPORTANT : SUPPRIMEZ TOUT LE CODE DU RootLayout QUI SUIVAIT ICI ***
+// Le RootLayout doit être dans son propre fichier (par exemple, src/app/layout.tsx ou src/app/(main)/layout.tsx)
