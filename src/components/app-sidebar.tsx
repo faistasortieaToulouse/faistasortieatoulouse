@@ -1,14 +1,9 @@
-// faistasortietest2/src/components/app-sidebar.tsx
-
-"use client"; // Le use client est nécessaire pour usePathname si vous l'ajoutez
+"use client";
 
 import React from 'react';
-// import { usePathname } from 'next/navigation'; // Décommentez si vous utilisez Next.js App Router pour l'état actif
-
-// --- Importer les dépendances pour la Sidebar ---
 import { 
     Calendar, 
-    Bus, // Utilisé pour Tisseo/Transport
+    Bus, 
     LayoutDashboard, 
     Users, 
     Facebook, 
@@ -16,26 +11,15 @@ import {
     MessageSquare, 
     LifeBuoy,
     Car,
-    Menu, // Ne sert plus, mais on le laisse pour l'instant
-    X // Ne sert plus, mais on le laisse pour l'instant
+    X // Icône pour fermer le menu sur mobile
 } from 'lucide-react';
 
-// Définition des éléments de navigation
+// Définition des éléments de navigation (inchangée)
 const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
     { href: '/tisseo', icon: Bus, label: 'Tisseo/Transport' }, 
-    {
-        href: 'https://discord.com/channels/1422806103267344416/1422806103904882842',
-        icon: MessageSquare,
-        label: 'Sorties à Toulouse',
-        external: true,
-    },
-    {
-        href: 'https://discord.com/channels/1422806103267344416/1422806103904882842',
-        icon: MessageSquare,
-        label: 'Discussions',
-        external: true,
-    },
+    { href: 'https://discord.com/channels/1422806103267344416/1422806103904882842', icon: MessageSquare, label: 'Sorties à Toulouse', external: true },
+    { href: 'https://discord.com/channels/1422806103267344416/1422806103904882842', icon: MessageSquare, label: 'Discussions', external: true },
     { href: '/calendar', icon: Calendar, label: 'Calendrier' },
     { href: '/mobility', icon: Car, label: 'Mobilité' },
     { href: '/meetup', icon: Users, label: 'Événements Meetup' },
@@ -44,16 +28,18 @@ const navItems = [
     { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
-// --- Composant AppSidebar EXPORTÉ (NOMMÉ) ---
-// Retrait des props isOpen et onToggle qui sont gérées par le contexte SidebarProvider
-export function AppSidebar() {
-    // const pathname = usePathname(); // Décommentez pour l'état actif
+/**
+ * Composant de la barre latérale de navigation de l'application.
+ * ATTENTION : Ce composant doit recevoir les props isOpen et onToggle pour la version mobile.
+ */
+export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen: boolean }) {
     
     // URL du logo réel de l'application
-    const ftsLogo = { imageUrl: "..." }; // URL du logo
+    const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2" }; 
     
     // Définition des couleurs pour la palette
     const sidebarBg = '#F7DEEF';
+    const textPrimary = 'text-gray-900'; 
     const textSecondary = 'text-gray-600';
     const borderSecondary = 'border-gray-300';
     const activeBg = 'bg-purple-300';
@@ -64,29 +50,54 @@ export function AppSidebar() {
         backgroundColor: '#D02F9D',
         transition: 'background-color 150ms ease-in-out'
     }; 
-
+    
     return (
-        // Le contenu de la Sidebar est désormais rendu directement par <Sidebar>
+        // Note : Le wrapper <aside> et les classes de positionnement mobile sont gérés
+        // par le composant <Sidebar> de Shadcn/UI dans votre MainLayout.tsx.
+        // Nous n'incluons ici que le contenu interne :
         <div 
-            className="w-full h-full flex flex-col p-4"
+            className="w-full h-full flex flex-col p-4" 
             style={{ backgroundColor: sidebarBg }}
         >
-            {/* SidebarHeader - Retrait des boutons Fermer/Ouvrir gérés par le Layout */}
+            {/* 1. SidebarHeader (Logo, Titre et Bouton Fermer) */}
             <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-3">
+                    {/* Logo et Titre */}
                     <a href="/" className="flex items-center gap-3 no-underline">
-                        {/* ... (Code du logo inchangé) ... */}
+                        {ftsLogo && (
+                            <img
+                                src={ftsLogo.imageUrl}
+                                alt="FTS Logo"
+                                width={40}
+                                height={40}
+                                className="rounded-full"
+                            />
+                        )}
+                        <div className="flex flex-col">
+                            <h2 className={`text-lg font-semibold ${textPrimary}`}>Fais ta Sortie</h2>
+                            <p className={`text-xs ${textSecondary}`}>à Toulouse</p>
+                        </div>
                     </a>
+                    
+                    {/* Bouton Fermer (Burger Menu à droite) - Visible uniquement sur mobile */}
+                    <button 
+                        // Le bouton burger dans la sidebar ferme la sidebar. 
+                        // Le bouton dans le MainLayout ouvre la sidebar.
+                        className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none lg:hidden`}
+                        onClick={onToggle}
+                        aria-label="Fermer le menu"
+                    >
+                        <X className="h-6 w-6" />
+                    </button>
                 </div>
             </div>
             
-            {/* SidebarContent (Menu) */}
+            {/* 2. SidebarContent (Menu de Navigation) */}
             <nav className="flex-1 overflow-y-auto pt-4">
                 <div className="flex flex-col gap-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
-                        // Logique d'activation (simulée ici, utilisez usePathname pour le vrai fonctionnement)
-                        const isActive = item.href === '/'; // || pathname === item.href; 
+                        const isActive = item.href === '/'; // À remplacer par usePathname() pour la détection d'URL
                         
                         const linkClasses = `w-full flex items-center p-2 rounded-lg transition ${
                             isActive 
@@ -101,7 +112,7 @@ export function AppSidebar() {
                                 target={item.external ? "_blank" : "_self"}
                                 rel={item.external ? "noopener noreferrer" : undefined}
                                 className={linkClasses}
-                                // onClick: ne pas fermer, car le SidebarProvider le gère s'il est configuré pour
+                                onClick={onToggle} // Fermer le menu après un clic sur mobile
                             >
                                 <Icon className="h-5 w-5 mr-3 text-purple-700" />
                                 <span>{item.label}</span>
@@ -109,7 +120,7 @@ export function AppSidebar() {
                         );
                     })}
                 </div>
-                {/* Liens supplémentaires ou bouton Discord stylisé */}
+                {/* Bouton Discord */}
                 <div className="mt-4 pt-4 border-t" style={{ borderColor: borderSecondary }}>
                     <a 
                         href="https://discord.com/invite/votre-invite-ici" 
@@ -126,5 +137,4 @@ export function AppSidebar() {
         </div>
     );
 }
-
-// *** ATTENTION : Supprimez l'export default function RootLayout(...) du fichier AppSidebar.tsx ***
+// *** Supprimez l'export default function RootLayout(...) de ce fichier AppSidebar.tsx ***
