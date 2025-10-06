@@ -11,158 +11,94 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 import Image from 'next/image';
 
-export const revalidate = 300; // Revalidate at most every 5 minutes
+export const revalidate = 300;
 
-// --- Constantes ---
 const GUILD_ID = '1422806103267344416';
 const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c";
 
-// --- Interfaces ---
-interface DiscordChannel {
-  id: string;
-  name: string;
-  position: number;
-  type: number;
-  parent_id?: string;
-}
-
-interface DiscordEvent {
-  id: string;
-  name: string;
-  description: string;
-  scheduled_start_time: string;
-  channel_id: string;
-}
-
-interface DiscordWidgetData {
-  id: string;
-  name: string;
-  instant_invite: string | null;
-  channels: DiscordChannel[];
-  members: any[];
-  presence_count: number;
-  events: DiscordEvent[];
-}
-
-interface WeatherData {
-  current: {
-    time: string;
-    temperature_2m: number;
-    weather_code: number;
-  };
-  current_units: {
-    temperature_2m: string;
-  };
-}
+interface DiscordChannel { id: string; name: string; position: number; type: number; parent_id?: string; }
+interface DiscordEvent { id: string; name: string; description: string; scheduled_start_time: string; channel_id: string; }
+interface DiscordWidgetData { id: string; name: string; instant_invite: string | null; channels: DiscordChannel[]; members: any[]; presence_count: number; events: DiscordEvent[]; }
+interface WeatherData { current: { time: string; temperature_2m: number; weather_code: number; }; current_units: { temperature_2m: string; }; }
 
 export default async function DashboardPage() {
   const now = new Date();
-  
-  const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'Europe/Paris'
-  });
-  const timeFormatter = new Intl.DateTimeFormat('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZoneName: 'short',
-    timeZone: 'Europe/Paris'
-  });
-  
+  const dateFormatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Paris' });
+  const timeFormatter = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'Europe/Paris' });
   const currentDate = dateFormatter.format(now);
   const currentTime = timeFormatter.format(now);
 
   // --- Météo ---
-  const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
-  let weatherData: WeatherData | null = null;
   let weatherDisplay = 'Météo indisponible 😕';
   let WeatherIcon = Cloud;
-
   try {
-    const res = await fetch(weatherUrl, { next: { revalidate: 3600 } });
-    weatherData = await res.json();
-
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1', { next: { revalidate: 3600 } });
+    const weatherData: WeatherData = await res.json();
     if (weatherData?.current) {
       const temp = Math.round(weatherData.current.temperature_2m);
       const unit = weatherData.current_units.temperature_2m;
       const code = weatherData.current.weather_code;
       weatherDisplay = `${temp}${unit} à Toulouse`;
-
       if (code >= 0 && code <= 1) WeatherIcon = Sun;
       else if (code >= 2 && code <= 3) WeatherIcon = Cloud;
       else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) WeatherIcon = CloudRain;
     }
-  } catch (e) {
-    console.error('Erreur lors de la récupération de la météo:', e);
-  }
+  } catch(e){ console.error('Erreur météo:', e); }
 
   // --- Discord Widget ---
   let discordData: DiscordWidgetData | null = null;
   try {
     const widgetRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } });
     if (widgetRes.ok) discordData = await widgetRes.json();
-  } catch (e) {
-    console.error('Erreur widget Discord:', e);
-  }
+  } catch(e){ console.error('Erreur widget Discord:', e); }
 
-  // --- Calcul des événements à venir sur 7 jours ---
-  const upcomingEventsCount = discordData?.events
-    ? discordData.events.filter(e => {
-        const start = new Date(e.scheduled_start_time);
-        const diff = (start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-        return diff >= 0 && diff <= 7;
-      }).length
-    : 0;
+  const upcomingEventsCount = discordData?.events?.filter(e => {
+    const start = new Date(e.scheduled_start_time);
+    const diff = (start.getTime() - now.getTime()) / (1000*60*60*24);
+    return diff >= 0 && diff <= 7;
+  }).length || 0;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       {/* HEADER */}
-      <header className="flex flex-col items-center text-center space-y-6">
+      <header className="flex flex-col items-center space-y-6">
 
         {/* Logo */}
-        <Image
-          src={ftsLogoUrl}
-          alt="Fais ta Sortie Toulouse"
-          width={200}
-          height={200}
-          className="rounded-full shadow-md"
-        />
+        <Image src={ftsLogoUrl} alt="Fais ta Sortie Toulouse" width={200} height={200} className="rounded-full shadow-md" />
 
-        {/* Barre date / heure / météo */}
-        <div className="flex flex-wrap justify-center items-center gap-6 bg-purple-50 border border-purple-200 shadow-sm rounded-full px-6 py-3 text-gray-700">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-purple-500" />
-            <span>{currentDate}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-purple-500" />
-            <span>{currentTime}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <WeatherIcon className="h-5 w-5 text-blue-500" />
-            <span>{weatherDisplay}</span>
-          </div>
-        </div>
+        {/* Ligne titre + barre date/heure/météo + burger */}
+        <div className="flex flex-col lg:flex-row justify-between items-center w-full max-w-5xl gap-4">
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            <div className="text-left">
+              <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
+              <p className="text-accent mt-1 lg:mt-2">
+                Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
+              </p>
+            </div>
 
-        {/* Titre + bouton burger */}
-        <div className="flex justify-between items-center w-full max-w-4xl px-4">
-          <div className="text-left">
-            <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
-            <p className="text-accent mt-2">
-              Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
-            </p>
+            {/* Barre date/heure/météo */}
+            <div className="flex flex-wrap justify-center items-center gap-4 bg-purple-50 border border-purple-200 shadow-sm rounded-full px-4 py-2 text-gray-700">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-500" />
+                <span>{currentDate}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-purple-500" />
+                <span>{currentTime}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <WeatherIcon className="h-5 w-5 text-blue-500" />
+                <span>{weatherDisplay}</span>
+              </div>
+            </div>
           </div>
+
           <SidebarTrigger />
         </div>
       </header>
 
       {/* Carousel */}
-      <section>
-        <ImageCarousel />
-      </section>
+      <section><ImageCarousel /></section>
 
       {/* Boutons */}
       <section className="flex flex-wrap justify-center items-center gap-4">
@@ -191,7 +127,7 @@ export default async function DashboardPage() {
         </Button>
       </section>
 
-      {/* Stats Discord */}
+      {/* Discord Stats */}
       <section>
         <DiscordStats data={discordData} />
       </section>
