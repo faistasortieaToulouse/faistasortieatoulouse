@@ -15,7 +15,7 @@ export const revalidate = 300; // Revalidate at most every 5 minutes
 
 // --- Constantes ---
 const GUILD_ID = '1422806103267344416';
-const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
+const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c";
 
 // --- Interfaces ---
 interface DiscordChannel {
