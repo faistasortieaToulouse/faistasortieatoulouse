@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Calendar, Bus, LayoutDashboard, Users, Facebook, Map, MessageSquare, LifeBuoy, Car } from "lucide-react";
-import { SidebarClose } from "@/components/ui/sidebar"; // bouton fermer compatible provider
+import { Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -27,7 +27,7 @@ export function AppSidebar() {
             <p className="text-xs text-gray-600">à Toulouse</p>
           </div>
         </a>
-        <SidebarClose className="lg:hidden cursor-pointer" />
+        <SidebarTrigger className="lg:hidden cursor-pointer" />
       </div>
 
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
