@@ -29,13 +29,14 @@ export function AppSidebar() {
       <div className="flex items-center justify-between mb-6">
       
 <Link href="/" className="flex items-center gap-3">
-  <Image
-    src={ftsLogo}
-    alt="FTS Logo"
-    width={40}
-    height={40}
-    className="rounded-full"
-  />
+  <div className="relative w-10 h-10 flex-shrink-0">
+    <Image
+      src={ftsLogo}
+      alt="FTS Logo"
+      fill
+      className="rounded-full object-cover"
+    />
+  </div>
   <div>
     <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
     <p className="text-xs text-gray-600">à Toulouse</p>
