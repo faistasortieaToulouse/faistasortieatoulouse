@@ -11,14 +11,20 @@ import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar'; // NOTE: Ceci doit être remplacé par ToggleInMainButton si vous utilisez le code de RootLayout.jsx
 
 import { ImageCarousel } from '@/components/image-carousel';
+// AJOUT de Image à partir de 'next/image' pour optimiser l'affichage du logo
+import Image from 'next/image';
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 // --- Constantes (ID de Guilde et URL du Logo) ---
 const GUILD_ID = '1422806103267344416';
 const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
+// NOUVELLE CONSTANTE POUR LE LOGO VIOLET
+const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b";
 
 // --- Interfaces (Types de Données) ---
+// ... (Interfaces inchangées)
+
 interface DiscordChannel {
     id: string;
     name: string;
@@ -137,125 +143,89 @@ export default async function DashboardPage() {
         }
         return res.json();
     })
-    .catch(err => {
-        console.error('Error fetching Discord channels:', err);
-        return []; 
-    }) : []; 
-
-    
-    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-        headers: {
-            // CORRECTION: Utilisation des backticks (template literal) pour le header
-            Authorization: `Bot ${DISCORD_TOKEN}`, 
-        },
-        next: { revalidate: 300 } 
+    .catch(e => {
+        console.error('Erreur lors de la récupération des canaux Discord:', e);
+        return [];
     })
-    .then(async res => {
-        if (!res.ok) {
-            const errorBody = await res.text().catch(() => 'No error body available');
-            console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody}`);
-            return []; 
-        }
-        return res.json();
-    })
-    .catch(err => {
-        console.error('Error fetching Discord events:', err);
-        return []; 
-    }) : []; 
+    : []; 
 
-    const oneWeek = 7 * 24 * 60 * 60 * 1000; 
+    // --- Récupération des Données du Widget Discord (inchangée) ---
+    const discordWidgetUrl = `https://discord.com/api/v10/guilds/${GUILD_ID}/widget.json`;
     
-    const upcomingEventsCount = eventsData.filter(event => {
-        const startTime = new Date(event.scheduled_start_time);
-        return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
-    }).length;
+    let discordData: DiscordWidgetData | null = null;
+    let upcomingEventsCount = 0;
 
-    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
-    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
-        .then(res => res.json())
-        .catch(() => null);
+    try {
+        const res = await fetch(discordWidgetUrl, { next: { revalidate: 300 } });
+        discordData = await res.json();
 
-    const discordData: DiscordWidgetData | null = widgetData ? {
-        ...widgetData,
-        channels: channelsData, 
-        events: eventsData
-    } : {
-        id: GUILD_ID,
-        name: 'Fais Ta Sortie à Toulouse',
-        instant_invite: null,
-        channels: channelsData, 
-        members: [],
-        presence_count: 0,
-        events: eventsData
-    };
+        // Calcul du nombre d'événements à venir (dans les 7 jours)
+        const oneWeekFromNow = now.getTime() + 7 * 24 * 60 * 60 * 1000;
+        upcomingEventsCount = discordData?.events?.filter(event => 
+            new Date(event.scheduled_start_time).getTime() < oneWeekFromNow
+        ).length || 0;
 
-    // --- Rendu ---
+    } catch (e) {
+        console.error('Erreur lors de la récupération du widget Discord:', e);
+    }
+    // ----------------------------------------------------------------
+
+    // --- Rendu du Composant (Next.js App Router) ---
     return (
-        <div className="flex flex-col gap-8 p-4 md:p-8">
-            
-            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
-                
-                {/* 1. Date */}
-                <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium">{currentDate}</span>
+        <div className="flex flex-col gap-10 p-4 md:p-8">
+            <header className="space-y-4">
+                {/* --- BLOC PRINCIPAL AVEC LOGO ET TITRE (CENTRALISÉ) --- */}
+                <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="flex items-center space-x-4">
+                        {/* AJOUT du logo FTS avec Image de Next.js */}
+                        <Image
+                            src={ftsLogoUrlPurple}
+                            alt="Logo FTS"
+                            width={50} // Ajustez la taille selon vos besoins
+                            height={50} // Ajustez la taille selon vos besoins
+                            className="rounded-full shadow-lg" // Optionnel: pour un style plus sympa
+                        />
+                        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            Tableau de Bord
+                        </h1>
+                    </div>
+                    
+                    {/* --- Bloc Date/Heure/Météo (Maintenu) --- */}
+                    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-muted-foreground text-sm">
+                        <span className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {currentDate}
+                        </span>
+                        <span className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4" />
+                            {currentTime}
+                        </span>
+                        <span className="flex items-center">
+                            <WeatherIcon className="mr-2 h-4 w-4" />
+                            {weatherDisplay}
+                        </span>
+                    </div>
                 </div>
-
-                {/* 2. Heure */}
-                <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span className="font-medium">{currentTime}</span>
-                </div>
-
-                {/* 3. Météo */}
-                <div className="flex items-center gap-2">
-                    <WeatherIcon className="h-4 w-4" />
-                    <span className="font-medium">{weatherDisplay}</span>
-                </div>
-            </div>
-            {/* ------------------------------------------- */}
-
-        {/* NOUVELLE STRUCTURE D'EN-TÊTE DU TABLEAU DE BORD AVEC LE BOUTON TOGGLE ET LE LOGO */}
-
-            <div className="flex flex-col gap-2">
-{/* Ligne Titre + Bouton + Logo */}
-<header className="flex items-center justify-between border-b pb-2">
-{/* Conteneur pour le titre et le bouton de bascule (Burger) */}
-<div className="flex items-center gap-4">
-    <h1 className="font-headline text-4xl font-bold text-gray-800">Tableau de bord</h1>
-    
-    {/* DÉPLACÉ: Le bouton Menu Burger est juste à droite du titre */}
-    <SidebarTrigger
-        className="flex"
-    />
-</div>
-                
-                {/* Logo à droite du titre */}
-                <img
-                    src={ftsLogoUrl} 
-                    alt="FTS Logo Dashboard"
-                    width={40}
-                    height={40}
-                    className="rounded-full shadow-lg"
-                />
+                {/* ------------------------------------------------ */}
             </header>
             
-            {/* Description sous le titre */}
-            <div>
-
-                    <p className="mt-2 text-accent">
+            {/* --- SECTION DESCRIPTION RAPIDE --- */}
+            <div className="bg-primary/10 p-6 rounded-lg shadow-inner">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h2 className="text-2xl font-semibold text-primary mb-2">
+                        Bienvenue !
+                    </h2>
+                    <p className="text-muted-foreground">
                         Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
                     </p>
                     <p className="mt-2 text-accent">
                         tout est gratuit et sans limite !
                     </p>
-</div>
-</div>
+                </div>
+            </div>
 
             <section>
-              <ImageCarousel />
+                <ImageCarousel />
             </section>
             
             <section className="flex flex-wrap justify-center items-center gap-4">
