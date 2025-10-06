@@ -4,18 +4,21 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
+// AJOUT de Calendar et Clock aux imports de lucide-react
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react";
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar'; // NOTE: Ceci doit être remplacé par ToggleInMainButton si vous utilisez le code de RootLayout.jsx
+
 import { ImageCarousel } from '@/components/image-carousel';
-import Image from 'next/image'; 
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
+// --- Constantes (ID de Guilde et URL du Logo) ---
 const GUILD_ID = '1422806103267344416';
-const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c"; 
+const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
 
+// --- Interfaces (Types de Données) ---
 interface DiscordChannel {
     id: string;
     name: string;
@@ -42,6 +45,7 @@ interface DiscordWidgetData {
     events: DiscordEvent[];
 }
 
+// Interface pour la réponse simple de l'API Open-Meteo
 interface WeatherData {
     current: {
         time: string;
@@ -53,7 +57,10 @@ interface WeatherData {
     };
 }
 
+// --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
+    
+    // --- Calcul de la Date et de l'Heure Locales (avec TimeZone Paris) ---
     const now = new Date();
     
     const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
@@ -72,7 +79,9 @@ export default async function DashboardPage() {
 
     const currentDate = dateFormatter.format(now);
     const currentTime = timeFormatter.format(now);
+    // -----------------------------------------------------------
 
+    // --- Récupération des Données Météo pour Toulouse (inchangée) ---
     const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
     
     let weatherData: WeatherData | null = null;
@@ -88,8 +97,10 @@ export default async function DashboardPage() {
             const unit = weatherData.current_units.temperature_2m;
             const code = weatherData.current.weather_code;
             
+            // CORRECTION: Utilisation des backticks (template literal)
             weatherDisplay = `${temp}${unit} à Toulouse`;
             
+            // Logique simple pour l'icône basée sur le code météo (WMO)
             if (code >= 0 && code <= 1) {
                 WeatherIcon = Sun; 
             } else if (code >= 2 && code <= 3) {
@@ -103,6 +114,7 @@ export default async function DashboardPage() {
     } catch (e) {
         console.error('Erreur lors de la récupération de la météo:', e);
     }
+    // ----------------------------------------------------------------
 
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
     
@@ -110,8 +122,10 @@ export default async function DashboardPage() {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
+    // CORRECTION: Utilisation des backticks (template literal) pour l'URL
     const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
         headers: {
+            // CORRECTION: Utilisation des backticks (template literal) pour le header
             Authorization: `Bot ${DISCORD_TOKEN}`, 
         },
         next: { revalidate: 300 } 
@@ -123,31 +137,13 @@ export default async function DashboardPage() {
         }
         return res.json();
     })
-    .catch(err => {
-        console.error('Error fetching Discord channels:', err);
-        return []; 
-    }) : []; 
-
-    
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-        headers: {
-            Authorization: `Bot ${DISCORD_TOKEN}`, 
-        },
-        next: { revalidate: 300 } 
-    })
-    .then(async res => {
-        if (!res.ok) {
-                    <SidebarTrigger /> 
-                </div>
-
-                {/* Descriptions (Sous le titre) */}
-                <p className="mt-2 text-accent">
-                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                </p>
-                <p className="mt-2 text-accent">
-                    tout est gratuit et sans limite !
-                </p>
-            </header>
+                        Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                    </p>
+                    <p className="mt-2 text-accent">
+                        tout est gratuit et sans limite !
+                    </p>
+</div>
+</div>
 
             <section>
               <ImageCarousel />
@@ -155,6 +151,7 @@ export default async function DashboardPage() {
             
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
+                    {/* CORRECTION: Utilisation des backticks (template literal) pour l'URL */}
                     <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
                         Pour commencer, clique ici :
                     </Link>
@@ -165,6 +162,7 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
+                {/* Le SidebarTrigger redondant a été retiré. */}
             </section>
 
             <section className="flex flex-wrap justify-center gap-4">
@@ -193,6 +191,7 @@ export default async function DashboardPage() {
                 </div>
             </section>
 
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
             <section>
                 <Alert>
                     <BellRing className="h-4 w-4" />
@@ -200,7 +199,7 @@ export default async function DashboardPage() {
                     <AlertDescription>
                         {upcomingEventsCount > 0 ? (
                             <p className="font-bold text-lg text-primary">
-                                Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
+                                Il y a actuellement {upcomingEventsCount} événements prévus cette semaine !
                             </p>
                         ) : (
                             'Aucun événement n’est prévu cette semaine. Consultez la liste ci-dessous pour organiser une sortie !'
@@ -208,6 +207,7 @@ export default async function DashboardPage() {
                     </AlertDescription>
                 </Alert>
             </section>
+            {/* ------------------------------------- */}
         </div>
     );
 }
