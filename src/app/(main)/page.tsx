@@ -209,9 +209,19 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* HEADER (TITRE, DESCRIPTION) - SOUS LA BARRE DE STATUT ET ALIGNÉ À GAUCHE */}
-            <header>
-                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
+            {/* HEADER (TITRE, DESCRIPTION, MENU BURGER) - SOUS LA BARRE DE STATUT */}
+            <header className="flex flex-col gap-4">
+                {/* NOUVELLE LIGNE POUR TITRE ET MENU BURGER */}
+                <div className="flex justify-between items-center w-full">
+                    
+                    {/* Titre Tableau de Bord (Gauche) */}
+                    <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
+
+                    {/* Menu Burger (Droite, visible seulement sur mobile) */}
+                    <SidebarTrigger className="md:hidden" />
+                </div>
+
+                {/* Descriptions (Sous le titre) */}
                 <p className="mt-2 text-accent">
                     Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
                 </p>
@@ -236,8 +246,7 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
-                {/* Le menu Burger est ici (visible sur mobile) */}
-                <SidebarTrigger className="md:hidden" />
+                {/* L'ancien SidebarTrigger ici a été supprimé */}
             </section>
 
             <section className="flex flex-wrap justify-center gap-4">
