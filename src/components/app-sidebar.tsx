@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 
 // --- Importer les dépendances pour la Sidebar ---
-import { 
-    Calendar, 
+import { 
+    Calendar, 
     Bus, // Utilisé pour Tisseo/Transport
-    LayoutDashboard, 
-    Users, 
-    Facebook, 
-    Map, 
-    MessageSquare, 
+    LayoutDashboard, 
+    Users, 
+    Facebook, 
+    Map, 
+    MessageSquare, 
     LifeBuoy,
     Car,
     Menu,
@@ -52,11 +52,11 @@ const navItems = [
  */
 export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen: boolean }) {
     // URL du logo réel de l'application
-    const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2" }; 
+    const ftsLogo = { imageUrl: "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2" }; 
 
     // Définition des couleurs pour la palette
     const sidebarBg = '#F7DEEF';
-    const textPrimary = 'text-gray-900'; 
+    const textPrimary = 'text-gray-900'; 
     const textSecondary = 'text-gray-600';
     const borderSecondary = 'border-gray-300';
     const activeBg = 'bg-purple-300';
@@ -64,10 +64,10 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
     const hoverBg = 'hover:bg-purple-200';
     
     // --- Nouvelle Couleur Discord ---
-    const discordBgStyle = { 
+    const discordBgStyle = { 
         backgroundColor: '#D02F9D',
         transition: 'background-color 150ms ease-in-out'
-    }; 
+    }; 
 
     // Classes conditionnelles pour l'ouverture/fermeture sur mobile
     const mobileClasses = `fixed top-0 left-0 z-40 transform transition-transform duration-300 ${
@@ -86,13 +86,11 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
             )}
 
             {/* Barre Latérale */}
-            <aside 
+            <aside 
                 className={`w-64 h-screen p-4 flex flex-col shadow-2xl ${mobileClasses}`}
                 style={{ backgroundColor: sidebarBg }}
             >
                 {/* SidebarHeader */}
-                {/* CORRECTION : Suppression de la classe Tailwind dynamique 'bg-[${sidebarBg}]' de className. 
-                   Le style est maintenant appliqué uniquement via la prop 'style'. */}
                 <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
                     <div className="flex items-center justify-between gap-3">
                         <a href="/" className="flex items-center gap-3 no-underline">
@@ -112,7 +110,7 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                         </a>
                         
                         {/* Bouton Fermer (visible uniquement sur les petits écrans) */}
-                        <button 
+                        <button 
                             className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none lg:hidden`}
                             onClick={onToggle}
                             aria-label="Fermer le menu"
@@ -124,72 +122,56 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                 
                 {/* SidebarContent (Menu) */}
                 <nav className="flex-1 overflow-y-auto pt-4">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        // Simuler le bouton de menu
-                        const ButtonContent = (
-                            <>
-                                <Icon className="h-5 w-5 mr-3" />
-                                <span>{item.label}</span>
-                            </>
-                        );
-
-                        // Définir si le lien est actif (simplifié pour la démo)
-                        const isActive = item.href === '/'; 
-
-                        const linkClasses = `w-full flex items-center p-3 rounded-lg transition duration-150 ${
-                            isActive 
-                                ? `${activeBg} ${activeText} shadow-lg` 
-                                : `${textPrimary} ${hoverBg} hover:text-gray-900`
-                        }`;
-
-                        return (
-                            <div key={item.label} className="mb-1">
-                                {item.external ? (
-                                    <a 
-                                        href={item.href} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        className={linkClasses}
-                                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                                    >
-                                        {ButtonContent}
-                                    </a>
-                                ) : (
-                                    <a 
-                                        href={item.href}
-                                        className={linkClasses}
-                                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                                    >
-                                        {ButtonContent}
-                                    </a>
-                                )}
-                            </div>
-                        );
-                    })}
+                    {/* CORRECTION : L'itération sur navItems doit retourner le JSX de chaque lien */}
+                    <div className="flex flex-col gap-2">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            // Définir si le lien est actif (à adapter avec usePathname() de next/navigation si nécessaire)
+                            const isActive = item.href === '/'; 
+                            
+                            const linkClasses = `w-full flex items-center p-2 rounded-lg transition ${
+                                isActive 
+                                    ? `${activeBg} ${activeText} font-semibold` 
+                                    : `${hoverBg} ${textSecondary}`
+                            }`;
+                            
+                            return (
+                                <a
+                                    key={item.label}
+                                    href={item.href}
+                                    target={item.external ? "_blank" : "_self"}
+                                    rel={item.external ? "noopener noreferrer" : undefined}
+                                    className={linkClasses}
+                                    onClick={onToggle} // Fermer le menu après un clic (sur mobile)
+                                >
+                                    <Icon className="h-5 w-5 mr-3 text-purple-700" />
+                                    <span>{item.label}</span>
+                                </a>
+                            );
+                        })}
+                    </div>
+                    {/* Liens supplémentaires ou bouton Discord stylisé (si non inclus dans navItems) */}
+                    <div className="mt-4 pt-4 border-t" style={{ borderColor: borderSecondary }}>
+                        <a 
+                            href="https://discord.com/invite/votre-invite-ici" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center p-2 rounded-lg text-white font-bold transition hover:brightness-110" 
+                            style={discordBgStyle}
+                            onClick={onToggle} // Fermer le menu après un clic (sur mobile)
+                        >
+                            <MessageSquare className="h-5 w-5 mr-2" />
+                            Rejoindre Discord
+                        </a>
+                    </div>
                 </nav>
-                
-                {/* SidebarFooter */}
-                <div className={`p-4 border-t ${borderSecondary} mt-auto`}>
-                    <a
-                        href="https://discord.com/channels/1422806103267344416/1422806103904882842"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full flex items-center justify-center p-2 rounded-lg text-white transition hover:brightness-110" 
-                        style={discordBgStyle}
-                        onClick={onToggle} // Fermer le menu après un clic (sur mobile)
-                    >
-                        <MessageSquare className="h-5 w-5 mr-2" />
-                        Rejoindre Discord
-                    </a>
-                </div>
             </aside>
         </>
     );
 }
 
 // --- Composant RootLayout EXPORTÉ (PAR DÉFAUT) ---
-// Ceci enveloppe le layout et gère l'état du menu burger sur mobile
+// Reste inchangé, il gère correctement l'état d'ouverture/fermeture et le responsive.
 export default function RootLayout({
     children,
 }: {
@@ -228,7 +210,7 @@ export default function RootLayout({
                 <main className="flex-1 overflow-y-auto lg:ml-64"> 
                     {/* Bouton Menu Burger (visible uniquement sur les petits écrans) */}
                     <div className="p-4 lg:hidden sticky top-0 bg-white shadow-md z-20">
-                        <button 
+                        <button 
                             className="p-2 rounded-lg text-gray-900 hover:bg-gray-100 transition focus:outline-none"
                             onClick={toggleSidebar}
                             aria-label="Ouvrir le menu"
@@ -242,7 +224,7 @@ export default function RootLayout({
                         <h1 className="text-4xl font-bold text-gray-800">Contenu Principal</h1>
                         <p className="mt-4 text-gray-600">Le contenu de vos pages s'affichera ici.</p>
                     </div>
-                    {children} 
+                    {children} 
                 </main>
             </div>
         </div>
