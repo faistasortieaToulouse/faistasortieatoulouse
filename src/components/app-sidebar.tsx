@@ -11,7 +11,7 @@ const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
   { href: "/tisseo", icon: Bus, label: "Tisseo/Transport" },
   { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Sorties à Toulouse", external: true },
-  { href: "/discussions", icon: MessageSquare, label: "Discussions" },
+  { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Discussions", external: true },
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
