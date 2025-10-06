@@ -35,6 +35,7 @@ return (
       alt="FTS Logo"
       fill
       className="rounded-full object-cover"
+      sizes="40px"
     />
   </div>
   <div>
