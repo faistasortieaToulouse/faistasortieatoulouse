@@ -60,23 +60,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
+
       {/* HEADER */}
       <header className="flex flex-col items-center space-y-6">
-
-        {/* Logo */}
         <Image src={ftsLogoUrl} alt="Fais ta Sortie Toulouse" width={200} height={200} className="rounded-full shadow-md" />
 
-        {/* Ligne titre + barre date/heure/météo + burger */}
         <div className="flex flex-col lg:flex-row justify-between items-center w-full max-w-5xl gap-4">
           <div className="flex flex-col lg:flex-row items-center gap-6">
             <div className="text-left">
               <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
               <p className="text-accent mt-1 lg:mt-2">
-                Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
+                Application pour faire des sorties à Toulouse. Tout est gratuit et sans limite.
               </p>
             </div>
 
-            {/* Barre date/heure/météo */}
             <div className="flex flex-wrap justify-center items-center gap-4 bg-purple-50 border border-purple-200 shadow-sm rounded-full px-4 py-2 text-gray-700">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-purple-500" />
@@ -127,12 +124,12 @@ export default async function DashboardPage() {
         </Button>
       </section>
 
-      {/* Discord Stats */}
+      {/* Statistiques Discord */}
       <section>
         <DiscordStats data={discordData} />
       </section>
 
-      {/* Recommandations + Events */}
+      {/* Recos + Events */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="flex flex-col gap-8">
           <AiRecommendations eventData={JSON.stringify(discordData?.events || [], null, 2)} />
@@ -144,21 +141,35 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Notifications événements */}
+      {/* Section "Événements à venir" avec compteur */}
+      <section className="space-y-2">
+        <h2 className="text-2xl font-bold text-purple-700">Événements à venir</h2>
+        <p className="text-lg font-semibold">{upcomingEventsCount}</p>
+        <p>Planifiés sur le Discord</p>
+      </section>
+
+      {/* Notifications détaillées */}
       <section>
         <Alert>
           <BellRing className="h-4 w-4" />
-          <AlertTitle>Événements à venir (7 jours)</AlertTitle>
+          <AlertTitle>Événements à venir</AlertTitle>
           <AlertDescription>
             {upcomingEventsCount > 0 ? (
-              <p className="font-bold text-lg text-primary">
-                Il y a actuellement {upcomingEventsCount} événement(s) prévus cette semaine !
+              <p>
+                Voici les prochains événements prévus sur le serveur Discord.
               </p>
             ) : (
-              'Aucun événement prévu cette semaine. Créez le vôtre sur Discord !'
+              'Aucun événement à venir pour le moment.'
             )}
           </AlertDescription>
         </Alert>
+      </section>
+
+      {/* Salons */}
+      <section className="space-y-2">
+        <h2 className="text-2xl font-bold text-purple-700">Salons du serveur</h2>
+        <p>Liste de tous les salons disponibles, groupés par catégorie.</p>
+        <DiscordChannelList channels={discordData?.channels} />
       </section>
     </div>
   );
