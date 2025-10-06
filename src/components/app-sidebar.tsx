@@ -13,9 +13,9 @@ const navItems = [
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
-  { href="/facebook-groups", icon: Facebook, label: "Groupes Facebook" },
-  { href="/interactive-map", icon: Map, label: "Carte Interactive" },
-  { href="/help", icon: LifeBuoy, label: "Aide" },
+  { href: "/facebook-groups", icon: Facebook, label: "Groupes Facebook" },
+  { href: "/map", icon: Map, label: "Carte Interactive" },
+  { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
 
 
