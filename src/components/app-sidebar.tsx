@@ -24,26 +24,24 @@ const navItems = [
 export function AppSidebar() {
   const ftsLogo = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media";
 
-    return (
-    <div className="flex items-center justify-between mb-6">
-      <Link href="/" className="flex items-center gap-3">
-        <div className="relative w-10 h-10 flex-shrink-0">
-          <Image
-            src={ftsLogo}
-            alt="FTS Logo"
-            fill
-            className="rounded-full object-cover"
-          />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
-          <p className="text-xs text-gray-600">à Toulouse</p>
-        </div>
-      </Link>
-      <SidebarTrigger className="lg:hidden cursor-pointer" />
-    </div>
-  );
-}
+return (
+    <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
+      <div className="flex items-center justify-between mb-6">
+      
+<Link href="/" className="flex items-center gap-3">
+  <div className="relative w-10 h-10 flex-shrink-0">
+    <Image
+      src={ftsLogo}
+      alt="FTS Logo"
+      fill
+      className="rounded-full object-cover"
+    />
+  </div>
+  <div>
+    <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
+    <p className="text-xs text-gray-600">à Toulouse</p>
+  </div>
+</Link>
 
         <SidebarTrigger className="lg:hidden cursor-pointer" />
       </div>
