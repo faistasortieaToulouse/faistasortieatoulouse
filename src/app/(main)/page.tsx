@@ -55,6 +55,7 @@ interface WeatherData {
 
 export default async function DashboardPage() {
   const now = new Date();
+
   const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
     weekday: 'long',
     year: 'numeric',
@@ -68,6 +69,7 @@ export default async function DashboardPage() {
     timeZoneName: 'short',
     timeZone: 'Europe/Paris'
   });
+
   const currentDate = dateFormatter.format(now);
   const currentTime = timeFormatter.format(now);
 
@@ -85,6 +87,7 @@ export default async function DashboardPage() {
       const unit = weatherData.current_units.temperature_2m;
       const code = weatherData.current.weather_code;
       weatherDisplay = `${temp}${unit} à Toulouse`;
+
       if (code >= 0 && code <= 1) WeatherIcon = Sun;
       else if (code >= 2 && code <= 3) WeatherIcon = Cloud;
       else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) WeatherIcon = CloudRain;
@@ -93,10 +96,11 @@ export default async function DashboardPage() {
     console.error('Erreur météo:', e);
   }
 
-  // --- Discord API ---
+  // --- Discord ---
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
   let channelsData: DiscordChannel[] = [];
   let eventsData: DiscordEvent[] = [];
+
   if (DISCORD_TOKEN) {
     try {
       const channelsRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
@@ -115,7 +119,7 @@ export default async function DashboardPage() {
     }
   }
 
-  // --- Widget Discord ---
+  // --- Widget Discord public ---
   let discordData: DiscordWidgetData | null = null;
   try {
     const widgetRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } });
@@ -124,123 +128,28 @@ export default async function DashboardPage() {
     console.error('Erreur widget Discord:', e);
   }
 
-  const upcomingEventsCount = eventsData.filter(e => {
-    const start = new Date(e.scheduled_start_time);
-    const diff = (start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 7;
-  }).length;
-
-  const onlineMembersCount = discordData?.members ? discordData.members.length : 0;
+  // --- Compter événements à venir sur 7 jours ---
+  const upcomingEventsCount = discordData?.events
+    ? discordData.events.filter(e => {
+        const start = new Date(e.scheduled_start_time);
+        const diff = (start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+        return diff >= 0 && diff <= 7;
+      }).length
+    : 0;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       {/* HEADER */}
       <header className="flex flex-col items-center text-center space-y-6">
-        <Image src={ftsLogoUrl} alt="FTS Logo" width={200} height={200} className="rounded-full shadow-md" />
+        <Image
+          src={ftsLogoUrl}
+          alt="FTS Logo"
+          width={200}
+          height={200}
+          className="rounded-full shadow-md"
+        />
 
         <div className="flex flex-wrap justify-center items-center gap-6 bg-purple-50 border border-purple-200 shadow-sm rounded-full px-6 py-3 text-gray-700">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-purple-500" />
-            <span>{currentDate}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-purple-500" />
-            <span>{currentTime}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <WeatherIcon className="h-5 w-5 text-blue-500" />
-            <span>{weatherDisplay}</span>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center w-full max-w-4xl px-4">
-          <div className="text-left">
-            <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
-            <p className="text-accent mt-2">
-              Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
-            </p>
-          </div>
-          <SidebarTrigger />
-        </div>
-      </header>
-
-      {/* Carousel */}
-      <section>
-        <ImageCarousel />
-      </section>
-
-      {/* Boutons action */}
-      <section className="flex flex-wrap justify-center items-center gap-4">
-        <Button asChild size="lg">
-          <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
-            Rejoindre la communauté
-          </Link>
-        </Button>
-        <Button asChild size="lg" variant="outline">
-          <Link href="https://discord.com/download" target="_blank" rel="noopener noreferrer">
-            <Download className="mr-2 h-5 w-5" />
-            Télécharger Discord
-          </Link>
-        </Button>
-      </section>
-
-      {/* Événements spéciaux */}
-      <section className="flex flex-wrap justify-center gap-4">
-        <Button size="lg" variant="outline" disabled>
-          <PartyPopper className="mr-2 h-5 w-5" /> Girls Party
-        </Button>
-        <Button size="lg" variant="outline" disabled>
-          <PartyPopper className="mr-2 h-5 w-5" /> Student Event
-        </Button>
-      </section>
-
-      {/* Discord Stats */}
-      <section>
-        <DiscordStats data={discordData} />
-      </section>
-
-      {/* Recos + Events */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="flex flex-col gap-8">
-          <AiRecommendations eventData={JSON.stringify(eventsData || [], null, 2)} />
-          <DiscordWidget />
-          <DiscordChannelList channels={channelsData} />
-        </div>
-        <div className="flex flex-col gap-8">
-          <DiscordEvents events={eventsData} />
-        </div>
-      </section>
-
-      {/* Alerte événements */}
-      <section className="space-y-4">
-        <Alert>
-          <BellRing className="h-4 w-4" />
-          <AlertTitle>Événements à venir (7 jours)</AlertTitle>
-          <AlertDescription>
-            {upcomingEventsCount > 0 ? (
-              <p className="font-bold text-lg text-primary">
-                {upcomingEventsCount} événement(s) prévus cette semaine !
-              </p>
-            ) : (
-              'Aucun événement prévu cette semaine. Créez le vôtre sur Discord !'
-            )}
-          </AlertDescription>
-        </Alert>
-
-        <Alert>
-          <BellRing className="h-4 w-4" />
-          <AlertTitle>Membres en ligne</AlertTitle>
-          <AlertDescription>
-            {onlineMembersCount > 0 ? (
-              <p className="font-bold text-lg text-primary">
-                {onlineMembersCount} actuellement sur le Discord
-              </p>
-            ) : (
-              "Aucun membre n'est actuellement en ligne."
-            )}
-          </AlertDescription>
-        </Alert>
-      </section>
-    </div>
-  );
-}
+            <span>{currentDa
