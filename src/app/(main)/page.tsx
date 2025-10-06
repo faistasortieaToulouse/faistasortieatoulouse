@@ -14,7 +14,6 @@ import Image from 'next/image';
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 const GUILD_ID = '1422806103267344416';
-// NOUVELLE URL DU LOGO FTS
 const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c"; 
 
 interface DiscordChannel {
@@ -180,27 +179,7 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
-            <header className="flex flex-col items-center gap-4">
-                {/* LOGO FTS - TAILLE 200x200 pixels avec la nouvelle URL */}
-                <Image
-                    src={ftsLogoUrlPurple}
-                    alt="Logo FTS"
-                    width={200} 
-                    height={200}
-                    className="rounded-full shadow-lg"
-                />
-                
-                {/* Titre Tableau de Bord */}
-                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
-                <p className="mt-2 text-accent text-center">
-                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                </p>
-                <p className="mt-2 text-accent text-center">
-                    tout est gratuit et sans limite !
-                </p>
-            </header>
-
-            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) */}
+            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - MAINTENANT EN HAUT */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
                 <div className="flex items-center gap-2">
@@ -218,6 +197,28 @@ export default async function DashboardPage() {
                     <span className="font-medium">{weatherDisplay}</span>
                 </div>
             </div>
+
+            {/* HEADER (LOGO, TITRE, DESCRIPTION) - PLACÉ SOUS LA BARRE DE STATUT ET ALIGNÉ À GAUCHE */}
+            <header className="flex flex-col gap-4"> {/* Suppression de items-center pour aligner à gauche */}
+                
+                {/* LOGO FTS - ALIGNÉ À GAUCHE */}
+                <Image
+                    src={ftsLogoUrlPurple}
+                    alt="Logo FTS"
+                    width={200} 
+                    height={200}
+                    className="rounded-full shadow-lg"
+                />
+                
+                {/* Titre Tableau de Bord */}
+                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
+                <p className="mt-2 text-accent"> {/* Suppression de text-center */}
+                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                </p>
+                <p className="mt-2 text-accent"> {/* Suppression de text-center */}
+                    tout est gratuit et sans limite !
+                </p>
+            </header>
 
             <section>
               <ImageCarousel />
