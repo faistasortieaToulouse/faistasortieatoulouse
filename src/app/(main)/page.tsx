@@ -148,13 +148,6 @@ export default async function DashboardPage() {
         <p>Planifiés sur le Discord</p>
       </section>
 
-          const oneWeek = 7 * 24 * 60 * 60 * 1000; 
-    
-    const upcomingEventsCount = eventsData.filter(event => {
-        const startTime = new Date(event.scheduled_start_time);
-        return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
-    }).length;
-
       {/* Notifications détaillées */}
       <section>
         <Alert>
