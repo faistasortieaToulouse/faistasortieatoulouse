@@ -13,11 +13,16 @@ import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 import { TimeWeatherBar } from '@/components/time-weather-bar'; // <-- AJOUTEZ CETTE LIGNE
+import Image from 'next/image';
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 // --- Constantes (ID de Guilde) ---
 const GUILD_ID = '1422806103267344416';
+
+// --- Constantes (URL du Logo et ID de Guilde) ---
+const GUILD_ID = '1422806103267344416';
+const FTS_LOGO_URL = 'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c';
 
 // --- Interfaces (Types de Données) ---
 interface DiscordChannel {
@@ -136,17 +141,29 @@ export default async function DashboardPage() {
     // --- Rendu ---
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
-                    <p className="mt-2 text-accent">
-                        Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                    </p>
-                    <p className="mt-2 text-accent">
-                        tout est gratuit et sans limite !
-                    </p>
-                </div>
-            </header>
+<header className="flex items-start justify-between">
+    <div>
+        <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
+        <p className="mt-2 text-accent">
+            Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+        </p>
+        <p className="mt-2 text-accent">
+            tout est gratuit et sans limite !
+        </p>
+    </div>
+    
+    {/* --- LOGO AJOUTÉ À DROITE --- */}
+    <div className="relative w-24 h-24 flex-shrink-0">
+        <Image
+            src={FTS_LOGO_URL}
+            alt="Logo FTS"
+            fill
+            className="rounded-lg object-cover"
+            sizes="96px"
+        />
+    </div>
+    {/* --------------------------- */}
+</header>
             
             {/* --- NOUVELLE BARRE DATE/HEURE/MÉTÉO --- */}
             <TimeWeatherBar />
