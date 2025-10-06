@@ -11,11 +11,13 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 import Image from 'next/image';
 
-export const revalidate = 300;
+export const revalidate = 300; // Revalidate at most every 5 minutes
 
+// --- Constantes ---
 const GUILD_ID = '1422806103267344416';
 const ftsLogoUrl = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c";
 
+// --- Interfaces ---
 interface DiscordChannel {
   id: string;
   name: string;
@@ -55,7 +57,7 @@ interface WeatherData {
 
 export default async function DashboardPage() {
   const now = new Date();
-
+  
   const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
     weekday: 'long',
     year: 'numeric',
@@ -69,7 +71,7 @@ export default async function DashboardPage() {
     timeZoneName: 'short',
     timeZone: 'Europe/Paris'
   });
-
+  
   const currentDate = dateFormatter.format(now);
   const currentTime = timeFormatter.format(now);
 
@@ -82,6 +84,7 @@ export default async function DashboardPage() {
   try {
     const res = await fetch(weatherUrl, { next: { revalidate: 3600 } });
     weatherData = await res.json();
+
     if (weatherData?.current) {
       const temp = Math.round(weatherData.current.temperature_2m);
       const unit = weatherData.current_units.temperature_2m;
@@ -93,33 +96,10 @@ export default async function DashboardPage() {
       else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) WeatherIcon = CloudRain;
     }
   } catch (e) {
-    console.error('Erreur météo:', e);
+    console.error('Erreur lors de la récupération de la météo:', e);
   }
 
-  // --- Discord ---
-  const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
-  let channelsData: DiscordChannel[] = [];
-  let eventsData: DiscordEvent[] = [];
-
-  if (DISCORD_TOKEN) {
-    try {
-      const channelsRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
-        headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
-        next: { revalidate: 300 }
-      });
-      if (channelsRes.ok) channelsData = await channelsRes.json();
-
-      const eventsRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-        headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
-        next: { revalidate: 300 }
-      });
-      if (eventsRes.ok) eventsData = await eventsRes.json();
-    } catch (err) {
-      console.error('Erreur Discord API:', err);
-    }
-  }
-
-  // --- Widget Discord public ---
+  // --- Discord Widget ---
   let discordData: DiscordWidgetData | null = null;
   try {
     const widgetRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } });
@@ -128,7 +108,7 @@ export default async function DashboardPage() {
     console.error('Erreur widget Discord:', e);
   }
 
-  // --- Compter événements à venir sur 7 jours ---
+  // --- Calcul des événements à venir sur 7 jours ---
   const upcomingEventsCount = discordData?.events
     ? discordData.events.filter(e => {
         const start = new Date(e.scheduled_start_time);
@@ -141,15 +121,109 @@ export default async function DashboardPage() {
     <div className="container mx-auto px-4 py-8 space-y-12">
       {/* HEADER */}
       <header className="flex flex-col items-center text-center space-y-6">
+
+        {/* Logo */}
         <Image
           src={ftsLogoUrl}
-          alt="FTS Logo"
+          alt="Fais ta Sortie Toulouse"
           width={200}
           height={200}
           className="rounded-full shadow-md"
         />
 
+        {/* Barre date / heure / météo */}
         <div className="flex flex-wrap justify-center items-center gap-6 bg-purple-50 border border-purple-200 shadow-sm rounded-full px-6 py-3 text-gray-700">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-purple-500" />
-            <span>{currentDa
+            <span>{currentDate}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-purple-500" />
+            <span>{currentTime}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <WeatherIcon className="h-5 w-5 text-blue-500" />
+            <span>{weatherDisplay}</span>
+          </div>
+        </div>
+
+        {/* Titre + bouton burger */}
+        <div className="flex justify-between items-center w-full max-w-4xl px-4">
+          <div className="text-left">
+            <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
+            <p className="text-accent mt-2">
+              Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
+            </p>
+          </div>
+          <SidebarTrigger />
+        </div>
+      </header>
+
+      {/* Carousel */}
+      <section>
+        <ImageCarousel />
+      </section>
+
+      {/* Boutons */}
+      <section className="flex flex-wrap justify-center items-center gap-4">
+        <Button asChild size="lg">
+          <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
+            Rejoindre la communauté
+          </Link>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link href="https://discord.com/download" target="_blank" rel="noopener noreferrer">
+            <Download className="mr-2 h-5 w-5" />
+            Télécharger Discord
+          </Link>
+        </Button>
+      </section>
+
+      {/* Événements spéciaux */}
+      <section className="flex flex-wrap justify-center gap-4">
+        <Button size="lg" variant="outline" disabled>
+          <PartyPopper className="mr-2 h-5 w-5" />
+          Girls Party
+        </Button>
+        <Button size="lg" variant="outline" disabled>
+          <PartyPopper className="mr-2 h-5 w-5" />
+          Student Event
+        </Button>
+      </section>
+
+      {/* Stats Discord */}
+      <section>
+        <DiscordStats data={discordData} />
+      </section>
+
+      {/* Recommandations + Events */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-8">
+          <AiRecommendations eventData={JSON.stringify(discordData?.events || [], null, 2)} />
+          <DiscordWidget />
+          <DiscordChannelList channels={discordData?.channels} />
+        </div>
+        <div className="flex flex-col gap-8">
+          <DiscordEvents events={discordData?.events} />
+        </div>
+      </section>
+
+      {/* Notifications événements */}
+      <section>
+        <Alert>
+          <BellRing className="h-4 w-4" />
+          <AlertTitle>Événements à venir (7 jours)</AlertTitle>
+          <AlertDescription>
+            {upcomingEventsCount > 0 ? (
+              <p className="font-bold text-lg text-primary">
+                Il y a actuellement {upcomingEventsCount} événement(s) prévus cette semaine !
+              </p>
+            ) : (
+              'Aucun événement prévu cette semaine. Créez le vôtre sur Discord !'
+            )}
+          </AlertDescription>
+        </Alert>
+      </section>
+    </div>
+  );
+}
