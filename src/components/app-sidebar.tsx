@@ -1,4 +1,6 @@
-"use client";
+// faistasortietest2/src/components/app-sidebar.tsx
+
+"use client"; 
 
 import React from 'react';
 import { 
@@ -10,8 +12,8 @@ import {
     Map, 
     MessageSquare, 
     LifeBuoy,
-    Car,
-    X // Icône pour fermer le menu sur mobile
+    Car
+    // X a été retiré de l'import car il n'est plus utilisé
 } from 'lucide-react';
 
 // Définition des éléments de navigation (inchangée)
@@ -28,10 +30,6 @@ const navItems = [
     { href: '/help', icon: LifeBuoy, label: 'Aide' },
 ];
 
-/**
- * Composant de la barre latérale de navigation de l'application.
- * ATTENTION : Ce composant doit recevoir les props isOpen et onToggle pour la version mobile.
- */
 export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen: boolean }) {
     
     // URL du logo réel de l'application
@@ -52,14 +50,11 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
     }; 
     
     return (
-        // Note : Le wrapper <aside> et les classes de positionnement mobile sont gérés
-        // par le composant <Sidebar> de Shadcn/UI dans votre MainLayout.tsx.
-        // Nous n'incluons ici que le contenu interne :
         <div 
             className="w-full h-full flex flex-col p-4" 
             style={{ backgroundColor: sidebarBg }}
         >
-            {/* 1. SidebarHeader (Logo, Titre et Bouton Fermer) */}
+            {/* 1. SidebarHeader (Logo et Titre) */}
             <div className={`p-4 border-b ${borderSecondary} sticky top-0 z-10`} style={{ backgroundColor: sidebarBg }}>
                 <div className="flex items-center justify-between gap-3">
                     {/* Logo et Titre */}
@@ -79,16 +74,8 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                         </div>
                     </a>
                     
-                    {/* Bouton Fermer (Burger Menu à droite) - Visible uniquement sur mobile */}
-                    <button 
-                        // Le bouton burger dans la sidebar ferme la sidebar. 
-                        // Le bouton dans le MainLayout ouvre la sidebar.
-                        className={`p-2 rounded-lg ${textPrimary} hover:bg-purple-300 transition focus:outline-none lg:hidden`}
-                        onClick={onToggle}
-                        aria-label="Fermer le menu"
-                    >
-                        <X className="h-6 w-6" />
-                    </button>
+                    {/* LE BOUTON DE FERMETURE (X) A ÉTÉ SUPPRIMÉ ICI */}
+                    
                 </div>
             </div>
             
@@ -97,7 +84,7 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                 <div className="flex flex-col gap-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
-                        const isActive = item.href === '/'; // À remplacer par usePathname() pour la détection d'URL
+                        const isActive = item.href === '/'; 
                         
                         const linkClasses = `w-full flex items-center p-2 rounded-lg transition ${
                             isActive 
@@ -112,7 +99,7 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
                                 target={item.external ? "_blank" : "_self"}
                                 rel={item.external ? "noopener noreferrer" : undefined}
                                 className={linkClasses}
-                                onClick={onToggle} // Fermer le menu après un clic sur mobile
+                                onClick={onToggle} 
                             >
                                 <Icon className="h-5 w-5 mr-3 text-purple-700" />
                                 <span>{item.label}</span>
@@ -137,4 +124,6 @@ export function AppSidebar({ onToggle, isOpen }: { onToggle: () => void, isOpen:
         </div>
     );
 }
-// *** Supprimez l'export default function RootLayout(...) de ce fichier AppSidebar.tsx ***
+
+// Assurez-vous d'avoir bien supprimé la fonction RootLayout exportée par défaut de ce fichier
+// si vous utilisez le MainLayout.
