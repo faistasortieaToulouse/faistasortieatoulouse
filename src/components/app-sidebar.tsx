@@ -27,19 +27,21 @@ export function AppSidebar() {
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
-<a href="/" className="flex items-center gap-3">
+      
+<Link href="/" className="flex items-center gap-3">
   <Image
     src={ftsLogo}
     alt="FTS Logo"
-    width={40}        // largeur du logo en pixels
-    height={40}       // hauteur du logo en pixels
+    width={40}
+    height={40}
     className="rounded-full"
   />
   <div>
     <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
     <p className="text-xs text-gray-600">à Toulouse</p>
   </div>
-</a>
+</Link>
+
         <SidebarTrigger className="lg:hidden cursor-pointer" />
       </div>
 
