@@ -173,7 +173,7 @@ export default async function DashboardPage() {
           <div className="text-left">
             <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
             <p className="text-accent mt-2">
-              Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
+              Application pour faire des sorties à Toulouse. Tout est gratuit et sans limite !
             </p>
           </div>
           <SidebarTrigger />
