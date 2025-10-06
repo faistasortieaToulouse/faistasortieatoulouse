@@ -10,11 +10,14 @@ import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
+// AJOUT de Image à partir de 'next/image' pour le logo
+import Image from 'next/image'; 
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
-// --- Constantes (ID de Guilde) ---
+// --- Constantes (ID de Guilde et URL du Logo) ---
 const GUILD_ID = '1422806103267344416';
+const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; // Restauration de la constante du logo
 
 // --- Interfaces (Types de Données) ---
 interface DiscordChannel {
@@ -31,7 +34,6 @@ interface DiscordEvent {
     description: string;
     scheduled_start_time: string;
     channel_id: string;
-    // Ajoutez d'autres champs si votre composant DiscordEvents les utilise
 }
 
 interface DiscordWidgetData {
@@ -50,7 +52,6 @@ interface WeatherData {
         time: string;
         temperature_2m: number;
         weather_code: number;
-        // ... autres champs
     };
     current_units: {
         temperature_2m: string;
@@ -137,102 +138,105 @@ export default async function DashboardPage() {
         }
         return res.json();
     })
-    .catch(err => {
-        console.error('Error fetching Discord channels:', err);
-        return []; 
-    }) : []; 
-
-    
-    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-        headers: {
-            Authorization: `Bot ${DISCORD_TOKEN}`, 
-        },
-        next: { revalidate: 300 } 
+    .catch(e => {
+        console.error('Erreur lors de la récupération des canaux Discord:', e);
+        return [];
     })
-    .then(async res => {
-        if (!res.ok) {
-            const errorBody = await res.text().catch(() => 'No error body available');
-            console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}. Details: ${errorBody}`);
-            return []; 
-        }
-        return res.json();
-    })
-    .catch(err => {
-        console.error('Error fetching Discord events:', err);
-        return []; 
-    }) : []; 
+    : []; 
 
-
-    const oneWeek = 7 * 24 * 60 * 60 * 1000; 
+    // --- Récupération des Données du Widget Discord (inchangée) ---
+    const discordWidgetUrl = `https://discord.com/api/v10/guilds/${GUILD_ID}/widget.json`;
     
-    const upcomingEventsCount = eventsData.filter(event => {
-        const startTime = new Date(event.scheduled_start_time);
-        return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
-    }).length;
+    let discordData: DiscordWidgetData | null = null;
+    let upcomingEventsCount = 0;
+
+    try {
+        const res = await fetch(discordWidgetUrl, { next: { revalidate: 300 } });
+        discordData = await res.json();
+
+        // Calcul du nombre d'événements à venir (dans les 7 jours)
+        const oneWeekFromNow = now.getTime() + 7 * 24 * 60 * 60 * 1000;
+        upcomingEventsCount = discordData?.events?.filter(event => 
+            new Date(event.scheduled_start_time).getTime() < oneWeekFromNow
+        ).length || 0;
+
+    } catch (e) {
+        console.error('Erreur lors de la récupération du widget Discord:', e);
+    }
+    // ----------------------------------------------------------------
 
 
-    const widgetData: { members?: any[], presence_count?: number, instant_invite: string | null } | null = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } })
-        .then(res => res.json())
-        .catch(() => null);
-
-
-    const discordData: DiscordWidgetData | null = widgetData ? {
-        ...widgetData,
-        channels: channelsData, 
-        events: eventsData
-    } : {
-        id: GUILD_ID,
-        name: 'Fais Ta Sortie à Toulouse',
-        instant_invite: null,
-        channels: channelsData, 
-        members: [],
-        presence_count: 0,
-        events: eventsData
-    };
-
-    // --- Rendu ---
+    // --- Rendu du Composant (Next.js App Router) ---
     return (
-        <div className="flex flex-col gap-8 p-4 md:p-8">
+        <div className="flex flex-col gap-10 p-4 md:p-8">
             
-            {/* BARRE DE STATUT MISE À JOUR : Date, Heure, Météo séparées */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
-                
-                {/* 1. Date */}
-                <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium">{currentDate}</span>
-                </div>
+            <header className="space-y-4">
+                {/* Conteneur principal qui centre tous les éléments de l'en-tête (titre, date, etc.) */}
+                <div className="flex flex-col items-center space-y-2">
+                    
+                    {/* --- NOUVELLE STRUCTURE : Titre | Menu Burger | Logo FTS --- */}
+                    {/* Le div interne utilise flex pour l'alignement horizontal et space-x-4 pour l'espacement */}
+                    <div className="flex items-center space-x-4">
+                        
+                        {/* 1. Tableau de Bord (Titre) */}
+                        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            Tableau de Bord
+                        </h1>
 
-                {/* 2. Heure */}
-                <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span className="font-medium">{currentTime}</span>
-                </div>
+                        {/* 2. Menu Burger (Visible seulement sur mobile) */}
+                        <div className="md:hidden">
+                            <SidebarTrigger />
+                        </div>
 
-                {/* 3. Météo */}
-                <div className="flex items-center gap-2">
-                    <WeatherIcon className="h-4 w-4" />
-                    <span className="font-medium">{weatherDisplay}</span>
+                        {/* 3. Logo FTS */}
+                        <Image
+                            src={ftsLogoUrlPurple}
+                            alt="Logo FTS"
+                            width={50}
+                            height={50}
+                            className="rounded-full shadow-lg flex-shrink-0"
+                        />
+                    </div>
+                    {/* -------------------------------------------------------- */}
+
+
+                    {/* --- Bloc Date/Heure/Météo (Structure inchangée et toujours centré) --- */}
+                    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-muted-foreground text-sm">
+                        <span className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {currentDate}
+                        </span>
+                        <span className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4" />
+                            {currentTime}
+                        </span>
+                        <span className="flex items-center">
+                            <WeatherIcon className="mr-2 h-4 w-4" />
+                            {weatherDisplay}
+                        </span>
+                    </div>
+                </div>
+            </header>
+            
+            {/* --- SECTION DESCRIPTION RAPIDE --- */}
+            <div className="bg-primary/10 p-6 rounded-lg shadow-inner">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h2 className="text-2xl font-semibold text-primary mb-2">
+                        Bienvenue !
+                    </h2>
+                    <p className="text-muted-foreground">
+                        Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                    </p>
+                    <p className="mt-2 text-accent">
+                        tout est gratuit et sans limite !
+                    </p>
                 </div>
             </div>
-            {/* ------------------------------------------- */}
-
-            <header>
-                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de bord</h1>
-                <p className="mt-2 text-accent">
-                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                </p>
-                <p className="mt-2 text-accent">
-                    tout est gratuit et sans limite !
-                </p>
-            </header>
 
             <section>
               <ImageCarousel />
             </section>
             
-            {/* ... Reste du JSX inchangé ... */}
-
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
                     <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
@@ -245,7 +249,6 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
-                <SidebarTrigger className="md:hidden" />
             </section>
 
             <section className="flex flex-wrap justify-center gap-4">
