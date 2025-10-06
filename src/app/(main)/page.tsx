@@ -14,7 +14,7 @@ import Image from 'next/image';
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 const GUILD_ID = '1422806103267344416';
-const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; 
+const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650.png?alt=media&token=f09a99c2-f552-4589-bdee-e9759b37015f"; 
 
 interface DiscordChannel {
     id: string;
@@ -180,12 +180,12 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
             <header className="flex flex-col items-center gap-4">
-                {/* LOGO FTS - TAILLE MISE À JOUR À 105x105 pixels */}
+                {/* LOGO FTS - TAILLE MISE À JOUR À 200x200 pixels */}
                 <Image
                     src={ftsLogoUrlPurple}
                     alt="Logo FTS"
-                    width={105} // Ajusté à 105
-                    height={105} // Ajusté à 105
+                    width={200} // Ajusté à 200
+                    height={200} // Ajusté à 200
                     className="rounded-full shadow-lg"
                 />
                 
