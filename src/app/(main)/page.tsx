@@ -12,6 +12,7 @@ import { DiscordEvents } from '@/components/discord-events';
 // Supprimé : import { DISCORD_TOKEN } from '@/lib/discord-config';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
+import { TimeWeatherBar } from '@/components/time-weather-bar'; // <-- AJOUTEZ CETTE LIGNE
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
@@ -146,7 +147,11 @@ export default async function DashboardPage() {
                     </p>
                 </div>
             </header>
-
+            
+            {/* --- NOUVELLE BARRE DATE/HEURE/MÉTÉO --- */}
+            <TimeWeatherBar />
+            {/* -------------------------------------- */}
+            
             <section>
               <ImageCarousel />
             </section>
