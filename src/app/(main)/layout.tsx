@@ -1,21 +1,33 @@
-// src/app/(main)/layout.tsx
+// faistasortietest2/src/components/MainLayout.tsx
 
-import MainLayout from '@/components/Layout';
-// import type { Metadata } from 'next'; // Si vous avez besoin de métadonnées spécifiques à la route /main
+import type { ReactNode } from 'react';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'; // <-- Import de SidebarTrigger
+import { AppSidebar } from '@/components/app-sidebar';
+import { Footer } from '@/components/footer';
+import { GoogleTranslateWidget } from '@/components/google-translate-widget';
 
-// --- Métadonnées optionnelles (si non définies globalement) ---
-// export const metadata: Metadata = {
-//   title: 'Fais Ta Sortie - Tableau de Bord',
-//   description: 'Tableau de bord principal de l\'application FTS.',
-// };
-// -----------------------------------------------------------
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  // Le rôle de ce fichier est uniquement d'encapsuler les routes enfants
-  // dans le layout que vous avez défini dans /components.
+export default function MainLayout({ children }: { children: ReactNode }) {
   return (
-    <Layout>
-      {children}
-    </Layout>
+    <SidebarProvider>
+      <Sidebar>
+        <AppSidebar />
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen">
+          {/* HEADER : Ajout du SidebarTrigger pour ouvrir/fermer la barre latérale */}
+          <header className="relative z-10 flex justify-between p-2 bg-background shadow-sm">
+             {/* 1. Bouton Menu Burger (visible sur tous les écrans) */}
+             <SidebarTrigger /> {/* Retire l'ancienne classe md:hidden pour qu'il soit toujours visible */}
+             
+             {/* 2. Google Translate (Aligné à droite) */}
+             <div className="w-48">
+                <GoogleTranslateWidget />
+             </div>
+          </header>
+          <div className="flex-grow">{children}</div>
+          <Footer />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
