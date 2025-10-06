@@ -9,13 +9,11 @@ import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
-// Rétablissement de l'import Image de Next.js
 import Image from 'next/image'; 
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 const GUILD_ID = '1422806103267344416';
-// Rétablissement de la constante du logo FTS
 const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; 
 
 interface DiscordChannel {
@@ -181,13 +179,13 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
-            <header className="flex flex-col items-center gap-4"> {/* Ajout de flex-col et items-center pour centrer */}
-                {/* LOGO FTS - Placé en haut de la header et centré */}
+            <header className="flex flex-col items-center gap-4">
+                {/* LOGO FTS - TAILLE MISE À JOUR À 105x105 pixels */}
                 <Image
                     src={ftsLogoUrlPurple}
                     alt="Logo FTS"
-                    width={50} // Taille ajustée pour qu'il soit bien visible en haut
-                    height={50}
+                    width={105} // Ajusté à 105
+                    height={105} // Ajusté à 105
                     className="rounded-full shadow-lg"
                 />
                 
@@ -201,7 +199,7 @@ export default async function DashboardPage() {
                 </p>
             </header>
 
-            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - Sous l'en-tête */}
+            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
                 <div className="flex items-center gap-2">
