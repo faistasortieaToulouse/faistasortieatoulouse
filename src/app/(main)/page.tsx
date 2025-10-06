@@ -140,20 +140,31 @@ export default async function DashboardPage() {
           <DiscordEvents events={discordData?.events} />
         </div>
       </section>
-
-      {/* Section "Événements à venir" avec compteur */}
       
-      // Juste après avoir récupéré les événements depuis l’API Discord :
 // --- Calcul du nombre d'événements à venir ---
 const oneWeek = 7 * 24 * 60 * 60 * 1000;
-
-const upcomingEventsCount = eventsData.filter(event => {
+const upcomingEventsCount = eventsData.filter((event) => {
   const startTime = new Date(event.scheduled_start_time);
   return (
     startTime.getTime() > now.getTime() &&
     startTime.getTime() - now.getTime() < oneWeek
   );
 }).length;
+
+// --- Rendu JSX ---
+return (
+  <div className="container mx-auto px-4 py-8 space-y-12">
+
+    {/* Section "Événements à venir" avec compteur */}
+    <section className="space-y-2 text-center">
+      <h2 className="text-2xl font-bold text-purple-700">Événements à venir</h2>
+      <p className="text-lg font-semibold">{upcomingEventsCount}</p>
+      <p>Planifiés sur le Discord</p>
+    </section>
+
+  </div>
+);
+
 
 
       <section className="space-y-2">
