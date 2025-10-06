@@ -1,7 +1,7 @@
 'use client';
 
 import { InfoCard, CardLink } from '@/components/info-card';
-import { Bus, Car, Bike, Zap } from 'lucide-react';
+import { Bus, Car, Bike, Zap, Train } from 'lucide-react';
 
 export default function MobilityPage() {
     return (
@@ -95,6 +95,26 @@ export default function MobilityPage() {
                     />
                 </InfoCard>
 
+{/* Section 5 : TER */}
+<InfoCard
+    icon={Train}
+    title="Transports Régionaux (TER)"
+    description="Horaires, tarifs et informations sur les trains régionaux."
+>
+    <CardLink
+        href="https://www.ter.sncf.com/occitanie"
+        text="Site Officiel TER Occitanie"
+    />
+    <CardLink
+        href="https://www.oui.sncf/horaires/train"
+        text="Rechercher un Train"
+    />
+    <CardLink
+        href="https://www.sncf.com/fr/service-client/infos-trafic"
+        text="Infos Trafic TER"
+    />
+</InfoCard>
+                
             </div>
         </div>
     );
