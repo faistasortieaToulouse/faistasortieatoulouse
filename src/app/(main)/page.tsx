@@ -6,6 +6,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 import { BellRing, Download, PartyPopper } from "lucide-react";
 import Link from 'next/link';
+import { useState } from 'react';
+import { DashboardMenu } from '@/components/dashboard-menu';
 import { DiscordEvents } from '@/components/discord-events';
 // Supprimé : import { DISCORD_TOKEN } from '@/lib/discord-config';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -149,20 +151,35 @@ export default async function DashboardPage() {
               <ImageCarousel />
             </section>
 
-            <section className="flex flex-wrap justify-center items-center gap-4">
-                <Button asChild size="lg">
-                    <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank" rel="noopener noreferrer">
-                        Pour commencer, clique ici :
-                    </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline">
-                    <Link href="https://discord.com/download" target="_blank" rel="noopener noreferrer">
-                        <Download className="mr-2 h-5 w-5" />
-                        Télécharger Discord
-                    </Link>
-                </Button>
-                <SidebarTrigger className="md:hidden" />
-            </section>
+<section className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
+  {/* Desktop : boutons visibles */}
+  <div className="hidden md:flex flex-wrap gap-4">
+    <Button asChild size="lg">
+      <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank">
+        Pour commencer
+      </Link>
+    </Button>
+    <Button asChild size="lg" variant="outline">
+      <Link href="https://discord.com/download" target="_blank">
+        <Download className="mr-2 h-5 w-5" />
+        Télécharger Discord
+      </Link>
+    </Button>
+    <Button size="lg" variant="outline" disabled>
+      <PartyPopper className="mr-2 h-5 w-5" />
+      Girls Party
+    </Button>
+    <Button size="lg" variant="outline" disabled>
+      <PartyPopper className="mr-2 h-5 w-5" />
+      Student Event
+    </Button>
+  </div>
+
+  {/* Mobile : menu burger */}
+  <DashboardMenu />
+</section>
+
+
 
             <section className="flex flex-wrap justify-center gap-4">
                 <Button size="lg" variant="outline" disabled>
