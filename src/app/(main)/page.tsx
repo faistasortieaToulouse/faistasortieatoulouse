@@ -4,22 +4,18 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-// AJOUT de Calendar et Clock aux imports de lucide-react
 import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
-// L'import Image de Next.js n'est plus nécessaire ici car le logo est retiré de l'en-tête principal.
-// Import Image supprimé pour plus de propreté.
+import Image from 'next/image'; 
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
-// --- Constantes (ID de Guilde) ---
 const GUILD_ID = '1422806103267344416';
-// La constante du logo FTS est retirée car non utilisée dans cette structure.
+const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestudio.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; 
 
-// --- Interfaces (Types de Données) ---
 interface DiscordChannel {
     id: string;
     name: string;
@@ -34,7 +30,6 @@ interface DiscordEvent {
     description: string;
     scheduled_start_time: string;
     channel_id: string;
-    // Ajoutez d'autres champs si votre composant DiscordEvents les utilise
 }
 
 interface DiscordWidgetData {
@@ -44,27 +39,21 @@ interface DiscordWidgetData {
     channels: DiscordChannel[];
     members: any[];
     presence_count: number;
-    events: DiscordEvent[]; // Contient les événements de l'API dédiée
+    events: DiscordEvent[];
 }
 
-// Interface pour la réponse simple de l'API Open-Meteo
 interface WeatherData {
     current: {
         time: string;
         temperature_2m: number;
         weather_code: number;
-        // ... autres champs
     };
     current_units: {
         temperature_2m: string;
     };
 }
 
-
-// --- Logique de Récupération des Données Côté Serveur (Next.js App Router) ---
 export default async function DashboardPage() {
-    
-    // --- Calcul de la Date et de l'Heure Locales (avec TimeZone Paris) ---
     const now = new Date();
     
     const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
@@ -83,10 +72,7 @@ export default async function DashboardPage() {
 
     const currentDate = dateFormatter.format(now);
     const currentTime = timeFormatter.format(now);
-    // -----------------------------------------------------------
 
-
-    // --- Récupération des Données Météo pour Toulouse (inchangée) ---
     const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
     
     let weatherData: WeatherData | null = null;
@@ -104,7 +90,6 @@ export default async function DashboardPage() {
             
             weatherDisplay = `${temp}${unit} à Toulouse`;
             
-            // Logique simple pour l'icône basée sur le code météo (WMO)
             if (code >= 0 && code <= 1) {
                 WeatherIcon = Sun; 
             } else if (code >= 2 && code <= 3) {
@@ -118,8 +103,6 @@ export default async function DashboardPage() {
     } catch (e) {
         console.error('Erreur lors de la récupération de la météo:', e);
     }
-    // ----------------------------------------------------------------
-
 
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
     
@@ -193,35 +176,43 @@ export default async function DashboardPage() {
         events: eventsData
     };
 
-    // --- Rendu ---
     return (
-        <div className="flex flex-col gap-8 p-4 md:p-8">
+        <div className="flex flex-col gap-8 p-4 md:p-8 pt-16 md:pt-16">
             
-            {/* BARRE DE STATUT RESTAURÉE : Date, Heure, Météo avec couleur violet pourpre */}
+            {/* BANDEAU FIXÉ POUR LE LOGO (MAINTENANT CENTRÉ) */}
+            {/* J'ai changé 'justify-between' en 'justify-center' pour centrer le logo */}
+            <div className="fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm z-50 shadow-md flex items-center justify-center px-4 md:px-8">
+                <Image
+                    src={ftsLogoUrlPurple}
+                    alt="Logo FTS"
+                    width={40}
+                    height={40}
+                    className="rounded-full shadow-lg"
+                />
+            </div>
+            {/* ----------------------------------------------------------------------------- */}
+
+
+            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
-                {/* 1. Date */}
                 <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium">{currentDate}</span>
                 </div>
 
-                {/* 2. Heure */}
                 <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span className="font-medium">{currentTime}</span>
                 </div>
 
-                {/* 3. Météo */}
                 <div className="flex items-center gap-2">
                     <WeatherIcon className="h-4 w-4" />
                     <span className="font-medium">{weatherDisplay}</span>
                 </div>
             </div>
-            {/* ------------------------------------------- */}
 
             <header>
-                {/* Titre Tableau de Bord restauré à sa place d'origine */}
                 <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
                 <p className="mt-2 text-accent">
                     Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
@@ -247,7 +238,6 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
-                {/* Le menu burger est ici, tel que dans votre code de référence */}
                 <SidebarTrigger className="md:hidden" />
             </section>
 
@@ -277,7 +267,6 @@ export default async function DashboardPage() {
                 </div>
             </section>
 
-            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
             <section>
                 <Alert>
                     <BellRing className="h-4 w-4" />
@@ -293,7 +282,6 @@ export default async function DashboardPage() {
                     </AlertDescription>
                 </Alert>
             </section>
-            {/* ------------------------------------- */}
         </div>
     );
 }
