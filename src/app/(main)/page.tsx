@@ -4,7 +4,7 @@ import { AiRecommendations } from '@/components/ai-recommendations';
 import { DiscordChannelList } from '@/components/discord-channel-list';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
+import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain } from "lucide-react"; 
 import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -114,35 +114,23 @@ export default async function DashboardPage() {
                 headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
                 next: { revalidate: 300 }
             });
-            if (channelsRes.ok) {
-                channelsData = await channelsRes.json();
-            } else {
-                console.error(`Erreur Discord Channels: ${channelsRes.status}`);
-            }
+            if (channelsRes.ok) channelsData = await channelsRes.json();
 
             const eventsRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
                 headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
                 next: { revalidate: 300 }
             });
-            if (eventsRes.ok) {
-                eventsData = await eventsRes.json();
-            } else {
-                console.error(`Erreur Discord Events: ${eventsRes.status}`);
-            }
+            if (eventsRes.ok) eventsData = await eventsRes.json();
         } catch (err) {
             console.error('Erreur Discord API:', err);
         }
     }
 
-    // --- Données Widget Discord ---
+    // --- WIDGET DISCORD ---
     let discordData: DiscordWidgetData | null = null;
     try {
         const widgetRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { next: { revalidate: 300 } });
-        if (widgetRes.ok) {
-            discordData = await widgetRes.json();
-        } else {
-            console.warn("Le widget Discord n'est pas activé.");
-        }
+        if (widgetRes.ok) discordData = await widgetRes.json();
     } catch (e) {
         console.error('Erreur lors de la récupération du widget Discord:', e);
     }
@@ -158,29 +146,40 @@ export default async function DashboardPage() {
         <div className="container mx-auto px-4 py-8 space-y-12">
             
             {/* --- HEADER --- */}
-            <header className="text-center space-y-4">
-                <div className="flex justify-center items-center gap-2">
-                    <Image 
-                        src={ftsLogoUrlPurple}
-                        alt="Fais ta Sortie Toulouse"
-                        width={120}
-                        height={120}
-                        className="rounded-full shadow-md"
-                    />
-                    <SidebarTrigger />
+            <header className="flex flex-col items-center text-center space-y-6">
+
+                {/* Logo centré */}
+                <Image 
+                    src={ftsLogoUrlPurple}
+                    alt="Fais ta Sortie Toulouse"
+                    width={200}
+                    height={200}
+                    className="rounded-full shadow-md"
+                />
+
+                {/* Barre météo / date / heure */}
+                <div className="flex flex-wrap justify-center items-center gap-6 text-gray-700 border-t border-b border-gray-300 py-3 w-full max-w-xl">
+                    <div className="flex items-center gap-2">
+                        <WeatherIcon className="h-5 w-5 text-blue-500" />
+                        {weatherDisplay}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium">{currentDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span>{currentTime}</span>
+                    </div>
                 </div>
 
-                <h1 className="text-4xl font-extrabold text-purple-700">
-                    Fais ta Sortie à Toulouse
-                </h1>
-                <p className="text-accent">
-                    Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
-                </p>
-                <p className="text-gray-500 italic">{currentDate} — {currentTime}</p>
-
-                <div className="flex justify-center items-center gap-2 text-lg text-gray-700">
-                    <WeatherIcon className="h-6 w-6 text-blue-500" />
-                    {weatherDisplay}
+                {/* Ligne titre + bouton burger */}
+                <div className="flex justify-between items-center w-full max-w-4xl px-4">
+                    <div className="text-left">
+                        <h1 className="text-4xl font-extrabold text-purple-700">Tableau de bord</h1>
+                        <p className="text-accent mt-2">
+                            Application communautaire gratuite pour organiser et rejoindre des sorties à Toulouse 🎉
+                        </p>
+                    </div>
+                    <SidebarTrigger />
                 </div>
             </header>
 
