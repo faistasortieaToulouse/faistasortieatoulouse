@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
+import { Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car, Facebook, Map, LifeBuoy } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
 
 const navItems = [
