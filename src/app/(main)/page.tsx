@@ -142,6 +142,15 @@ export default async function DashboardPage() {
       </section>
 
       {/* Section "Événements à venir" avec compteur */}
+      
+      // Juste après avoir récupéré les événements depuis l’API Discord :
+const oneWeek = 7 * 24 * 60 * 60 * 1000;
+
+const upcomingEventsCount = eventsData.filter(event => {
+  const startTime = new Date(event.scheduled_start_time);
+  return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
+}).length;
+
       <section className="space-y-2">
         <h2 className="text-2xl font-bold text-purple-700">Événements à venir</h2>
         <p className="text-lg font-semibold">{upcomingEventsCount}</p>
