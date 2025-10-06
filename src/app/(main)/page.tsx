@@ -9,12 +9,14 @@ import Link from 'next/link';
 import { DiscordEvents } from '@/components/discord-events';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
+// Rétablissement de l'import Image de Next.js
 import Image from 'next/image'; 
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 const GUILD_ID = '1422806103267344416';
-const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestudio.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; 
+// Rétablissement de la constante du logo FTS
+const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTSvioletpourpre.png?alt=media&token=ac9e92a4-2904-402a-ae24-997f7d3e6f0b"; 
 
 interface DiscordChannel {
     id: string;
@@ -177,23 +179,29 @@ export default async function DashboardPage() {
     };
 
     return (
-        <div className="flex flex-col gap-8 p-4 md:p-8 pt-16 md:pt-16">
+        <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
-            {/* BANDEAU FIXÉ POUR LE LOGO (MAINTENANT CENTRÉ) */}
-            {/* J'ai changé 'justify-between' en 'justify-center' pour centrer le logo */}
-            <div className="fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-sm z-50 shadow-md flex items-center justify-center px-4 md:px-8">
+            <header className="flex flex-col items-center gap-4"> {/* Ajout de flex-col et items-center pour centrer */}
+                {/* LOGO FTS - Placé en haut de la header et centré */}
                 <Image
                     src={ftsLogoUrlPurple}
                     alt="Logo FTS"
-                    width={40}
-                    height={40}
+                    width={50} // Taille ajustée pour qu'il soit bien visible en haut
+                    height={50}
                     className="rounded-full shadow-lg"
                 />
-            </div>
-            {/* ----------------------------------------------------------------------------- */}
+                
+                {/* Titre Tableau de Bord */}
+                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
+                <p className="mt-2 text-accent text-center">
+                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
+                </p>
+                <p className="mt-2 text-accent text-center">
+                    tout est gratuit et sans limite !
+                </p>
+            </header>
 
-
-            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) */}
+            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - Sous l'en-tête */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
                 <div className="flex items-center gap-2">
@@ -211,16 +219,6 @@ export default async function DashboardPage() {
                     <span className="font-medium">{weatherDisplay}</span>
                 </div>
             </div>
-
-            <header>
-                <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
-                <p className="mt-2 text-accent">
-                    Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
-                </p>
-                <p className="mt-2 text-accent">
-                    tout est gratuit et sans limite !
-                </p>
-            </header>
 
             <section>
               <ImageCarousel />
