@@ -52,12 +52,14 @@ export default async function DashboardPage() {
     if (widgetRes.ok) discordData = await widgetRes.json();
   } catch(e){ console.error('Erreur widget Discord:', e); }
 
-  const upcomingEventsCount = discordData?.events?.filter(e => {
-    const start = new Date(e.scheduled_start_time);
-    const diff = (start.getTime() - now.getTime()) / (1000*60*60*24);
-    return diff >= 0 && diff <= 7;
+  // --- Calcul du nombre d'événements à venir ---
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
+  const upcomingEventsCount = discordData?.events?.filter(event => {
+    const startTime = new Date(event.scheduled_start_time);
+    return startTime.getTime() > now.getTime() && (startTime.getTime() - now.getTime()) < oneWeek;
   }).length || 0;
 
+  // --- Rendu JSX ---
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
 
@@ -129,50 +131,8 @@ export default async function DashboardPage() {
         <DiscordStats data={discordData} />
       </section>
 
-      {/* Recos + Events */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="flex flex-col gap-8">
-          <AiRecommendations eventData={JSON.stringify(discordData?.events || [], null, 2)} />
-          <DiscordWidget />
-          <DiscordChannelList channels={discordData?.channels} />
-        </div>
-        <div className="flex flex-col gap-8">
-          <DiscordEvents events={discordData?.events} />
-        </div>
-      </section>
-
-            {/* Section "Événements à venir" avec compteur */}
-      
-// --- Calcul du nombre d'événements à venir ---
-const oneWeek = 7 * 24 * 60 * 60 * 1000;
-
-const upcomingEventsCount =
-  (eventsData?.filter((event) => {
-    const startTime = new Date(event.scheduled_start_time);
-    return (
-      startTime.getTime() > now.getTime() &&
-      startTime.getTime() - now.getTime() < oneWeek
-    );
-  }).length) || 0;
-
-// --- Rendu JSX ---
-return (
-  <div className="container mx-auto px-4 py-8 space-y-12">
-
-    {/* Section "Événements à venir" avec compteur */}
-    <section className="space-y-2 text-center">
-      <h2 className="text-2xl font-bold text-purple-700">Événements à venir</h2>
-      <p className="text-lg font-semibold">{upcomingEventsCount}</p>
-      <p>Planifiés sur le Discord</p>
-    </section>
-
-  </div>
-);
-
-
-
-
-      <section className="space-y-2">
+      {/* Section "Événements à venir" */}
+      <section className="space-y-2 text-center">
         <h2 className="text-2xl font-bold text-purple-700">Événements à venir</h2>
         <p className="text-lg font-semibold">{upcomingEventsCount}</p>
         <p>Planifiés sur le Discord</p>
@@ -185,9 +145,7 @@ return (
           <AlertTitle>Événements à venir</AlertTitle>
           <AlertDescription>
             {upcomingEventsCount > 0 ? (
-              <p>
-                Voici les prochains événements prévus sur le serveur Discord.
-              </p>
+              <p>Voici les prochains événements prévus sur le serveur Discord.</p>
             ) : (
               'Aucun événement à venir pour le moment.'
             )}
@@ -200,6 +158,17 @@ return (
         <h2 className="text-2xl font-bold text-purple-700">Salons du serveur</h2>
         <p>Liste de tous les salons disponibles, groupés par catégorie.</p>
         <DiscordChannelList channels={discordData?.channels} />
+      </section>
+
+      {/* Recos + Events */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-8">
+          <AiRecommendations eventData={JSON.stringify(discordData?.events || [], null, 2)} />
+          <DiscordWidget />
+        </div>
+        <div className="flex flex-col gap-8">
+          <DiscordEvents events={discordData?.events} />
+        </div>
       </section>
     </div>
   );
