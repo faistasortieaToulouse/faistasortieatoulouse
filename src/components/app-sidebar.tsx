@@ -9,10 +9,15 @@ const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
   { href: "/tisseo", icon: Bus, label: "Tisseo/Transport" },
   { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Sorties à Toulouse", external: true },
+  { href: "/discussions", icon: MessageSquare, label: "Discussions" },
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
+  { href="/facebook-groups", icon: Facebook, label: "Groupes Facebook" },
+  { href="/interactive-map", icon: Map, label: "Carte Interactive" },
+  { href="/help", icon: LifeBuoy, label: "Aide" },
 ];
+
 
 export function AppSidebar() {
   const ftsLogo = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media";
