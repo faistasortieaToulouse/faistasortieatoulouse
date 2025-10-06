@@ -211,14 +211,14 @@ export default async function DashboardPage() {
 
             {/* HEADER (TITRE, DESCRIPTION, MENU BURGER) - SOUS LA BARRE DE STATUT */}
             <header className="flex flex-col gap-4">
-                {/* NOUVELLE LIGNE POUR TITRE ET MENU BURGER */}
+                {/* LIGNE DU TITRE ET DU MENU BURGER */}
                 <div className="flex justify-between items-center w-full">
                     
                     {/* Titre Tableau de Bord (Gauche) */}
                     <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
 
-                    {/* Menu Burger (Droite, visible seulement sur mobile) */}
-                    <SidebarTrigger className="md:hidden" />
+                    {/* Menu Burger (Droite) - La classe md:hidden a été retirée */}
+                    <SidebarTrigger /> 
                 </div>
 
                 {/* Descriptions (Sous le titre) */}
@@ -246,7 +246,6 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
-                {/* L'ancien SidebarTrigger ici a été supprimé */}
             </section>
 
             <section className="flex flex-wrap justify-center gap-4">
