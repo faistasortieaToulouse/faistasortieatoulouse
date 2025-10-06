@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
+import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
 import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
+  { href: "/facebook-groups", icon: Facebook, label: "Groupes Facebook" },
   { href: "/map", icon: Map, label: "Carte Interactive" },
   { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
