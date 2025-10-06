@@ -70,10 +70,6 @@ return (
           Rejoindre Discord
         </a>
       </nav>
-            {/* Google Translate */}
-      <div className="mt-auto">
-        <GoogleTranslate />
-      </div>
     </aside>
   );
 }
