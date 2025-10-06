@@ -140,6 +140,8 @@ export default async function DashboardPage() {
           <DiscordEvents events={discordData?.events} />
         </div>
       </section>
+
+            {/* Section "Événements à venir" avec compteur */}
       
 // --- Calcul du nombre d'événements à venir ---
 const oneWeek = 7 * 24 * 60 * 60 * 1000;
