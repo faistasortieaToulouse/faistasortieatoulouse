@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
 import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
+import GoogleTranslate from '@/components/GoogleTranslate';
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -69,6 +70,10 @@ return (
           Rejoindre Discord
         </a>
       </nav>
+            {/* Google Translate */}
+      <div className="mt-auto">
+        <GoogleTranslate />
+      </div>
     </aside>
   );
 }
