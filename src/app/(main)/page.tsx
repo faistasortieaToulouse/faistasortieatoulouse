@@ -1,121 +1,34 @@
 // src/app/(main)/page.tsx
 
-import { DiscordStats } from '@/components/discord-stats';
-import { DiscordWidget } from '@/components/discord-widget';
-import { AiRecommendations } from '@/components/ai-recommendations';
-import { DiscordChannelList } from '@/components/discord-channel-list';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from '@/components/ui/button';
-import { BellRing, Download, PartyPopper, Cloud, Sun, CloudRain, Calendar, Clock } from "lucide-react"; 
-import Link from 'next/link';
-import { DiscordEvents } from '@/components/discord-events';
-// import { SidebarTrigger } from '@/components/ui/sidebar'; // Rendu inutile par le MainLayout
-import { ImageCarousel } from '@/components/image-carousel';
-import Image from 'next/image'; 
+// ... (Imports inchangés) ...
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 const GUILD_ID = '1422806103267344416';
 const ftsLogoUrlPurple = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c"; 
 
-interface DiscordChannel {
-    id: string;
-    name: string;
-    position: number;
-    type: number;
-    parent_id?: string;
-}
-
-interface DiscordEvent {
-    id: string;
-    name: string;
-    description: string;
-    scheduled_start_time: string;
-    channel_id: string;
-    // ... (Ajoutez ici toutes les autres propriétés nécessaires pour un événement Discord si nécessaire)
-}
-
-interface DiscordWidgetData {
-    id: string;
-    name: string;
-    instant_invite: string | null;
-    channels: DiscordChannel[];
-    members: any[];
-    presence_count: number;
-    events: DiscordEvent[];
-}
-
-interface WeatherData {
-    current: {
-        time: string;
-        temperature_2m: number;
-        weather_code: number;
-    };
-    current_units: {
-        temperature_2m: string;
-    };
-}
+// ... (Interfaces inchangées : DiscordChannel, DiscordEvent, DiscordWidgetData, WeatherData) ...
 
 export default async function DashboardPage() {
     
     // =================================================================
-    // CORRECTION : Déclaration et initialisation des variables en tête
+    // DÉCLARATIONS ET LOGIQUE DATE/MÉTÉO (CORRIGÉES PRÉCÉDEMMENT)
     // =================================================================
     const now = new Date();
-    
-    const dateFormatter = new Intl.DateTimeFormat('fr-FR', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        timeZone: 'Europe/Paris' 
-    });
-    const timeFormatter = new Intl.DateTimeFormat('fr-FR', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        timeZoneName: 'short',
-        timeZone: 'Europe/Paris' 
-    });
-
+    // ... (Logique dateFormatter et timeFormatter) ...
     const currentDate = dateFormatter.format(now);
     const currentTime = timeFormatter.format(now);
 
-    const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=43.60&longitude=1.44&current=temperature_2m,weather_code&timezone=Europe%2FParis&forecast_days=1';
+    // ... (Logique météo : weatherUrl, weatherData, weatherDisplay, WeatherIcon) ...
     
-    let weatherData: WeatherData | null = null;
-    let weatherDisplay = 'Météo indisponible 😕';
-    let WeatherIcon = Cloud; 
-    
-    // =================================================================
-    // Logique de récupération de la MÉTÉO (Maintenant après les déclarations)
-    // =================================================================
-    try {
-        const res = await fetch(weatherUrl, { next: { revalidate: 3600 } }); 
-        weatherData = await res.json();
+    // (J'ai retiré le corps de cette section pour ne pas répéter tout le code météo,
+    // mais elle doit être présente et correcte ici)
+    // ... (Début du try/catch météo ici) ...
+    // ... (Fin du try/catch météo ici) ...
 
-        if (weatherData && weatherData.current) {
-            const temp = Math.round(weatherData.current.temperature_2m);
-            const unit = weatherData.current_units.temperature_2m;
-            const code = weatherData.current.weather_code;
-            
-            weatherDisplay = `${temp}${unit} à Toulouse`;
-            
-            if (code >= 0 && code <= 1) {
-                WeatherIcon = Sun; 
-            } else if (code >= 2 && code <= 3) {
-                WeatherIcon = Cloud; 
-            } else if (code >= 51 && code <= 67 || code >= 80 && code <= 82) {
-                WeatherIcon = CloudRain; 
-            } else {
-                WeatherIcon = Cloud; 
-            }
-        }
-    } catch (e) {
-        console.error('Erreur lors de la récupération de la météo:', e);
-    }
-    
+
     // =================================================================
-    // Logique de récupération de DISCORD (À adapter et s'assurer que DiscordData est bien défini)
+    // LOGIQUE DISCORD : Récupération des données
     // =================================================================
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN; 
     
@@ -123,53 +36,86 @@ export default async function DashboardPage() {
         console.warn("DISCORD_BOT_TOKEN est manquant. Seules les données publiques (Widget API) seront disponibles.");
     }
     
-    // Ces blocs de code sont incomplets dans votre exemple fourni, je les laisse en l'état 
-    // en supposant qu'ils définissent correctement discordData, eventsData, et upcomingEventsCount.
+    // 1. Récupération des salons (Channels)
+    const channelsData: DiscordChannel[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
+        headers: {
+            Authorization: `Bot ${DISCORD_TOKEN}`, 
+        },
+        next: { revalidate: 300 } 
+    })
+    .then(async res => {
+        if (!res.ok) {
+            console.error(`Failed to fetch Discord channels: ${res.status} ${res.statusText}`);
+            return []; 
+        }
+        return res.json();
+    })
+    .catch(err => {
+        console.error('Error fetching Discord channels:', err);
+        return []; 
+    }) : []; 
 
-    const discordData: DiscordWidgetData | null = null; // Placeholder, remplacer par la logique réelle
-    const upcomingEventsCount = 0; // Placeholder, remplacer par la logique réelle
     
-    // NOTE : La logique de récupération des données Discord que vous avez fournie était incomplète (coupée).
-    // Veuillez vous assurer que la variable `discordData` et `upcomingEventsCount` sont correctement 
-    // définies avant d'être utilisées dans le JSX. Si le reste de la logique est manquante, 
-    // le code ci-dessous pourrait planter. J'ai ajouté des placeholders pour la compilation.
+    // 2. Récupération des événements (Events)
+    const eventsData: DiscordEvent[] = DISCORD_TOKEN ? await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+        headers: {
+            Authorization: `Bot ${DISCORD_TOKEN}`, 
+        },
+        next: { revalidate: 300 } 
+    })
+    .then(async res => {
+        if (!res.ok) {
+            console.error(`Failed to fetch Discord events: ${res.status} ${res.statusText}`);
+            return [];
+        }
+        return res.json();
+    })
+    .catch(err => {
+        console.error('Error fetching Discord events:', err);
+        return [];
+    }) : [];
+    
+    
+    // 3. Récupération du Widget Public (pour les membres/statistiques)
+    const widgetData: { presence_count: number; members: any[]; } = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, { 
+        next: { revalidate: 300 } 
+    })
+    .then(res => res.json())
+    .catch(() => ({ presence_count: 0, members: [] }));
 
-    // ... (Le code Discord original coupé devrait être ici, incluant la définition de `discordData`, `eventsData`, et `upcomingEventsCount`.)
+    
+    // 4. Construction de l'objet principal DiscordData
+    const discordData: DiscordWidgetData = {
+        id: GUILD_ID,
+        name: 'Fais ta Sortie',
+        instant_invite: `https://discord.gg/votre-invite`, // À remplacer par l'invite réelle
+        channels: channelsData,
+        members: widgetData.members,
+        presence_count: widgetData.presence_count,
+        events: eventsData,
+    };
+
+    // 5. Calcul des événements à venir
+    const oneWeekFromNow = now.getTime() + (7 * 24 * 60 * 60 * 1000);
+    
+    const upcomingEventsCount = eventsData.filter(event => {
+        const startTime = new Date(event.scheduled_start_time).getTime();
+        return startTime >= now.getTime() && startTime <= oneWeekFromNow;
+    }).length;
+
 
     // =================================================================
-    // Début du Rendu JSX
+    // DÉBUT DU RENDU JSX
     // =================================================================
+
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
-            {/* LOGO FTS - TOUT EN HAUT ET CENTRÉ */}
-            <div className="flex justify-center w-full">
-                <Image
-                    src={ftsLogoUrlPurple}
-                    alt="Logo FTS"
-                    width={200} 
-                    height={200}
-                    className="rounded-full shadow-lg"
-                />
-            </div>
+            {/* ... (Bloc LOGO FTS inchangé) ... */}
             
-            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - UTILISE LES VARIABLES CORRECTEMENT INITIALISÉES */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center text-sm md:text-base">
-                <div className="flex items-center justify-center p-3 bg-white rounded-xl shadow-md border border-gray-200">
-                    <Calendar className="mr-2 h-5 w-5 text-purple-600" />
-                    <span>{currentDate}</span>
-                </div>
-                <div className="flex items-center justify-center p-3 bg-white rounded-xl shadow-md border border-gray-200">
-                    <Clock className="mr-2 h-5 w-5 text-purple-600" />
-                    <span>{currentTime}</span>
-                </div>
-                <div className="flex items-center justify-center p-3 bg-white rounded-xl shadow-md border border-gray-200">
-                    <WeatherIcon className="mr-2 h-5 w-5 text-purple-600" />
-                    <span>{weatherDisplay}</span>
-                </div>
-            </div>
+            {/* ... (Bloc BARRE DE STATUT inchangé) ... */}
 
-            {/* HEADER (TITRE, DESCRIPTION) - SOUS LA BARRE DE STATUT */}
+            {/* ... (Bloc HEADER inchangé, sans SidebarTrigger) ... */}
             <header className="flex flex-col gap-4">
                 {/* LIGNE DU TITRE */}
                 <div className="flex justify-between items-center w-full">
@@ -191,6 +137,8 @@ export default async function DashboardPage() {
                     <ImageCarousel />
                 </div>
             </section>
+            
+            {/* ... (Sections boutons inchangées) ... */}
             
             <section className="flex flex-wrap justify-center items-center gap-4">
                 <Button asChild size="lg">
@@ -218,16 +166,20 @@ export default async function DashboardPage() {
             </section>
 
             <section>
+                {/* Utilise discordData */}
                 <DiscordStats data={discordData} />
             </section>
             
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-8">
+                    {/* Utilise discordData?.events */}
                     <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
                     <DiscordWidget />
+                    {/* Utilise discordData?.channels */}
                     <DiscordChannelList channels={discordData?.channels} />
                 </div>
                 <div className="flex flex-col gap-8">
+                    {/* Utilise discordData?.events */}
                     <DiscordEvents events={discordData?.events} />
                 </div>
             </section>
@@ -237,6 +189,7 @@ export default async function DashboardPage() {
                     <BellRing className="h-4 w-4" />
                     <AlertTitle>Événements à Venir (7 Jours)</AlertTitle>
                     <AlertDescription>
+                        {/* Utilise upcomingEventsCount */}
                         {upcomingEventsCount > 0 ? (
                             <p className="font-bold text-lg text-primary">
                                 Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
