@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Facebook, Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
 import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
@@ -26,13 +27,19 @@ export function AppSidebar() {
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
-        <a href="/" className="flex items-center gap-3">
-          <img src={ftsLogo} alt="FTS Logo" className="w-10 h-10 rounded-full" />
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
-            <p className="text-xs text-gray-600">à Toulouse</p>
-          </div>
-        </a>
+<a href="/" className="flex items-center gap-3">
+  <Image
+    src={ftsLogo}
+    alt="FTS Logo"
+    width={40}        // largeur du logo en pixels
+    height={40}       // hauteur du logo en pixels
+    className="rounded-full"
+  />
+  <div>
+    <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
+    <p className="text-xs text-gray-600">à Toulouse</p>
+  </div>
+</a>
         <SidebarTrigger className="lg:hidden cursor-pointer" />
       </div>
 
