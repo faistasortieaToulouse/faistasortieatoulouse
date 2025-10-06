@@ -179,7 +179,18 @@ export default async function DashboardPage() {
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8"> 
             
-            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - MAINTENANT EN HAUT */}
+            {/* LOGO FTS - TOUT EN HAUT ET CENTRÉ */}
+            <div className="flex justify-center w-full">
+                <Image
+                    src={ftsLogoUrlPurple}
+                    alt="Logo FTS"
+                    width={200} 
+                    height={200}
+                    className="rounded-full shadow-lg"
+                />
+            </div>
+            
+            {/* BARRE DE STATUT (DATE/HEURE/MÉTÉO) - SOUS LE LOGO */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3 rounded-lg bg-[#A020F0] text-white shadow-lg text-sm md:text-base">
                 
                 <div className="flex items-center gap-2">
@@ -198,24 +209,13 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* HEADER (LOGO, TITRE, DESCRIPTION) - PLACÉ SOUS LA BARRE DE STATUT ET ALIGNÉ À GAUCHE */}
-            <header className="flex flex-col gap-4"> {/* Suppression de items-center pour aligner à gauche */}
-                
-                {/* LOGO FTS - ALIGNÉ À GAUCHE */}
-                <Image
-                    src={ftsLogoUrlPurple}
-                    alt="Logo FTS"
-                    width={200} 
-                    height={200}
-                    className="rounded-full shadow-lg"
-                />
-                
-                {/* Titre Tableau de Bord */}
+            {/* HEADER (TITRE, DESCRIPTION) - SOUS LA BARRE DE STATUT ET ALIGNÉ À GAUCHE */}
+            <header>
                 <h1 className="font-headline text-4xl font-bold text-primary">Tableau de Bord</h1>
-                <p className="mt-2 text-accent"> {/* Suppression de text-center */}
+                <p className="mt-2 text-accent">
                     Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
                 </p>
-                <p className="mt-2 text-accent"> {/* Suppression de text-center */}
+                <p className="mt-2 text-accent">
                     tout est gratuit et sans limite !
                 </p>
             </header>
@@ -236,6 +236,7 @@ export default async function DashboardPage() {
                         Télécharger Discord
                     </Link>
                 </Button>
+                {/* Le menu Burger est ici (visible sur mobile) */}
                 <SidebarTrigger className="md:hidden" />
             </section>
 
