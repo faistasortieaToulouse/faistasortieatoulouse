@@ -145,7 +145,7 @@ let discordPolls: any[] = [];
 if (DISCORD_TOKEN) {
     try {
         // Récupère les 10 derniers messages du salon #général
-        const messagesRes = await fetch(`https://discord.com/api/v10/channels/${POLLS_CHANNEL_ID}/messages?limit=10`, {
+        const messagesRes = await fetch(`https://discord.com/api/v10/channels/${POLLS_CHANNEL_ID}/messages?limit=100`, {
             headers: {
                 Authorization: `Bot ${DISCORD_TOKEN}`, 
             },
