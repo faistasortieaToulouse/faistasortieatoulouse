@@ -271,20 +271,32 @@ if (DISCORD_TOKEN) {
 // ... (le reste du code continue ici)
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
-            <section>
-                <Alert>
-                    <BellRing className="h-4 w-4" />
-                    <AlertTitle>Événements à Venir (7 Jours)</AlertTitle>
-                    <AlertDescription>
-                        {upcomingEventsCount > 0 ? (
-                            <p className="font-bold text-lg text-primary">
-                                Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
-                            </p>
-                        ) : (
-                            'Aucun événement n’est prévu cette semaine. Consultez la liste ci-dessous pour organiser une sortie !'
-                        )}
-                    </AlertDescription>
-                </Alert>
+// Dans src/app/(main)/page.tsx, dans la section <section className="grid...">
+
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="flex flex-col gap-8">
+                    {/* ... (première colonne inchangée) ... */}
+                    <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
+                    <DiscordWidget />
+                    <DiscordChannelList channels={discordData?.channels} />
+                </div>
+                
+                {/* 🆕 NOUVELLE COLONNE DE DROITE AVEC DÉBOGAGE */}
+                <div className="flex flex-col gap-8">
+                    
+                    <DiscordEvents events={discordData?.events} />
+                    
+                    {/* 🚨 ZONE DE DÉBOGAGE : DOIT ÊTRE AFFICHÉE SUR LA PAGE 🚨 */}
+                    <div className="p-4 bg-red-100 border border-red-400">
+                        <h4 className="font-bold">DEBUG POLLS DATA ({discordPolls.length} trouvé(s))</h4>
+                        <pre className="whitespace-pre-wrap text-sm">
+                            {JSON.stringify(discordPolls, null, 2)}
+                        </pre>
+                    </div>
+                    
+                    {/* Commentez la ligne de composant DiscordPolls pour l'instant */}
+                    {/* <DiscordPolls polls={discordPolls} /> */}
+                </div>
             </section>
             {/* ------------------------------------- */}
         </div>
