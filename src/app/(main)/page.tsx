@@ -14,11 +14,13 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ImageCarousel } from '@/components/image-carousel';
 import { TimeWeatherBar } from '@/components/time-weather-bar'; // <-- AJOUTEZ CETTE LIGNE
 import Image from 'next/image';
+import { DiscordPolls } from '@/components/discord-polls'; // <-- NOUVEL IMPORT
 
 export const revalidate = 300; // Revalidate at most every 5 minutes
 
 // --- Constantes (URL du Logo et ID de Guilde) ---
 const GUILD_ID = '1422806103267344416';
+const POLLS_CHANNEL_ID = '1422806103904882842'; // ID du salon #général
 const FTS_LOGO_URL = 'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c';
 
 // --- Interfaces (Types de Données) ---
@@ -135,6 +137,34 @@ export default async function DashboardPage() {
         events: eventsData
     };
 
+
+    // Dans DashboardPage() après la récupération des événements (eventsData)
+
+// --- Récupération des Sondages (Messages) ---
+let discordPolls: any[] = [];
+if (DISCORD_TOKEN) {
+    try {
+        // Récupère les 10 derniers messages du salon #général
+        const messagesRes = await fetch(`https://discord.com/api/v10/channels/${POLLS_CHANNEL_ID}/messages?limit=10`, {
+            headers: {
+                Authorization: `Bot ${DISCORD_TOKEN}`, 
+            },
+            next: { revalidate: 60 } // Rafraîchissement plus fréquent pour les sondages (1 minute)
+        });
+        
+        if (!messagesRes.ok) {
+            console.error(`Failed to fetch Discord messages for polls: ${messagesRes.status} ${messagesRes.statusText}`);
+        } else {
+            const messagesData: any[] = await messagesRes.json();
+            // Filtrer pour ne garder que les messages qui contiennent un champ 'poll' et ne sont pas expirés
+            discordPolls = messagesData.filter(message => message.poll && !message.poll.expired);
+        }
+    } catch (err) {
+        console.error('Error fetching Discord messages for polls:', err);
+    }
+}
+
+
     // --- Rendu ---
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
@@ -215,16 +245,30 @@ export default async function DashboardPage() {
                 <DiscordStats data={discordData} />
             </section>
             
+            // REMPLACER LA SECTION SUIVANTE DANS DashboardPage()
+
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* 1. Colonne de Gauche (AI, Widget, Liste de Salons) */}
                 <div className="flex flex-col gap-8">
                     <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
                     <DiscordWidget />
                     <DiscordChannelList channels={discordData?.channels} />
                 </div>
+                
+                {/* 2. Colonne de Droite (Événements, puis Sondages) */}
                 <div className="flex flex-col gap-8">
+                    
+                    {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR */}
                     <DiscordEvents events={discordData?.events} />
+                    
+                    {/* 🆕 2ème Élément : SONDAGES DISCORD (comme demandé, après les événements) */}
+                    <DiscordPolls polls={discordPolls} /> 
                 </div>
             </section>
+
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
+// ... (le reste du code continue ici)
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
             <section>
