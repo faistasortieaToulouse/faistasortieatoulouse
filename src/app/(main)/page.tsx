@@ -263,9 +263,9 @@ return (
                     <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
                     
                     {/* Le conteneur défilant. J'utilise la version finale pour le test. */}
-                    <div className="max-h-[400px] min-h-[300px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-                        <DiscordEvents events={discordData?.events} />
-                    </div>
+<div className="max-h-[150px] min-h-[150px] overflow-y-scroll pr-2 bg-gray-100 dark:bg-gray-800">
+    <DiscordEvents events={discordData?.events} />
+</div>
                 </div>
                 
                 {/* 🆕 2ème Élément : Sondages Discord */}
