@@ -227,6 +227,12 @@ if (DISCORD_TOKEN) {
 //      <PartyPopper className="mr-2 h-5 w-5" />
 //      Student Event
 //    </Button>
+
+    <Button size="lg" variant="outline" disabled>
+      <PartyPopper className="mr-2 h-5 w-5" />
+      Rando Données
+    </Button>
+      
   </div>
 
   {/* Mobile : menu burger */}
