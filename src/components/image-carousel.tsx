@@ -19,7 +19,8 @@ export function ImageCarousel() {
           <CarouselItem key={image.id} className="md:basis-1/2 lg:basis-1/3">
             <div className="p-1">
               <Card>
-                <CardContent className="relative flex aspect-square items-center justify-center p-0 overflow-hidden rounded-lg">
+                // REMPLACER cette ligne dans image-carrousel.tsx
+                  <CardContent className="relative flex aspect-video md:aspect-[4/3] lg:aspect-[16/9] items-center justify-center p-0 overflow-hidden rounded-lg">
                   <Image
                     src={image.imageUrl}
                     alt={image.description}
