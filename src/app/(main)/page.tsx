@@ -137,12 +137,7 @@ export default async function DashboardPage() {
         events: eventsData
     };
 
-// --- Filtrer uniquement les événements à venir ---
-const upcomingEvents = discordData?.events?.filter(
-  event => new Date(event.scheduled_start_time) > new Date()
-);
 
-    
     // Dans DashboardPage() après la récupération des événements (eventsData)
 
 // --- Récupération des Sondages (Messages) ---
@@ -219,20 +214,14 @@ if (DISCORD_TOKEN) {
         Télécharger Discord
       </Link>
     </Button>
-//    <Button size="lg" variant="outline" disabled>
-//      <PartyPopper className="mr-2 h-5 w-5" />
-//      Girls Party
-//    </Button>
-//    <Button size="lg" variant="outline" disabled>
-//      <PartyPopper className="mr-2 h-5 w-5" />
-//      Student Event
-//    </Button>
-
     <Button size="lg" variant="outline" disabled>
       <PartyPopper className="mr-2 h-5 w-5" />
-      Rando Données
+      Girls Party
     </Button>
-      
+    <Button size="lg" variant="outline" disabled>
+      <PartyPopper className="mr-2 h-5 w-5" />
+      Student Event
+    </Button>
   </div>
 
   {/* Mobile : menu burger */}
@@ -244,49 +233,44 @@ if (DISCORD_TOKEN) {
             </section>
             
             // REMPLACER LA SECTION SUIVANTE DANS DashboardPage()
-// ... (Toute la logique de récupération de données reste inchangée au début de DashboardPage) ...
 
-// --- Rendu ---
-return (
-    // Ce div est le conteneur principal de la page
-    <div className="flex flex-col gap-8 p-4 md:p-8">
+<section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    {/* 1. Colonne de Gauche (Inchagée) */}
+    <div className="flex flex-col gap-8">
+        <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
+        <DiscordWidget />
+        <DiscordChannelList channels={discordData?.channels} />
+    </div>
+    
+    {/* 2. Colonne de Droite (MODIFIÉE) */}
+    <div className="flex flex-col gap-8">
         
-        {/* L'en-tête, le logo, le menu, la TimeWeatherBar, et le carrousel vont ici */}
-        {/* ... (Code de l'en-tête, des boutons, de DiscordStats, etc. DOIT être ici) ... */}
+        {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
+// Dans la section de la colonne de droite (2. Colonne de Droite)
 
-        {/* ------------------------------------------- */}
-        {/* VOTRE CODE DE GRILLE CORRECTEMENT POSITIONNÉ */}
-        {/* ------------------------------------------- */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            {/* 1. Colonne de Gauche (Inchagée) */}
-            <div className="flex flex-col gap-8 p-4 md:p-8 h-full"> 
-                <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
-                <DiscordWidget />
-                <DiscordChannelList channels={discordData?.channels} />
-            </div>
-            
-            {/* 2. Colonne de Droite (MODIFIÉE AVEC DÉFILEMENT) */}
 <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
     <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
     
-    {/* 🛑 MODIFICATION ULTIME 🛑 */}
-    <div 
-        className="max-h-[100px] min-h-[100px] bg-gray-100 dark:bg-gray-800 rounded-md"
-        style={{ overflowY: 'scroll !important' }} // Forçage CSS brut
-    >
-        <DiscordEvents events={upcomingEvents} />
+    {/* AJOUTEZ min-h-[400px] ET bg-gray-100 */}
+    <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <DiscordEvents events={discordData?.events} />
     </div>
 </div>
-                </div>
-                
-                {/* 🆕 2ème Élément : Sondages Discord */}
-                <DiscordPolls polls={discordPolls} /> 
-            </div>
-        </section>
-
-        {/* ... (Autres sections qui pourraient être ici, comme la "SECTION NOTIFICATIONS DYNAMIQUE") ... */}
         
+        {/* 🆕 2ème Élément : Sondages Discord (Sous l'encart d'événements) */}
+        <DiscordPolls polls={discordPolls} /> 
     </div>
-);
+</section>
+
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
+// ... (le reste du code continue ici)
+
+            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
+// Dans src/app/(main)/page.tsx, dans la section <section className="grid...">
+
+
+            {/* ------------------------------------- */}
+        </div>
+    );
 }
