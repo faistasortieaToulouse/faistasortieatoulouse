@@ -137,7 +137,12 @@ export default async function DashboardPage() {
         events: eventsData
     };
 
+// --- Filtrer uniquement les événements à venir ---
+const upcomingEvents = discordData?.events?.filter(
+  event => new Date(event.scheduled_start_time) > new Date()
+);
 
+    
     // Dans DashboardPage() après la récupération des événements (eventsData)
 
 // --- Récupération des Sondages (Messages) ---
@@ -264,7 +269,7 @@ return (
         className="max-h-[100px] min-h-[100px] bg-gray-100 dark:bg-gray-800 rounded-md"
         style={{ overflowY: 'scroll !important' }} // Forçage CSS brut
     >
-        <DiscordEvents events={discordData?.events} />
+        <DiscordEvents events={upcomingEvents} />
     </div>
 </div>
                 </div>
