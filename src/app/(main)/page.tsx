@@ -247,14 +247,16 @@ if (DISCORD_TOKEN) {
     <div className="flex flex-col gap-8">
         
         {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
-        <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-            <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-            
-            {/* L'encart de défilement : Hauteur Max de 400px et scroll activé */}
-            <div className="max-h-[400px] overflow-y-auto pr-2">
-                <DiscordEvents events={discordData?.events} />
-            </div>
-        </div>
+// Dans la section de la colonne de droite (2. Colonne de Droite)
+
+<div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+    <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+    
+    {/* AJOUTEZ min-h-[400px] ET bg-gray-100 */}
+    <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <DiscordEvents events={discordData?.events} />
+    </div>
+</div>
         
         {/* 🆕 2ème Élément : Sondages Discord (Sous l'encart d'événements) */}
         <DiscordPolls polls={discordPolls} /> 
