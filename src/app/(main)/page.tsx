@@ -232,7 +232,7 @@ if (DISCORD_TOKEN) {
                 <DiscordStats data={discordData} />
             </section>
             
-            // REMPLACER LA SECTION SUIVANTE DANS DashboardPage()
+            {/* REMPLACER LA SECTION SUIVANTE DANS DashboardPage() */}
 
 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
     
@@ -247,7 +247,7 @@ if (DISCORD_TOKEN) {
     <div className="flex flex-col gap-8">
         
         {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
-// Dans la section de la colonne de droite (2. Colonne de Droite)
+{/* Dans la section de la colonne de droite (2. Colonne de Droite) */}
 
 <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
     <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
@@ -264,10 +264,10 @@ if (DISCORD_TOKEN) {
 </section>
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
-// ... (le reste du code continue ici)
+{/* ... (le reste du code continue ici) */}
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
-// Dans src/app/(main)/page.tsx, dans la section <section className="grid...">
+{/* Dans src/app/(main)/page.tsx, dans la section <section className="grid..."> */}
 
 
             {/* ------------------------------------- */}
