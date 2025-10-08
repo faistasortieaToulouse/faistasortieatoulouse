@@ -228,44 +228,38 @@ if (DISCORD_TOKEN) {
   <DashboardMenu />
 </section>
 
-
-
-            <section className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" variant="outline" disabled>
-                    <PartyPopper className="mr-2 h-5 w-5" />
-                    Girls Party
-                </Button>
-                <Button size="lg" variant="outline" disabled>
-                    <PartyPopper className="mr-2 h-5 w-5" />
-                    Student Event
-                </Button>
-            </section>
-
             <section>
                 <DiscordStats data={discordData} />
             </section>
             
             // REMPLACER LA SECTION SUIVANTE DANS DashboardPage()
 
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                {/* 1. Colonne de Gauche (AI, Widget, Liste de Salons) */}
-                <div className="flex flex-col gap-8">
-                    <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
-                    <DiscordWidget />
-                    <DiscordChannelList channels={discordData?.channels} />
-                </div>
-                
-                {/* 2. Colonne de Droite (Événements, puis Sondages) */}
-                <div className="flex flex-col gap-8">
-                    
-                    {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR */}
-                    <DiscordEvents events={discordData?.events} />
-                    
-                    {/* 🆕 2ème Élément : SONDAGES DISCORD (comme demandé, après les événements) */}
-                    <DiscordPolls polls={discordPolls} /> 
-                </div>
-            </section>
+<section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    {/* 1. Colonne de Gauche (Inchagée) */}
+    <div className="flex flex-col gap-8">
+        <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
+        <DiscordWidget />
+        <DiscordChannelList channels={discordData?.channels} />
+    </div>
+    
+    {/* 2. Colonne de Droite (MODIFIÉE) */}
+    <div className="flex flex-col gap-8">
+        
+        {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
+        <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+            <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+            
+            {/* L'encart de défilement : Hauteur Max de 400px et scroll activé */}
+            <div className="max-h-[400px] overflow-y-auto pr-2">
+                <DiscordEvents events={discordData?.events} />
+            </div>
+        </div>
+        
+        {/* 🆕 2ème Élément : Sondages Discord (Sous l'encart d'événements) */}
+        <DiscordPolls polls={discordPolls} /> 
+    </div>
+</section>
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
 // ... (le reste du code continue ici)
