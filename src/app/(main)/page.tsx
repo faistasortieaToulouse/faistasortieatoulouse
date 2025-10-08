@@ -261,7 +261,7 @@ return (
     
     {/* 🛑 MODIFICATION ULTIME 🛑 */}
     <div 
-        className="max-h-[150px] min-h-[150px] bg-gray-100 dark:bg-gray-800 rounded-md"
+        className="max-h-[100px] min-h-[100px] bg-gray-100 dark:bg-gray-800 rounded-md"
         style={{ overflowY: 'scroll !important' }} // Forçage CSS brut
     >
         <DiscordEvents events={discordData?.events} />
