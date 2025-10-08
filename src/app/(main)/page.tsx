@@ -224,7 +224,7 @@ if (DISCORD_TOKEN) {
     </Button>
     <Button size="lg" variant="outline" disabled>
       <PartyPopper className="mr-2 h-5 w-5" />
-      Rando Event
+      Rando Trip
     </Button>
   </div>
 
@@ -240,29 +240,37 @@ if (DISCORD_TOKEN) {
 
 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
     
-    {/* 1. Colonne de Gauche (Inchagée) */}
+    {/* 1. Colonne de Gauche (MAINTENANT AVEC WIDGET & CHANNELS) */}
     <div className="flex flex-col gap-8">
-        <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
         <DiscordWidget />
         <DiscordChannelList channels={discordData?.channels} />
     </div>
     
-    {/* 2. Colonne de Droite (MODIFIÉE) */}
+    {/* 2. Colonne de Droite (MAINTENANT AVEC IA EN PREMIER) */}
     <div className="flex flex-col gap-8">
         
-        {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
-{/* Dans la section de la colonne de droite (2. Colonne de Droite) */}
+        {/* --- 🆕 1er Élément : Recommandations d'Événements IA --- */}
+        <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+            <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
+            <p className="text-sm text-gray-500 mb-4">
+                Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+            </p>
+            
+            <AiRecommendations 
+                eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} 
+            />
+        </div>
+        {/* ---------------------------------------------------- */}
 
-<div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-    <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-    
-    {/* AJOUTEZ min-h-[400px] ET bg-gray-100 */}
-    <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-        <DiscordEvents events={discordData?.events} />
-    </div>
-</div>
+        {/* 2ème Élément : ÉVÈNEMENTS À VENIR dans un encart défilant */}
+        <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+            <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+            <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+                <DiscordEvents events={discordData?.events} />
+            </div>
+        </div>
         
-        {/* 🆕 2ème Élément : Sondages Discord (Sous l'encart d'événements) */}
+        {/* 3ème Élément : Sondages Discord */}
         <DiscordPolls polls={discordPolls} /> 
     </div>
 </section>
