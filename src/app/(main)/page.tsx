@@ -256,15 +256,16 @@ return (
             </div>
             
             {/* 2. Colonne de Droite (MODIFIÉE AVEC DÉFILEMENT) */}
-            <div className="flex flex-col gap-8">
-                
-                {/* ➡️ 1er Élément : ÉVÈNEMENTS À VENIR dans l'encart DÉFILANT */}
-                <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-                    <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-                    
-                    {/* Le conteneur défilant. J'utilise la version finale pour le test. */}
-<div className="max-h-[150px] min-h-[150px] overflow-y-scroll pr-2 bg-gray-100 dark:bg-gray-800">
-    <DiscordEvents events={discordData?.events} />
+<div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+    <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+    
+    {/* 🛑 MODIFICATION ULTIME 🛑 */}
+    <div 
+        className="max-h-[150px] min-h-[150px] bg-gray-100 dark:bg-gray-800 rounded-md"
+        style={{ overflowY: 'scroll !important' }} // Forçage CSS brut
+    >
+        <DiscordEvents events={discordData?.events} />
+    </div>
 </div>
                 </div>
                 
