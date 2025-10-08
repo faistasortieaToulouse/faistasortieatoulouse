@@ -254,7 +254,7 @@ return (
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* 1. Colonne de Gauche (Inchagée) */}
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 p-4 md:p-8 h-full"> 
                 <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
                 <DiscordWidget />
                 <DiscordChannelList channels={discordData?.channels} />
