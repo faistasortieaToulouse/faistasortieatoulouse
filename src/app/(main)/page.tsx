@@ -219,14 +219,14 @@ if (DISCORD_TOKEN) {
         Télécharger Discord
       </Link>
     </Button>
-    <Button size="lg" variant="outline" disabled>
-      <PartyPopper className="mr-2 h-5 w-5" />
-      Girls Party
-    </Button>
-    <Button size="lg" variant="outline" disabled>
-      <PartyPopper className="mr-2 h-5 w-5" />
-      Student Event
-    </Button>
+//    <Button size="lg" variant="outline" disabled>
+//      <PartyPopper className="mr-2 h-5 w-5" />
+//      Girls Party
+//    </Button>
+//    <Button size="lg" variant="outline" disabled>
+//      <PartyPopper className="mr-2 h-5 w-5" />
+//      Student Event
+//    </Button>
   </div>
 
   {/* Mobile : menu burger */}
