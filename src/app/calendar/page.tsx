@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Plus, BellRing, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar'; // Importe le composant que vous venez de corriger
+import { fr } from 'date-fns/locale'; // Pour afficher le calendrier en français
 
 interface Event {
     id: number;
@@ -39,6 +41,27 @@ export default function CalendarPage() {
     const upcomingEvents = mockEvents.filter(event => new Date(event.date) > new Date())
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    // --- NOUVEAU CODE ICI ---
+
+// Convertit la liste d'événements en un tableau d'objets Date pour DayPicker
+const eventDays = mockEvents.map(event => new Date(event.date));
+
+// Définit les modificateurs pour le calendrier (Mise en évidence des événements)
+const modifiers = {
+    eventDay: eventDays
+};
+
+// Style les modificateurs (Ce style sera appliqué aux jours listés dans 'eventDay')
+const modifiersStyles = {
+    eventDay: {
+        border: '2px solid var(--primary)', // Utilise la variable CSS de votre couleur primaire
+        borderRadius: '50%',
+        fontWeight: 'bold' as 'bold',
+    },
+};
+
+// --- FIN DU NOUVEAU CODE ---
+    
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             <header className="flex justify-between items-center">
@@ -83,9 +106,20 @@ export default function CalendarPage() {
                         Vue Mensuelle (Intégration future)
                     </h2>
                     {/* Ceci est un grand bloc visuel pour un futur calendrier */}
-                    <div className="h-[400px] w-full bg-background rounded-lg flex items-center justify-center text-muted-foreground text-lg border border-dashed">
-                        <p>Intégration d'un calendrier interactif ici</p>
-                    </div>
+            {/* NOUVEAU : Le composant Calendrier Interactif */}
+                    <div className="w-full flex justify-center">
+                        <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            className="rounded-md border p-4"
+                            locale={fr} // Affiche en français
+                            
+                            // Props pour la mise en évidence des jours d'événement
+                            modifiers={modifiers}
+                            modifiersStyles={modifiersStyles}
+                        />
+                    </div>
                 </div>
 
                 {/* 2. Liste des événements (Sidebar) */}
