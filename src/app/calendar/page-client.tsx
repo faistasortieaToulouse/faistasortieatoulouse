@@ -91,7 +91,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {/* 1. Calendrier Interactif */}
-                {/* CHANGEMENT ICI: Remplacement de bg-card par bg-secondary pour un meilleur contraste global */}
+                {/* Le conteneur est en bg-secondary (gris clair) pour un meilleur contraste global */}
                 <div className="lg:col-span-2 bg-secondary p-6 rounded-xl shadow-lg border flex flex-col items-center">
                     <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
                         <CalendarIcon className="h-6 w-6 text-primary" />
@@ -108,8 +108,9 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             eventDay: eventDays, 
                         }}
                         modifiersClassNames={{
-                            // Conserver les styles de texte agressifs pour forcer la visibilité
-                            day: 'text-black [&:not([aria-selected])]:text-gray-700', 
+                            // CORRECTION FINALE: Force le texte des jours en NOIR pour garantir la visibilité.
+                            // Utilise également un fond transparent pour les jours (si le conteneur est bg-secondary).
+                            day: 'text-black bg-transparent hover:bg-gray-100/50 [&:not([aria-selected])]:text-black', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
