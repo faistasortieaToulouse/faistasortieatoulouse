@@ -1,71 +1,134 @@
-import CalendarClient from './page-client';
+'use client';
 
-// FORCE LE RENDU DYNAMIQUE CÔTÉ SERVEUR (SSR)
-// Ceci est CRUCIAL pour éviter le timeout de build, car l'appel API sera fait
-// à chaque requête utilisateur plutôt que lors de la compilation.
-export const dynamic = 'force-dynamic'; 
+import { useState } from 'react';
+// Importation nécessaire pour la locale française du calendrier
+import { fr } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Plus, BellRing, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar'; 
 
-export const revalidate = 300; // Rafraîchissement des données toutes les 5 minutes (toujours utile pour les données dynamiques)
-
-// Définitions nécessaires pour le serveur
+// Définitions de type pour les événements Discord
 interface DiscordEvent {
     id: string;
     name: string;
-    scheduled_start_time: string;
+    scheduled_start_time: string; // Utilise le nom de la propriété Discord
     description?: string;
 }
 
-const GUILD_ID = '1422806103267344416'; // Votre ID de Guilde
-
-// Logique de Récupération des Événements avec gestion du Timeout
-async function fetchEventsData(): Promise<DiscordEvent[]> {
-    const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
-    if (!DISCORD_TOKEN) {
-        console.warn("DISCORD_BOT_TOKEN est manquant. Les événements ne seront pas chargés.");
-        // Retourne une erreur pour que le log dans Vercel soit clair, mais ne bloque pas la page
-        return []; 
-    }
-    
-    // --- GESTION DU TIMEOUT (10 secondes) ---
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes
-
-    try {
-        const res = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-            headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
-            signal: controller.signal, // Attache le signal d'annulation
-            // Utiliser 'no-store' garantit que la donnée est toujours fraîche, 
-            // mais 'force-dynamic' sur la page est suffisant
-            cache: 'no-store', 
-        });
-
-        clearTimeout(timeoutId); // Annule le timeout si la réponse est reçue à temps
-
-        if (!res.ok) {
-            console.error(`Erreur lors de la récupération des événements Discord: ${res.status} ${res.statusText}`);
-            return [];
-        }
-        return res.json();
-    } catch (err) {
-        clearTimeout(timeoutId);
-        if ((err as Error).name === 'AbortError') {
-            console.error('Erreur: Timeout de 10s atteint pour la récupération des événements Discord.');
-        } else {
-            console.error('Erreur de réseau ou de parsing lors de la récupération des événements Discord:', err);
-        }
-        return [];
-    }
+// Props attendues du composant Serveur
+interface CalendarClientProps {
+    eventsData: DiscordEvent[]; // Tous les événements (passés et futurs)
+    upcomingEvents: DiscordEvent[]; // Événements futurs, déjà triés (pour l'alerte)
 }
 
-export default async function CalendarServerPage() {
-    const eventsData = await fetchEventsData();
+// --- Fonction de formatage de date ---
+const formatEventTime = (isoString: string) => {
+    const date = new Date(isoString);
+    // Utilisation de fr-FR pour le formatage standard du texte
+    return new Intl.DateTimeFormat('fr-FR', { 
+        day: 'numeric', 
+        month: 'short', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    }).format(date);
+};
 
-    // Filtre pour la notification (événements à venir)
-    const upcomingEvents = eventsData.filter(event => new Date(event.scheduled_start_time) > new Date())
-        .sort((a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime());
+export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+    
+    // Convertir les événements Discord en objets Date pour marquer les jours dans le calendrier
+    const eventDays = eventsData.map(event => new Date(event.scheduled_start_time));
+
+    // Liste complète des événements triés par ordre chronologique
+    const allSortedEvents = eventsData.sort((a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime());
 
     return (
-        // Passe les données récupérées au composant client pour l'affichage
-        <CalendarClient eventsData={eventsData} upcomingEvents={upcomingEvents} />
+        <div className="flex flex-col gap-8 p-4 md:p-8">
+            <header className="flex justify-between items-center">
+                <div>
+                    <h1 className="font-headline text-4xl font-bold text-primary">
+                        Calendrier des Sorties
+                    </h1>
+                    <p className="mt-1 text-muted-foreground">
+                        Organisez vos événements et consultez les prochaines activités de la communauté.
+                    </p>
+                </div>
+                <Button>
+                    <Plus className="h-5 w-5 mr-2" />
+                    Ajouter un Événement
+                </Button>
+            </header>
+
+            {/* Alerte pour les événements à venir */}
+            <Alert className="border-l-4 border-primary">
+                <BellRing className="h-5 w-5 text-primary" />
+                <AlertTitle className="text-primary">
+                    Prochaines Dates Clés
+                </AlertTitle>
+                <AlertDescription>
+                    {upcomingEvents.length > 0 && upcomingEvents[0] ? (
+                        <p>
+                            **{upcomingEvents.length}** événements Discord prévus. Le prochain est : **{upcomingEvents[0].name}** le {formatEventTime(upcomingEvents[0].scheduled_start_time)}.
+                        </p>
+                    ) : (
+                        'Aucun événement n’est prévu pour le moment. Soyez le premier à en organiser un !'
+                    )}
+                </AlertDescription>
+            </Alert>
+
+            {/* Zone principale du calendrier (Structure Grid) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* 1. Calendrier Interactif */}
+                <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border flex flex-col items-center">
+                    <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
+                        <CalendarIcon className="h-6 w-6 text-primary" />
+                        Vue Mensuelle des Événements
+                    </h2>
+                    
+                    {/* Intégration du composant Calendar */}
+                    <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        locale={fr} // <-- PASSAGE DE L'OBJET LOCALE IMPORTÉ
+                        modifiers={{
+                            eventDay: eventDays, 
+                        }}
+                        modifiersClassNames={{
+                            eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
+                        }}
+                        className="rounded-xl border shadow"
+                    />
+                </div>
+
+                {/* 2. Liste des événements (Sidebar) */}
+                <div className="lg:col-span-1 flex flex-col gap-4">
+                    <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
+                        Liste Complète des Sorties
+                    </h2>
+                    <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[600px] overflow-y-auto">
+                        {allSortedEvents.map((event) => (
+                            <div 
+                                key={event.id} 
+                                className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
+                            >
+                                <p className="font-bold text-lg text-primary">{event.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {formatEventTime(event.scheduled_start_time)} - {event.description || 'Pas de description'}
+                                </p>
+                            </div>
+                        ))}
+                        {allSortedEvents.length === 0 && (
+                             <p className="text-muted-foreground text-center py-4">
+                                Aucun événement Discord trouvé.
+                             </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+        </div>
     );
 }
