@@ -4,11 +4,13 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css"; // ✅ Import nécessaire pour l'affichage des dates
-
+import { EventTooltip } from './EventTooltip'; // n'oublie pas d'importer
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  eventMap?: Record<string, DiscordEvent[]>;
+};
 
 function Calendar({
   className,
@@ -56,12 +58,49 @@ day_today:
         ...classNames,
       }}
       components={{
-        Day: ({ date, displayMonth, modifiers, style, ...props }) => (
-          <button
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "relative h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-foreground"
-            )}
+
+        Day: ({ date, modifiers, ...props }) => {
+  const dateKey = date.toDateString();
+  const eventsForDay = props.eventMap?.[dateKey] || [];
+
+  return (
+    <button
+      className={cn(
+        buttonVariants({ variant: "ghost" }),
+        "relative h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-foreground"
+      )}
+      {...props}
+    >
+      {eventsForDay.length > 0 && (
+        <>
+          {/* Point rose */}
+          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
+          
+          {/* Tooltip simple au hover */}
+          <span className="absolute bottom-full mb-1 hidden group-hover:block bg-card text-card-foreground p-1 rounded shadow text-xs z-50">
+            {eventsForDay.map(e => e.name).join(", ")}
+          </span>
+        </>
+      )}
+    </button>
+  );
+}
+
+  return (
+    <button
+      className={cn(
+        buttonVariants({ variant: "ghost" }),
+        "relative h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-foreground"
+      )}
+      style={style}
+      {...props}
+    >
+      {modifiers?.eventDay && (
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
+      )}
+    </button>
+  );
+}
             style={style}
             {...props}
           >
