@@ -78,6 +78,52 @@
   }
 }
 
+/* === Personnalisation du calendrier (react-day-picker) === */
+.rdp {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--card));
+  --rdp-cell-size: 40px;
+  color: hsl(var(--foreground));
+  font-size: 0.9rem;
+}
+
+.rdp-months {
+  background-color: hsl(var(--card));
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.rdp-day {
+  color: hsl(var(--foreground)) !important;
+  border-radius: 50%;
+}
+
+.rdp-day_selected {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-weight: 600;
+}
+
+.rdp-day_today {
+  border: 2px solid hsl(var(--primary)) !important;
+}
+
+.rdp-day:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.rdp-day_eventDay::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+}
+
 @layer base {
   * {
     @apply border-border;
