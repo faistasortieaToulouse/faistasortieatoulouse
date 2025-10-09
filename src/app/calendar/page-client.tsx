@@ -39,7 +39,12 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
     
     // Convertir les événements Discord en objets Date pour marquer les jours dans le calendrier
     // SAFEGUARD: Utilise (eventsData || []) pour garantir que .map est appelé sur un tableau
-    const eventDays = (eventsData || []).map(event => new Date(event.scheduled_start_time));
+    const eventMap = (eventsData || []).reduce((acc, event) => {
+  const dateKey = new Date(event.scheduled_start_time).toDateString();
+  if (!acc[dateKey]) acc[dateKey] = [];
+  acc[dateKey].push(event);
+  return acc;
+}, {} as Record<string, DiscordEvent[]>);
 
     // Liste complète des événements triés par ordre chronologique
     // SAFEGUARD: Utilise (eventsData || []).slice() pour trier une copie sûre de l'array
