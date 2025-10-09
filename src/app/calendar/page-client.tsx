@@ -100,6 +100,9 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             eventDay: eventDays, 
                         }}
                         modifiersClassNames={{
+                            // CORRECTION 1: Ajout de 'text-black/80' pour que les chiffres soient visibles sur fond blanc (si le fond est clair)
+                            // et remplacement par 'text-primary-foreground' pour les jours avec événement pour assurer le contraste.
+                            day: 'text-gray-900 dark:text-gray-100', // S'assurer que le texte est sombre/clair selon le thème
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
@@ -118,8 +121,9 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                                 className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
                             >
                                 <p className="font-bold text-lg text-primary">{event.name}</p>
+                                {/* CORRECTION 2: Suppression de la ligne de description. La date et l'heure suffisent. */}
                                 <p className="text-sm text-muted-foreground">
-                                    {formatEventTime(event.scheduled_start_time)} - {event.description || 'Pas de description'}
+                                    {formatEventTime(event.scheduled_start_time)}
                                 </p>
                             </div>
                         ))}
