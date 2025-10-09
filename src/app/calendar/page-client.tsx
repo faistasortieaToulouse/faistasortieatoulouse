@@ -100,9 +100,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             eventDay: eventDays, 
                         }}
                         modifiersClassNames={{
-                            // CORRECTION 1: Ajout de 'text-black/80' pour que les chiffres soient visibles sur fond blanc (si le fond est clair)
-                            // et remplacement par 'text-primary-foreground' pour les jours avec événement pour assurer le contraste.
-                            day: 'text-gray-900 dark:text-gray-100', // S'assurer que le texte est sombre/clair selon le thème
+                            // CORRECTION 1: Remplacement par 'text-foreground' pour garantir le contraste sur fond blanc/clair
+                            day: 'text-foreground', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
@@ -114,6 +113,10 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                     <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
                         Liste Complète des Sorties
                     </h2>
+                    {/* CORRECTION 2: J'ai retiré le max-h pour laisser la carte grandir, mais j'ai surtout ajouté 'overflow-y-auto' 
+                       pour que la barre de défilement apparaisse automatiquement si le contenu est trop long. 
+                       Pour s'assurer qu'elle défile dans la carte, il faut s'assurer que le conteneur 'bg-card' ait une hauteur limitée, 
+                       que je vais remettre à 600px pour un bon équilibre visuel. */}
                     <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[600px] overflow-y-auto">
                         {allSortedEvents.map((event) => (
                             <div 
@@ -121,7 +124,6 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                                 className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
                             >
                                 <p className="font-bold text-lg text-primary">{event.name}</p>
-                                {/* CORRECTION 2: Suppression de la ligne de description. La date et l'heure suffisent. */}
                                 <p className="text-sm text-muted-foreground">
                                     {formatEventTime(event.scheduled_start_time)}
                                 </p>
