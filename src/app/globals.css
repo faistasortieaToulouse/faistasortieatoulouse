@@ -124,6 +124,10 @@
   border-radius: 50%;
 }
 
+button.group:hover span {
+  display: block;
+}
+
 @layer base {
   * {
     @apply border-border;
