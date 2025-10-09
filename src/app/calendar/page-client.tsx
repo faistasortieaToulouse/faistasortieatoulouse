@@ -91,8 +91,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {/* 1. Calendrier Interactif */}
-                {/* Le conteneur est en bg-secondary (gris clair) pour un meilleur contraste global */}
-                <div className="lg:col-span-2 bg-secondary p-6 rounded-xl shadow-lg border flex flex-col items-center">
+                {/* REMPLACEMENT DE BG-SECONDARY PAR BG-CARD (Rose très clair) */}
+                <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border flex flex-col items-center">
                     <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
                         <CalendarIcon className="h-6 w-6 text-primary" />
                         Vue Mensuelle des Événements
@@ -107,13 +107,13 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                         modifiers={{
                             eventDay: eventDays, 
                         }}
-                        // Utilisez classNames pour cibler directement les éléments internes
+                        // UTILISATION D'UNE CLASSE SURPUISSANTE POUR LE TEXTE
                         classNames={{
-                            // Force le fond du mois à utiliser la couleur accent pour un meilleur contraste
-                            months: "bg-accent/10 rounded-xl",
-                            // Force les jours de la semaine (lu, ma, me...) à la couleur foncée principale
-                            dayHeader: "text-card-foreground !text-opacity-100", 
-                            // Force le texte de tous les jours à la couleur foncée principale
+                            // Force le fond du mois pour rompre le blanc total
+                            months: "bg-background/50 rounded-xl",
+                            // Force les jours de la semaine (lu, ma, me...) en couleur foncée
+                            dayHeader: "text-card-foreground !font-semibold", 
+                            // Force le texte de TOUS les jours à la couleur foncée la plus lisible
                             day: 'text-card-foreground !text-opacity-100 [&:not([aria-selected])]:text-card-foreground',
                         }}
                         modifiersClassNames={{
@@ -121,7 +121,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             day: 'text-card-foreground bg-transparent hover:bg-gray-100/50 [&:not([aria-selected])]:text-card-foreground', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
-                        className="rounded-xl border shadow"
+                        // Ajout d'une couleur de fond explicite au calendrier lui-même
+                        className="rounded-xl border shadow bg-card" 
                     />
                 </div>
 
