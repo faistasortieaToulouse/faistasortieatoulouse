@@ -270,8 +270,20 @@ if (DISCORD_TOKEN) {
             </div>
         </div>
         
-        {/* 3ème Élément : Sondages Discord */}
-        <DiscordPolls polls={discordPolls} /> 
+{/* 3ème Élément : Sondages Discord (Avec barre défilante) */}
+        <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+            <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
+            
+            {/* L'encart défilant pour les sondages */}
+            {/* J'utilise max-h-[400px] pour qu'il ait la même hauteur que la section Événements. */}
+            <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+                {/* L'utilisation de min-h-[100px] garantit une hauteur minimale même sans sondage */}
+                <div className="min-h-[100px]">
+                    <DiscordPolls polls={discordPolls} /> 
+                </div>
+            </div>
+        </div>
+        
     </div>
 </section>
 
