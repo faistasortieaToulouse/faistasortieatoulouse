@@ -56,7 +56,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                         Organisez vos événements et consultez les prochaines activités de la communauté.
                     </p>
                 </div>
-                {/* CORRECTION 1: Ajout du lien vers le serveur Discord en utilisant 'asChild' sur le Button */}
+                {/* Ajout du lien vers le serveur Discord en utilisant 'asChild' sur le Button */}
                 <Button asChild>
                     <a 
                         href="https://discord.com/channels/1422806103267344416/1422806103904882842" 
@@ -91,7 +91,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {/* 1. Calendrier Interactif */}
-                <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border flex flex-col items-center">
+                {/* CHANGEMENT ICI: Remplacement de bg-card par bg-secondary pour un meilleur contraste global */}
+                <div className="lg:col-span-2 bg-secondary p-6 rounded-xl shadow-lg border flex flex-col items-center">
                     <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
                         <CalendarIcon className="h-6 w-6 text-primary" />
                         Vue Mensuelle des Événements
@@ -107,8 +108,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             eventDay: eventDays, 
                         }}
                         modifiersClassNames={{
-                            // CORRECTION 2: Forcer une couleur foncée (gris 900) pour les chiffres du calendrier
-                            day: 'text-gray-900', 
+                            // Conserver les styles de texte agressifs pour forcer la visibilité
+                            day: 'text-black [&:not([aria-selected])]:text-gray-700', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
