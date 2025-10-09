@@ -107,9 +107,15 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                         modifiers={{
                             eventDay: eventDays, 
                         }}
+                        // Utilisez classNames pour cibler directement les éléments internes
+                        classNames={{
+                            // Force les jours de la semaine (lu, ma, me...) en noir
+                            dayHeader: "text-black", 
+                            // Force le texte de tous les jours en noir
+                            day: 'text-black [&:not([aria-selected])]:text-black',
+                        }}
                         modifiersClassNames={{
-                            // CORRECTION FINALE: Force le texte des jours en NOIR pour garantir la visibilité.
-                            // Utilise également un fond transparent pour les jours (si le conteneur est bg-secondary).
+                            // Les styles day et text-black sont redondants ici, mais nous les gardons pour la sécurité
                             day: 'text-black bg-transparent hover:bg-gray-100/50 [&:not([aria-selected])]:text-black', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
