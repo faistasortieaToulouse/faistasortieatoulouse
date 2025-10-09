@@ -56,9 +56,16 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                         Organisez vos événements et consultez les prochaines activités de la communauté.
                     </p>
                 </div>
-                <Button>
-                    <Plus className="h-5 w-5 mr-2" />
-                    Ajouter un Événement
+                {/* CORRECTION 1: Ajout du lien vers le serveur Discord en utilisant 'asChild' sur le Button */}
+                <Button asChild>
+                    <a 
+                        href="https://discord.com/channels/1422806103267344416/1422806103904882842" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                    >
+                        <Plus className="h-5 w-5 mr-2" />
+                        Ajouter un Événement
+                    </a>
                 </Button>
             </header>
 
@@ -100,8 +107,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                             eventDay: eventDays, 
                         }}
                         modifiersClassNames={{
-                            // CORRECTION 1: Remplacement par 'text-foreground' pour garantir le contraste sur fond blanc/clair
-                            day: 'text-foreground', 
+                            // CORRECTION 2: Forcer une couleur foncée (gris 900) pour les chiffres du calendrier
+                            day: 'text-gray-900', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
@@ -113,10 +120,6 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                     <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
                         Liste Complète des Sorties
                     </h2>
-                    {/* CORRECTION 2: J'ai retiré le max-h pour laisser la carte grandir, mais j'ai surtout ajouté 'overflow-y-auto' 
-                       pour que la barre de défilement apparaisse automatiquement si le contenu est trop long. 
-                       Pour s'assurer qu'elle défile dans la carte, il faut s'assurer que le conteneur 'bg-card' ait une hauteur limitée, 
-                       que je vais remettre à 600px pour un bon équilibre visuel. */}
                     <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[600px] overflow-y-auto">
                         {allSortedEvents.map((event) => (
                             <div 
