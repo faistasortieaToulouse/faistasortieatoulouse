@@ -9,7 +9,6 @@ import { Button } from './ui/button';
 interface DiscordEvent {
   id: string;
   name: string;
-  description: string;
   scheduled_start_time: string;
   channel_id: string;
 }
@@ -40,12 +39,6 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
                     <Clock className="mt-0.5 h-4 w-4 flex-shrink-0" />
                     <span>{format(new Date(event.scheduled_start_time), "HH'h'mm", { locale: fr })}</span>
                   </div>
-                  {event.description && (
-                    <div className="flex items-start gap-2">
-                      <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                      <p className="whitespace-pre-wrap">{event.description}</p>
-                    </div>
-                  )}
                 </div>
                  <Button asChild size="sm" variant="outline" className="mt-4">
                   <a href={`https://discord.com/events/1422806103267344416/${event.id}`} target="_blank" rel="noopener noreferrer">
