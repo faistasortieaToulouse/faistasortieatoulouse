@@ -49,11 +49,6 @@ const eventMap = (eventsData || []).reduce((acc, event) => {
 // ✅ AJOUT : génère les dates d’événements pour le calendrier
 const eventDays = Object.keys(eventMap).map(dateKey => new Date(dateKey));
 
-// Liste complète triée
-const allSortedEvents = (eventsData || []).slice().sort(
-  (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
-);
-
     // Liste complète des événements triés par ordre chronologique
     // SAFEGUARD: Utilise (eventsData || []).slice() pour trier une copie sûre de l'array
     const allSortedEvents = (eventsData || []).slice().sort((a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime());
