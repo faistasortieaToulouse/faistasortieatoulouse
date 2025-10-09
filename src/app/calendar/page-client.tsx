@@ -109,14 +109,16 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                         }}
                         // Utilisez classNames pour cibler directement les éléments internes
                         classNames={{
-                            // Force les jours de la semaine (lu, ma, me...) en noir
-                            dayHeader: "text-black", 
-                            // Force le texte de tous les jours en noir
-                            day: 'text-black [&:not([aria-selected])]:text-black',
+                            // Force le fond du mois à utiliser la couleur accent pour un meilleur contraste
+                            months: "bg-accent/10 rounded-xl",
+                            // Force les jours de la semaine (lu, ma, me...) à la couleur foncée principale
+                            dayHeader: "text-card-foreground !text-opacity-100", 
+                            // Force le texte de tous les jours à la couleur foncée principale
+                            day: 'text-card-foreground !text-opacity-100 [&:not([aria-selected])]:text-card-foreground',
                         }}
                         modifiersClassNames={{
-                            // Les styles day et text-black sont redondants ici, mais nous les gardons pour la sécurité
-                            day: 'text-black bg-transparent hover:bg-gray-100/50 [&:not([aria-selected])]:text-black', 
+                            // Applique le même forçage sur les modificateurs de jour
+                            day: 'text-card-foreground bg-transparent hover:bg-gray-100/50 [&:not([aria-selected])]:text-card-foreground', 
                             eventDay: 'bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors', 
                         }}
                         className="rounded-xl border shadow"
