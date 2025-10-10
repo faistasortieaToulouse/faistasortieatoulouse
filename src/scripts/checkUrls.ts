@@ -1,32 +1,22 @@
-// faistasortietest2/src/scripts/checkUrls.ts
-import fetch from "node-fetch"; // npm install node-fetch@2
-import categories from "../app/organiser-sorties/page"; // importe le tableau des catégories et URLs
+// checkUrls.ts
+import fs from 'fs';
+import fetch from 'node-fetch';
+import { categories } from './urlsList'; // liste de tous les liens
 
-// Fonction pour tester une URL
-async function checkUrl(url: string): Promise<string> {
-  try {
-    const res = await fetch(url, { method: "HEAD", redirect: "follow" });
-    if (res.ok) {
-      return ""; // OK, pas de message
-    } else {
-      return `- Attention ! L'adresse de cette page a changé ! Navigue sur le site Web pour actualiser. : ${url}`;
-    }
-  } catch (err) {
-    return `- Attention ! L'adresse de cette page a changé ! Navigue sur le site Web pour actualiser. : ${url}`;
-  }
-}
+(async () => {
+  const results: Record<string, string> = {};
 
-// Fonction principale
-async function main() {
   for (const category of categories) {
-    console.log(`\n📂 ${category.title}`);
     for (const url of category.links) {
-      const message = await checkUrl(url);
-      if (message) {
-        console.log(message);
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        results[url] = res.ok ? '' : '— Attention ! L’adresse de cette page a changé, merci de parcourir le site web.';
+      } catch {
+        results[url] = '— Attention ! L’adresse de cette page a changé, merci de parcourir le site web.';
       }
     }
   }
-}
 
-main();
+  fs.writeFileSync('src/lib/checkUrlsResults.json', JSON.stringify(results, null, 2));
+  console.log('Vérification terminée');
+})();
