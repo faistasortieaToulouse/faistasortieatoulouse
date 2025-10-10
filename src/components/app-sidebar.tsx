@@ -19,6 +19,7 @@ const navItems = [
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
   { href: "/facebook", icon: Facebook, label: "Groupes Facebook" },
   { href: "/map", icon: Map, label: "Carte Interactive" },
+  { href: "/partenaires", icon: ExternalLink, label: "Partenaires" },
   { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
 
