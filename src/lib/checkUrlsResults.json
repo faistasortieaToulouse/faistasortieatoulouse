@@ -1,6 +1,3 @@
-import fs from 'fs';
-import fetch from 'node-fetch';
-
 // Exemple très simple : remplacer par tes catégories et liens réels
 const categories = [
 {
