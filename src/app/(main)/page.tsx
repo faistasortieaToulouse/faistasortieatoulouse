@@ -288,12 +288,21 @@ if (DISCORD_TOKEN) {
 </section>
 
             {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
-{/* ... (le reste du code continue ici) */}
-
-            {/* --- SECTION NOTIFICATIONS DYNAMIQUE --- */}
-{/* Dans src/app/(main)/page.tsx, dans la section <section className="grid..."> */}
-
-
+            <section>
+                <Alert>
+                    <BellRing className="h-4 w-4" />
+                    <AlertTitle>Événements à Venir (7 Jours)</AlertTitle>
+                    <AlertDescription>
+                        {upcomingEventsCount > 0 ? (
+                            <p className="font-bold text-lg text-primary">
+                                Il y a actuellement **{upcomingEventsCount}** événements prévus cette semaine !
+                            </p>
+                        ) : (
+                            'Aucun événement n’est prévu cette semaine. Consultez la liste ci-dessous pour organiser une sortie !'
+                        )}
+                    </AlertDescription>
+                </Alert>
+            </section>
             {/* ------------------------------------- */}
         </div>
     );
