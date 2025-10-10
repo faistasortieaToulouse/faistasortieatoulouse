@@ -20,6 +20,8 @@ export default function MapPage() {
 
   useEffect(() => {
     setApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
+  console.log("Clé Google Maps :", process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
+  setApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
   }, []);
 
   return (
