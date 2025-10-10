@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ChevronLeft, Zap, ExternalLink } from 'lucide-react';
 import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
 import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
@@ -12,11 +13,13 @@ const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
   { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Sorties à Toulouse", external: true },
   { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Discussions", external: true },
+  { href: "/organiser-sorties", icon: Zap, label: "Organise tes Sorties" },
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
   { href: "/facebook", icon: Facebook, label: "Groupes Facebook" },
   { href: "/map", icon: Map, label: "Carte Interactive" },
+  { href: "/partenaires", icon: ExternalLink, label: "Partenaires" },
   { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
 
