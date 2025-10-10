@@ -205,7 +205,7 @@ if (DISCORD_TOKEN) {
   <div className="hidden md:flex flex-wrap gap-4">
     <Button asChild size="lg">
       <Link href={`https://discord.com/channels/${GUILD_ID}/1422806103904882842`} target="_blank">
-        Pour commencer
+        Pour commencer clique sur ce bouton
       </Link>
     </Button>
     <Button asChild size="lg" variant="outline">
