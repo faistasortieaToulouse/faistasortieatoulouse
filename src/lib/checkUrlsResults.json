@@ -1,0 +1,229 @@
+{
+  "timestamp": "2025-10-10T18:50:00Z",
+  "categories": [
+    {
+      "title": "Événements des établissements privés gratuits et payants",
+      "links": [
+        { "url": "https://www.toulousebouge.com", "status": "" },
+        { "url": "https://www.clutchmag.fr/evenements", "status": "" },
+        { "url": "https://www.lepetittou.com/activite/culture/", "status": "" },
+        { "url": "https://31.agendaculturel.fr/agenda-culturel/toulouse/", "status": "" },
+        { "url": "https://toulousesecret.com/culture/page/8/", "status": "" },
+        { "url": "https://www.jds.fr/toulouse/agenda/", "status": "" },
+        { "url": "https://www.alentoor.fr/toulouse/agenda", "status": "" },
+        { "url": "https://www.cityzeum.com/evenement/toulouse", "status": "" },
+        { "url": "https://toulouse.latribune.fr/evenements.html", "status": "" },
+        { "url": "https://www.lafrenchtechtoulouse.com/open-agenda/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des établissements publics gratuits",
+      "links": [
+        { "url": "https://bibliotheque.toulouse.fr/agenda", "status": "" },
+        { "url": "https://agenda.toulouse-metropole.fr/", "status": "" },
+        { "url": "https://www.toulouse-tourisme.com/agenda", "status": "" },
+        { "url": "https://www.hautegaronnetourisme.com/bouger-et-sortir/sortir-se-divertir/tout-agenda/", "status": "" },
+        { "url": "https://cpieterrestoulousaines.org/agenda/", "status": "" },
+        { "url": "https://www.culture.gouv.fr/Regions/Drac-Occitanie", "status": "" },
+        { "url": "https://openagenda.com/toulouse-metropole", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements alternatifs gratuits",
+      "links": [
+        { "url": "https://toulouse.demosphere.net/", "status": "" },
+        { "url": "https://radar.squat.net/fr/events/city/Toulouse", "status": "" },
+        { "url": "https://la-toulouse.fr/category/evenement/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements gratuits des médias",
+      "links": [
+        { "url": "https://www.amis.monde-diplomatique.fr/", "status": "" },
+        { "url": "https://infolocale.actu.fr/occitanie/haute-garonne/toulouse-31000", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements gratuits des établissements de nuit",
+      "links": [
+        { "url": "https://auchatnoir.noblogs.org/", "status": "" },
+        { "url": "https://www.facebook.com/levasion.bar/events?locale=fr_FR", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements gratuits des bars associatifs",
+      "links": [
+        { "url": "http://lapasserelle-negreneys.org/", "status": "" },
+        { "url": "https://www.facebook.com/lapasserellenegreneys/events", "status": "" },
+        { "url": "https://www.sozinho.org/agenda/", "status": "" },
+        { "url": "https://www.placecommune.fr/prog1", "status": "" },
+        { "url": "https://www.maisonmalepere.fr/programmation", "status": "" },
+        { "url": "https://cafe-lastronef.fr/programme/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des établissements culturels alternatifs",
+      "links": [
+        { "url": "https://lachapelletoulouse.com/evenements/", "status": "" },
+        { "url": "http://lehangar.eklablog.com/", "status": "" },
+        { "url": "https://vive.mixart-myrys.org/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des librairies",
+      "links": [
+        { "url": "https://www.ombres-blanches.fr/posts/30/Nos-evenements", "status": "" },
+        { "url": "https://www.librairieprivat.com/agenda.php", "status": "" },
+        { "url": "https://www.librairie-terranova.fr/agenda-librairie", "status": "" },
+        { "url": "https://www.fnac.com/Toulouse-Wilson/Fnac-Toulouse-Wilson/cl55/w-4", "status": "" },
+        { "url": "https://www.fnac.com/Toulouse-Labege/Fnac-Labege/cl57/w-4", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des orchestres, bals et concerts",
+      "links": [
+        { "url": "https://conservatoire.toulouse.fr/agenda/", "status": "" },
+        { "url": "http://www.orchestre-h2o.fr", "status": "" },
+        { "url": "https://orchestre.ut-capitole.fr/accueil/concerts", "status": "" },
+        { "url": "https://www.out-toulouse.fr/saison-en-cours", "status": "" },
+        { "url": "https://philharmonia-tolosa.fr/?cat=5", "status": "" },
+        { "url": "https://orchestre-opus31.fr/events/", "status": "" },
+        { "url": "http://ensemble-orchestral-pierre-de-fermat.fr/concerts-a-venir.php", "status": "" },
+        { "url": "https://www.comdt.org/saison/les-concerts/", "status": "" },
+        { "url": "https://agendatrad.org/calendrier/France/Occitanie", "status": "" },
+        { "url": "https://www.facebook.com/groups/221534187648", "status": "" },
+        { "url": "https://www.diversdanses.org/", "status": "" },
+        { "url": "https://www.facebook.com/Diversdanse/?locale=fr_FR", "status": "" },
+        { "url": "https://www.facebook.com/page.bombes.2.bal/?locale=fr_FR", "status": "" },
+        { "url": "https://toulouse-les-orgues.org/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des halles",
+      "links": [
+        { "url": "https://halles-cartoucherie.fr/agenda/", "status": "" },
+        { "url": "https://www.leshallesdelatransition.com/evenements-programmation", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des lieux culturels publics",
+      "links": [
+        { "url": "https://www.facebook.com/EspaceRoguet/events", "status": "" },
+        { "url": "https://www.facebook.com/theatredesmazades/events", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des conférences et débats gratuits",
+      "links": [
+        { "url": "https://www.amis.monde-diplomatique.fr/", "status": "" },
+        { "url": "https://www.fest.fr/agenda/haute-garonne/toulouse/conferences-forums-et-debats", "status": "" },
+        { "url": "https://www.rencontres-occitanie.fr/", "status": "" },
+        { "url": "https://museum.toulouse-metropole.fr/agenda/type/rencontres-conferences/", "status": "" },
+        { "url": "https://www.tse-fr.eu/fr/events/conferences", "status": "" },
+        { "url": "https://www.arnaud-bernard.net/conversations-socratiques/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des musées gratuit",
+      "links": [
+        { "url": "https://museum.toulouse-metropole.fr/agenda/type/rencontres-conferences/", "status": "" },
+        { "url": "https://www.cite-espace.com/a-la-une/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements scientifiques",
+      "links": [
+        { "url": "https://www.canal-u.tv/chaines/fermatscience/voyage-en-mathematique", "status": "" },
+        { "url": "https://www.chu-toulouse.fr/agenda/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des établissements de l'enseignement",
+      "links": [
+        { "url": "https://www.univ-tlse3.fr/agenda", "status": "" },
+        { "url": "https://www.univ-tlse3.fr/actualites", "status": "" },
+        { "url": "https://www.univ-tlse2.fr/accueil/agenda", "status": "" },
+        { "url": "https://culture.univ-tlse2.fr/accueil/a-venir/a-la-fabrique", "status": "" },
+        { "url": "https://www.ut-capitole.fr/accueil/campus/espace-media/actualites", "status": "" },
+        { "url": "https://www.inp-toulouse.fr/fr/actualites.html", "status": "" },
+        { "url": "https://www.univ-toulouse.fr/des-campus-attractifs/culture", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements particuliers",
+      "links": [
+        { "url": "https://carnavaldetoulouse.fr/SiteCarnaval/", "status": "" },
+        { "url": "https://www.tourisme-occitanie.com/agenda/par-date/mois/agenda-mars/?id1[q]=carnaval&id1[geo]=46.521075663842865~9.151611328125002~40.979898069620155~-3.6254882812500004", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements d'exposition",
+      "links": [
+        { "url": "https://www.chu-toulouse.fr/agenda/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements de botanique",
+      "links": [
+        { "url": "http://lacaravanedescueilleurs.fr/stages-ateliers/", "status": "" },
+        { "url": "https://www.hautegaronnetourisme.com/resultats-de-recherche/?search=botanique", "status": "" },
+        { "url": "https://arbresetpaysagesdautan.fr", "status": "" },
+        { "url": "https://www.mairie-revel.fr/agenda/", "status": "" },
+        { "url": "https://www.destination-belledonne.com/offres/balade-botanique-contee-comestibles-medicinales-de-juillet-revel-fr-5407688/#tariffs", "status": "" },
+        { "url": "https://www.eventbrite.fr/d/france--toulouse/botanique/", "status": "" },
+        { "url": "https://www.billetweb.fr/balade-botanique-comestibles-medicinales-daout1", "status": "" },
+        { "url": "https://tourisme.hautstolosans.fr/fr/diffusio/fetes-et-manifestations/rv-aux-jardins-visite-du-jardin-pedagogique-grenade-sur-garonne_TFOFMAMID031V50VXJB", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements d'art",
+      "links": [
+        { "url": "https://www.facebook.com/ArtByLizzie31/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements des festivals",
+      "links": [
+        { "url": "https://www.jds.fr/toulouse/agenda/manifestations-fetes-festivals-137_B", "status": "" },
+        { "url": "https://31.agendaculturel.fr/festival/", "status": "" },
+        { "url": "https://www.helloasso.com/e/reg/occitanie/dep/haute-garonne/ville/toulouse/act/festival", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements de Noël",
+      "links": [
+        { "url": "https://www.jds.fr/toulouse/agenda/concert-de-l-avent-et-de-noel-270_B", "status": "" },
+        { "url": "https://www.unidivers.fr/event/theatre-du-capitole-toulouse-2022-12-10t2000000100/", "status": "" },
+        { "url": "https://31.agendaculturel.fr/festival/spectacles-de-noel-toulouse.html", "status": "" },
+        { "url": "https://toulouse-les-orgues.org/evenement/concert-de-noel/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements de marchés de Noël",
+      "links": [
+        { "url": "https://www.jds.fr/toulouse/agenda/concert-de-l-avent-et-de-noel-270_B", "status": "" },
+        { "url": "http://marchedenoeltoulouse.fr/", "status": "" },
+        { "url": "https://noel.org/31-Haute-Garonne", "status": "" },
+        { "url": "https://www.festinoel.com/agendas-departement-31.html", "status": "" },
+        { "url": "https://toulouse.kidiklik.fr/articles/336279-les-marches-de-noel-autour-de-toulouse.html", "status": "" },
+        { "url": "https://www.helloasso.com/e/reg/occitanie/dep/haute-garonne/act/concert", "status": "" },
+        { "url": "https://www.lacordevocale.org/agenda/31-haute-garonne.html", "status": "" },
+        { "url": "https://31.agendaculturel.fr/festival/spectacles-de-noel/", "status": "" }
+      ]
+    },
+    {
+      "title": "Événements culturels",
+      "links": [
+        { "url": "https://www.helloasso.com/associations/culture-ambition-toulouse", "status": "" },
+        { "url": "https://www.eventbrite.fr/d/france--toulouse/gratuit/", "status": "" },
+        { "url": "https://fr-fr.facebook.com/groups/221534187648/", "status": "" },
+        { "url": "https://www.culture31.com/", "status": "" },
+        { "url": "https://www.toulouseinfos.fr/actualites/culture/50521-carte-toulouse-cultures.html", "status": "" },
+        { "url": "https://www.univ-toulouse.fr/des-campus-attractifs/culture", "status": "" },
+        { "url": "https://www.instagram.com/toulouse_culture/", "status": "" },
+        { "url": "https://actu.fr/toulouse/loisirs-culture", "status": "" },
+        { "url": "https://www.cultureenmouvements.org/agenda", "status": "" }
+      ]
+    }
+  ]
+}
