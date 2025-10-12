@@ -1,7 +1,6 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -40,7 +39,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      // NOUVELLE ENTRÉE : Ajout du domaine Firebase pour autoriser le logo
       {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',

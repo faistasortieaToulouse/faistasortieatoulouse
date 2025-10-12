@@ -6,19 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import checkResults from '@/lib/checkUrlsResults.json';
 
-{category.links.map((url) => (
-  <div key={url} className="flex justify-between items-center border p-3 rounded-lg hover:bg-muted transition">
-    <span className="truncate text-sm">
-      {url} {checkResults[url] && <span className="text-red-600">{checkResults[url]}</span>}
-    </span>
-    <Button asChild size="sm" variant="secondary">
-      <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center">
-        Ouvrir <ExternalLink className="h-4 w-4 ml-2" />
-      </a>
-    </Button>
-  </div>
-))}
-
 // Structure des catégories et des liens
 const categories = [
   {
