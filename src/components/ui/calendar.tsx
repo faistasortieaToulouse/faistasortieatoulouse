@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -15,7 +15,7 @@ export type DiscordEvent = {
 };
 
 export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, "children"> & {
-  events?: DiscordEvent[]; // liste d’événements Discord
+  events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
 };
@@ -32,7 +32,7 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
     return map;
   }, [events]);
 
-  // Filtrage des props pour éviter d’envoyer des props non reconnus au DOM
+  // Filtrer les props pour éviter de passer displayMonth ou autres props internes à <button>
   const { children, ...dayPickerProps } = props;
 
   return (
@@ -75,23 +75,26 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
             const dateKey = date.toDateString();
             const eventsForDay = eventMap[dateKey] || [];
 
+            // On supprime les props internes pour éviter les warnings React
+            const { displayMonth, ...buttonProps } = dayProps;
+
             return (
               <button
+                {...buttonProps}
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
                   "relative h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-foreground group"
                 )}
-                {...dayProps}
               >
+                {date.getDate()}
                 {eventsForDay.length > 0 && (
                   <>
-                    {/* Point rose pour indiquer un événement */}
                     <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
-
-                    {/* Tooltip simple au survol */}
-                    <span className="absolute bottom-full mb-1 hidden group-hover:block bg-card text-card-foreground p-1 rounded shadow text-xs z-50 whitespace-nowrap">
-                      {eventsForDay.map((e) => e.name).join(", ")}
-                    </span>
+<span className="absolute bottom-full mb-1 hidden group-hover:block bg-card text-card-foreground p-1 rounded shadow text-xs z-50 whitespace-nowrap">
+  {eventsForDay.map((e) => (
+    <div key={e.id}>{e.name}</div>
+  ))}
+</span>
                   </>
                 )}
               </button>

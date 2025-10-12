@@ -19,7 +19,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 
-// --- Types ---
 interface DiscordEvent {
   id: string;
   name: string;
@@ -40,18 +39,15 @@ interface MapClientProps {
   initialEvents: DiscordEvent[];
 }
 
-// --- Constantes ---
 const TOULOUSE_CENTER = { lat: 43.6047, lng: 1.4442 };
 const GUILD_ID = '1422806103267344416';
 
-// --- Composant principal ---
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [geocodingStatus, setGeocodingStatus] = useState<'pending' | 'loading' | 'complete' | 'error'>('pending');
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // Filtre uniquement les événements externes avec une adresse valide
   const addressEvents = useMemo(
     () => initialEvents.filter(e => e.entity_type === 3 && !!e.entity_metadata?.location?.trim().length),
     [initialEvents]
@@ -100,7 +96,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     return () => clearInterval(interval);
   }, [apiKey, addressEvents]);
 
-  // --- Détails d’un événement (affichage texte) ---
+  // --- Détails d’un événement ---
   const getLocationDetails = (event: DiscordEvent) => {
     if (event.entity_type === 3) {
       const location = event.entity_metadata?.location?.trim();
@@ -125,7 +121,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     };
   };
 
-  // --- Rendu de la carte ---
+  // --- Carte ---
   const renderMap = () => (
     <APIProvider apiKey={apiKey!}>
       <Map
@@ -154,47 +150,42 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     </APIProvider>
   );
 
-  // --- Gestion des états de la carte ---
   const renderMapStatus = () => {
-    if (!apiKey) {
+    if (!apiKey)
       return (
         <div className="flex h-full items-center justify-center bg-muted/50">
-          <p className="text-muted-foreground">❌ Clé API Google Maps manquante.</p>
+          ❌ Clé API Google Maps manquante.
         </div>
       );
-    }
-    if (addressEvents.length === 0) {
+    if (addressEvents.length === 0)
       return (
         <div className="flex h-full items-center justify-center bg-muted/50">
           <Info className="h-5 w-5 mr-2 text-yellow-500" />
           Aucun événement externe à afficher.
         </div>
       );
-    }
-    if (geocodingStatus === 'pending' || geocodingStatus === 'loading') {
+    if (geocodingStatus === 'pending' || geocodingStatus === 'loading')
       return (
         <div className="flex h-full items-center justify-center bg-muted/50">
           <Loader2 className="animate-spin h-5 w-5 text-primary mr-2" />
           Chargement et géocodage de {addressEvents.length} événement(s)...
         </div>
       );
-    }
-    if (geocodingStatus === 'complete' && mappedEvents.length === 0) {
+    if (geocodingStatus === 'complete' && mappedEvents.length === 0)
       return (
         <div className="flex h-full items-center justify-center bg-muted/50">
           <TriangleAlert className="h-5 w-5 text-red-500 mr-2" />
           Tous les géocodages ont échoué.
         </div>
       );
-    }
-    if (geocodingStatus === 'error') {
+    if (geocodingStatus === 'error')
       return (
         <div className="flex h-full items-center justify-center bg-muted/50">
           <TriangleAlert className="h-5 w-5 text-red-500 mr-2" />
           Erreur de chargement de Google Maps.
         </div>
       );
-    }
+
     return renderMap();
   };
 
@@ -219,81 +210,80 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         </AlertDescription>
       </Alert>
 
+      {/* Carte */}
       <Card>
         <CardContent className="p-0">
           <div className="aspect-video w-full min-h-[500px]">{renderMapStatus()}</div>
         </CardContent>
       </Card>
 
-      <section>
-        <Card>
-          <CardHeader>
-            <CardTitle>Liste des événements à venir</CardTitle>
-            <CardDescription>Y compris ceux sans localisation mappable.</CardDescription>
-          </CardHeader>
-          <CardContent className="max-h-[600px] overflow-y-auto space-y-4 p-4">
-            {initialEvents.length === 0 ? (
-              <p className="text-muted-foreground">Aucun événement trouvé.</p>
-            ) : (
-              initialEvents.map(event => {
-                const details = getLocationDetails(event);
-                return (
-                  <div
-                    key={event.id}
-                    className="rounded-lg border bg-card p-4 shadow-sm transition hover:shadow-md"
-                  >
-                    <h3 className="mb-2 font-semibold text-primary">{event.name}</h3>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <div className="flex items-start gap-2">
-                        <Calendar className="mt-0.5 h-4 w-4" />
-                        <span>
-                          {format(new Date(event.scheduled_start_time), 'EEEE d MMMM yyyy', { locale: fr })}
-                        </span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <Clock className="mt-0.5 h-4 w-4" />
-                        <span>{format(new Date(event.scheduled_start_time), "HH'h'mm", { locale: fr })}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        {details.icon}
-                        <a
-                          href={details.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={
-                            details.isMappable
-                              ? 'text-blue-600 hover:text-blue-800 underline flex items-center'
-                              : 'text-foreground font-medium flex items-center'
-                          }
-                        >
-                          {details.text}
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
-                      </div>
+      {/* Liste des événements sous la carte */}
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Liste des événements à venir</CardTitle>
+          <CardDescription>Y compris ceux sans localisation mappable.</CardDescription>
+        </CardHeader>
+        <CardContent className="max-h-[400px] overflow-y-auto space-y-4 p-4">
+          {initialEvents.length === 0 ? (
+            <p className="text-muted-foreground">Aucun événement trouvé.</p>
+          ) : (
+            initialEvents.map(event => {
+              const details = getLocationDetails(event);
+              return (
+                <div
+                  key={event.id}
+                  className="rounded-lg border bg-card p-4 shadow-sm transition hover:shadow-md"
+                >
+                  <h3 className="mb-2 font-semibold text-primary">{event.name}</h3>
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <Calendar className="mt-0.5 h-4 w-4" />
+                      <span>{format(new Date(event.scheduled_start_time), 'EEEE d MMMM yyyy', { locale: fr })}</span>
                     </div>
-
-                    <Button
-                      asChild
-                      size="sm"
-                      variant="outline"
-                      className="mt-4 bg-primary hover:bg-primary/90 text-white border-primary"
-                    >
+                    <div className="flex items-start gap-2">
+                      <Clock className="mt-0.5 h-4 w-4" />
+                      <span>{format(new Date(event.scheduled_start_time), "HH'h'mm", { locale: fr })}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      {details.icon}
                       <a
-                        href={`https://discord.com/events/${GUILD_ID}/${event.id}`}
+                        href={details.link}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className={
+                          details.isMappable
+                            ? 'text-blue-600 hover:text-blue-800 underline flex items-center'
+                            : 'text-foreground font-medium flex items-center'
+                        }
                       >
-                        Voir sur Discord
-                        <ExternalLink className="ml-2 h-4 w-4" />
+                        {details.text}
+                        <ExternalLink className="ml-1 h-3 w-3" />
                       </a>
-                    </Button>
+                    </div>
                   </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
-      </section>
+
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="mt-4 bg-primary hover:bg-primary/90 text-white border-primary"
+                  >
+                    <a
+                      href={`https://discord.com/events/${GUILD_ID}/${event.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Voir sur Discord
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
+

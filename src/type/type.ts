@@ -20,6 +20,10 @@ export interface DiscordEvent {
   description: string;
   scheduled_start_time: string;
   channel_id: string;
+  entity_metadata?: {
+    location?: string; // <-- ici on ajoute le lieu
+  };
 }
+
 
 // Ajoute d’autres types partagés ici...
