@@ -29,6 +29,7 @@ interface DashboardClientProps {
   discordData: DiscordWidgetData;
   discordPolls: any[];
   eventsData: DiscordEvent[];
+  totalMembers: number; // <-- ajout
 }
 
 //  carouselImages: string[]; // <-- ajouter
@@ -39,6 +40,7 @@ export default function DashboardClient({
   discordData,
   discordPolls,
   eventsData,
+  totalMembers,
 }: DashboardClientProps) {
 const carouselImages: string[] = placeholderData.carouselImages
   .map((img: any) => (typeof img === 'string' ? img : img.imageUrl))
@@ -96,14 +98,26 @@ const upcomingEventsCount = useMemo(() => {
       </div>
 
 
-
       {/* Main Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Colonne gauche */}
-        <div className="flex flex-col gap-8">
-          <DiscordWidget />
-          <DiscordChannelList channels={discordData?.channels} />
-        </div>
+{/* Colonne gauche */}
+<div className="flex flex-col gap-8">
+  <DiscordWidget />
+  <DiscordChannelList channels={discordData?.channels} />
+
+  {/* Total des membres du serveur */}
+  <Card className="relative p-4 flex flex-col justify-between h-28">
+    <div className="flex justify-between items-start">
+      <div>
+        <div className="text-sm text-gray-700">Membres sur le serveur</div>
+        <div className="text-2xl font-bold">{totalMembers}</div> 
+        <div className="text-xs text-gray-500">Inscrits sur le Discord</div>
+      </div>
+      <Users className="h-5 w-5 text-primary self-start" />
+    </div>
+  </Card>
+</div>
+
 
         {/* Colonne droite */}
         <div className="flex flex-col gap-8">

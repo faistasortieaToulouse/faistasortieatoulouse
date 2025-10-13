@@ -37,6 +37,21 @@ export default async function DashboardPage() {
     } catch {}
   }
 
+// --- Fetch Members ---
+let membersData: any[] = [];
+if (DISCORD_TOKEN) {
+  try {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, {
+      headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
+      next: { revalidate: 300 },
+    });
+    membersData = res.ok ? await res.json() : [];
+  } catch {}
+}
+
+// --- Calcul du total de membres ---
+const totalMembersCount = membersData.length;
+
   // --- Fetch Events ---
   let eventsData: DiscordEvent[] = [];
   if (DISCORD_TOKEN) {
@@ -81,7 +96,7 @@ export default async function DashboardPage() {
         name: 'Fais Ta Sortie à Toulouse',
         instant_invite: null,
         channels: channelsData,
-        members: [],
+        members: membersData,
         presence_count: 0,
         events: eventsData,
       };
@@ -111,6 +126,7 @@ export default async function DashboardPage() {
         discordData={discordData}
         discordPolls={discordPolls}
         eventsData={eventsData}
+        totalMembers={totalMembersCount} // <-- nouvelle prop
         ftsLogoUrl={FTS_LOGO_URL} // peut être supprimé si logo retiré dans DashboardClient
       />
     </div>
