@@ -45,6 +45,7 @@ const GUILD_ID = '1422806103267344416';
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [geocodingStatus, setGeocodingStatus] = useState<'pending' | 'loading' | 'complete' | 'error'>('pending');
+  const [mapsLoaded, setMapsLoaded] = useState(false);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -53,50 +54,48 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     [initialEvents]
   );
 
-  // --- Géocodage ---
+  // --- Géocodage via fetch ---
   useEffect(() => {
-    if (!apiKey || addressEvents.length === 0) return;
+    if (!apiKey || addressEvents.length === 0) {
+      setGeocodingStatus(addressEvents.length === 0 ? 'complete' : 'error');
+      return;
+    }
 
-    const interval = setInterval(() => {
-      if (window.google?.maps?.Geocoder) {
-        clearInterval(interval);
-        setGeocodingStatus('loading');
+    const geocodeAll = async () => {
+      setGeocodingStatus('loading');
+      const temp: MappedEvent[] = [];
+      let successCount = 0;
 
-        const geocoder = new window.google.maps.Geocoder();
-        const temp: MappedEvent[] = [];
-        let done = 0;
+      for (const event of addressEvents) {
+        const location = event.entity_metadata?.location?.trim();
+        if (!location) continue;
 
-        addressEvents.forEach(event => {
-          const location = event.entity_metadata?.location;
-          if (!location) {
-            done++;
-            return;
+        try {
+          const res = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
+          );
+          const data = await res.json();
+
+          if (data.status === 'OK' && data.results.length > 0) {
+            const { lat, lng } = data.results[0].geometry.location;
+            temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
+            successCount++;
+          } else {
+            console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
           }
-
-          geocoder.geocode({ address: location }, (results, status) => {
-            done++;
-            if (status === 'OK' && results && results[0]) {
-              const lat = results[0].geometry.location.lat();
-              const lng = results[0].geometry.location.lng();
-              temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
-            } else {
-              temp.push({ ...event, position: { lat: 0, lng: 0 }, isGeocoded: false });
-              console.warn(`⚠️ Géocodage échoué pour "${event.name}" (${status})`);
-            }
-
-            if (done === addressEvents.length) {
-              setMappedEvents(temp.filter(e => e.isGeocoded));
-              setGeocodingStatus('complete');
-            }
-          });
-        });
+        } catch (err) {
+          console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
+        }
       }
-    }, 500);
 
-    return () => clearInterval(interval);
+      setMappedEvents(temp);
+      console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
+      setGeocodingStatus('complete');
+    };
+
+    geocodeAll();
   }, [apiKey, addressEvents]);
 
-  // --- Détails d’un événement ---
   const getLocationDetails = (event: DiscordEvent) => {
     if (event.entity_type === 3) {
       const location = event.entity_metadata?.location?.trim();
@@ -121,32 +120,38 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     };
   };
 
-  // --- Carte ---
   const renderMap = () => (
-    <APIProvider apiKey={apiKey!}>
-      <Map
-        defaultCenter={mappedEvents.length > 0 ? mappedEvents[0].position : TOULOUSE_CENTER}
-        defaultZoom={13}
-        mapId="toulouse-map"
-        gestureHandling="greedy"
-        disableDefaultUI
-        className="w-full h-full"
-      >
-        {mappedEvents.map(event => (
-          <Marker
-            key={event.id}
-            position={event.position}
-            title={`${event.name} - ${event.entity_metadata?.location}`}
-            icon={{
-              path: window.google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#EF4444',
-              fillOpacity: 0.9,
-              strokeWeight: 0
-            }}
-          />
-        ))}
-      </Map>
+    <APIProvider apiKey={apiKey!} onLoad={() => setMapsLoaded(true)}>
+      {mapsLoaded && mappedEvents.length > 0 ? (
+        <Map
+          defaultCenter={mappedEvents[0].position}
+          defaultZoom={13}
+          mapId="toulouse-map"
+          gestureHandling="greedy"
+          disableDefaultUI
+          className="w-full h-full"
+        >
+          {mappedEvents.map(event => (
+            <Marker
+              key={event.id}
+              position={event.position}
+              title={`${event.name} - ${event.entity_metadata?.location}`}
+              icon={{
+                path: window.google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: '#EF4444',
+                fillOpacity: 0.9,
+                strokeWeight: 0
+              }}
+            />
+          ))}
+        </Map>
+      ) : (
+        <div className="flex h-full items-center justify-center bg-muted/50">
+          <Loader2 className="animate-spin h-5 w-5 text-primary mr-2" />
+          Chargement de la carte...
+        </div>
+      )}
     </APIProvider>
   );
 
@@ -189,7 +194,6 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     return renderMap();
   };
 
-  // --- Rendu principal ---
   return (
     <div className="flex flex-col gap-8 p-4 md:p-8">
       <header>
@@ -210,14 +214,12 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         </AlertDescription>
       </Alert>
 
-      {/* Carte */}
       <Card>
         <CardContent className="p-0">
           <div className="aspect-video w-full min-h-[500px]">{renderMapStatus()}</div>
         </CardContent>
       </Card>
 
-      {/* Liste des événements sous la carte */}
       <Card className="mt-4">
         <CardHeader>
           <CardTitle>Liste des événements à venir</CardTitle>
@@ -286,4 +288,3 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     </div>
   );
 }
-
