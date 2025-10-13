@@ -45,15 +45,15 @@ const carouselImages: string[] = placeholderData.carouselImages
   .filter((url): url is string => !!url && url.length > 0);
   const onlineMembers = discordData?.presence_count || 0;
 
-  const upcomingEventsCount = useMemo(() => {
-    const now = new Date();
-    const sevenDays = new Date();
-    sevenDays.setDate(now.getDate() + 7);
-    return eventsData.filter(ev => {
-      const start = new Date(ev.scheduled_start_time);
-      return start >= now && start <= sevenDays;
-    }).length;
-  }, [eventsData]);
+const upcomingEventsCount = useMemo(() => {
+  const now = new Date();
+  const sevenDays = new Date();
+  sevenDays.setDate(now.getDate() + 7);
+  return eventsData.filter(ev => {
+    const start = new Date(ev.scheduled_start_time);
+    return start >= now && start <= sevenDays;
+  }).length;
+}, [eventsData]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -95,10 +95,7 @@ const carouselImages: string[] = placeholderData.carouselImages
         <DashboardMenu />
       </div>
 
-      {/* Discord Stats */}
-      <section>
-        <DiscordStats data={discordData} />
-      </section>
+
 
       {/* Main Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
