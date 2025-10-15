@@ -25,6 +25,12 @@ import { AiRecommendations } from "./ai-recommendations";
 
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
+// Imports pour les boutons de l'application
+import { Store, Apple, Share2 } from "lucide-react";
+import Link from 'next/link'; 
+import { Button } from "@/components/ui/button"; 
+import { useToast } from "@/hooks/use-toast";
+
 interface DashboardClientProps {
   discordData: DiscordWidgetData;
   discordPolls: any[];
@@ -42,6 +48,7 @@ export default function DashboardClient({
   eventsData,
   totalMembers,
 }: DashboardClientProps) {
+  const { toast } = useToast(); // Cette ligne doit être présente !
 const carouselImages: string[] = placeholderData.carouselImages
   .map((img: any) => (typeof img === 'string' ? img : img.imageUrl))
   .filter((url): url is string => !!url && url.length > 0);
@@ -56,6 +63,36 @@ const upcomingEventsCount = useMemo(() => {
     return start >= now && start <= sevenDays;
   }).length;
 }, [eventsData]);
+
+  // Fonction pour gérer le partage de l'application
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Mon Application TWA/PWA",
+          text: "Téléchargez Mon Application pour ne rien manquer de nos événements et discussions !",
+          url: "https://mon-appli-fictive.com", 
+        });
+        toast({
+          title: "Partage réussi 🎉",
+          description: "Merci d'avoir partagé l'application !",
+        });
+      } catch (error) {
+        console.error("Erreur de partage :", error);
+        toast({
+          title: "Partage annulé",
+          description: "Le partage a été interrompu ou le navigateur ne le supporte pas.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      navigator.clipboard.writeText("https://mon-appli-fictive.com");
+      toast({
+        title: "Lien copié !",
+        description: "Le lien de l'application a été copié dans votre presse-papiers.",
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -88,15 +125,10 @@ const upcomingEventsCount = useMemo(() => {
         </Card>
       </div>
 
-
-
-
-
       {/* DashboardMenu sous le carrousel */}
       <div className="w-full mt-4">
         <DashboardMenu />
       </div>
-
 
       {/* Main Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -117,7 +149,6 @@ const upcomingEventsCount = useMemo(() => {
     </div>
   </Card>
 </div>
-
 
         {/* Colonne droite */}
         <div className="flex flex-col gap-8">
@@ -166,6 +197,55 @@ const upcomingEventsCount = useMemo(() => {
           </AlertDescription>
         </Alert>
       </section>
+
+      {/* NOUVELLE SECTION À LA FIN POUR TÉLÉCHARGEMENT/PARTAGE */}
+      <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
+        
+        {/* 1. Lien Google Play (TWA Android) */}
+        <Link 
+          href="https://play.google.com/store/apps/details?id=com.votre.appli.android" 
+          target="_blank" 
+          className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+        >
+          <Store className="h-5 w-5" />
+          {/* Utilisation du badge officiel Google Play */}
+          <Image
+            src="/images/google-play-badge.png" // ⬅️ Le chemin de votre badge
+            alt="Disponible sur Google Play"
+            width={180} // Ajustez la taille selon vos besoins
+            height={53} // Ajustez la taille selon vos besoins
+          />
+        </Link>
+
+        {/* 🚀 NOUVEAU BOUTON : Téléchargement direct APK/TWA */}
+        <Link 
+          href="/votre-application.apk" // ⬅️ REMPLACER PAR LE CHEMIN VERS VOTRE APK
+          download // Important : force le téléchargement du fichier
+          className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+        >
+          <Store className="h-5 w-5" />
+          <span className="font-semibold">Télécharger le fichier APK (TWA)</span>
+        </Link>
+
+        {/* 2. Lien/Instructions pour PWA (Apple/iOS) */}
+        <Link 
+          href="/install-pwa-ios" 
+          className="flex items-center space-x-2 p-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        >
+          <Apple className="h-5 w-5" />
+          <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
+        </Link>
+
+        {/* 3. Bouton de Partage */}
+        <Button 
+          onClick={handleShare} 
+          className="flex items-center space-x-2 p-3 bg-primary text-primary-foreground rounded-lg shadow-md hover:bg-primary/90 transition duration-300"
+        >
+          <Share2 className="h-5 w-5" />
+          <span className="font-semibold">Partager l'application</span>
+        </Button>
+
+      </section>
 
     </div>
   );

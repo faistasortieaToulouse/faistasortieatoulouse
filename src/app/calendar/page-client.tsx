@@ -54,7 +54,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
   selected={selectedDate}
   onSelect={setSelectedDate}
   locale={fr}
-  events={eventsData}   // <-- passer les événements ici
+  events={eventsData}   // <-- C'est cette prop qui est incorrecte
   className="rounded-xl border shadow bg-card"
 />
 
