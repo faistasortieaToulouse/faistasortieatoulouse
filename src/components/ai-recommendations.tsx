@@ -93,10 +93,9 @@ const Skeleton = ({ className }: { className?: string }) => (
 
 
 // -----------------------------------------------------
-// 2. SYSTÈME DE TOAST COMPLET (Basé sur le code fourni)
+// 2. SYSTÈME DE TOAST COMPLET
 // -----------------------------------------------------
 
-// MOCK: Les primitives Radix sont simulées par de simples divs.
 const ToastPrimitives = {
     Provider: ({ children }: ComponentProps) => <>{children}</>,
     Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
@@ -130,7 +129,6 @@ const ToastPrimitives = {
     )),
 };
 
-// Constantes et types pour useToast
 type ToastVariant = 'default' | 'destructive';
 let TOAST_COUNT = 0;
 function generateId() {
@@ -144,9 +142,7 @@ type Toast = {
     variant?: ToastVariant;
     duration?: number;
     action?: React.ReactElement<typeof ToastPrimitives.Action>;
-} & ToastProps;
-
-type ToastProps = {}; // Gardé vide pour la simplicité
+};
 
 type ActionType =
     | { type: 'ADD_TOAST'; toast: Toast }
@@ -171,7 +167,6 @@ const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
     }
 };
 
-// 2.1. Le Context et le Hook useToast
 const ToastContext = createContext<{ toasts: Toast[]; toast: (props: Partial<Toast>) => { id: string }; dismiss: (toastId?: string) => void } | undefined>(undefined);
 
 function ToastProvider({ children }: ComponentProps) {
@@ -207,7 +202,6 @@ function ToastProvider({ children }: ComponentProps) {
 const useToast = () => {
     const context = useContext(ToastContext);
     if (context === undefined) { 
-        // Ceci est la gestion d'erreur qui corrige le message "[Toast Mock] called outside of provider"
         return { toasts: [], toast: (props: Partial<Toast>) => { 
             console.warn("[Toast Mock] Toast called outside of provider:", props);
             return { id: generateId() };
@@ -216,7 +210,6 @@ const useToast = () => {
     return context;
 };
 
-// 2.2. Composants Toast UI (Simplifiés à partir de votre code toast.tsx)
 const toastVariants = cva(
     "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all",
     {
@@ -261,7 +254,6 @@ const ToastClose = ({ id }: { id: string }) => {
     );
 };
 
-// 2.3. Toaster (Basé sur le code fourni)
 function Toaster() {
     const { toasts } = useToast();
 
@@ -293,7 +285,15 @@ function Toaster() {
 // L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas
 const API_KEY = ''; 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+// CONSTRUIRE L'URL EN TANT QUE FONCTION POUR GÉRER L'ABSENCE DE CLÉ
+const buildApiUrl = () => {
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
+    if (API_KEY && API_KEY !== '') {
+        url += `?key=${API_KEY}`;
+    }
+    return url;
+};
 
 // Fonction utilitaire pour l'attente
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -324,6 +324,10 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     setRecommendations('');
     console.log("--- Démarrage de la requête Gemini ---");
     console.log("Préférences utilisateur:", values.userPreferences);
+    
+    // Obtenir l'URL de l'API (avec ou sans le paramètre ?key)
+    const apiUrl = buildApiUrl();
+    console.log(`URL d'appel: ${apiUrl}`);
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français.`;
@@ -349,7 +353,7 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         attempts++;
         console.log(`Tentative d'API n°${attempts}...`);
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(apiUrl, { // Utilisation de l'URL construite
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -361,7 +365,8 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         if (response.status === 403) {
              const errorText = await response.text();
              console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-             throw new Error(`Erreur d'authentification (Statut 403). Veuillez vérifier l'accès à l'API.`);
+             // JETER UNE ERREUR SPÉCIFIQUE
+             throw new Error(`Erreur d'authentification (Statut 403). L'API exige une identité d'appelant établie.`);
         }
         
         if (response.status === 400) {
@@ -411,6 +416,7 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
       console.error('Erreur CRITIQUE lors de l\'obtention des recommandations IA:', error);
       
+      // Mise à jour du Toast pour afficher l'erreur
       toast({
         variant: 'destructive',
         title: 'Échec de la Recommandation',
