@@ -22,7 +22,8 @@ export default function PrivacyPolicyPage() {
             <CardTitle>1. Introduction</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Fais ta sortie à Toulouse (ci-après « l'Application » ou « Nous ») s'engage à protéger la confidentialité des utilisateurs. Cette politique de confidentialité détaille les types d'informations que nous collectons via l'Application, la manière dont nous les utilisons et les droits des utilisateurs concernant ces informations.</p>
+            {/* MISE À JOUR : Ajout de l'entité légale Happy People 31 et son adresse */}
+            <p>Fais ta sortie à Toulouse (ci-après « l'Application » ou « Nous »), éditée par l'association **Happy People 31**, basée au 26, avenue de la Colonne à Toulouse, s'engage à protéger la confidentialité des utilisateurs. Cette politique de confidentialité détaille les types d'informations que nous collectons via l'Application, la manière dont nous les utilisons et les droits des utilisateurs concernant ces informations.</p>
           </CardContent>
         </Card>
 
@@ -34,16 +35,20 @@ export default function PrivacyPolicyPage() {
             <div>
                 <h3 className="font-semibold">2.1. Informations Fournies par l'Utilisateur</h3>
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li>Données d'identité et de contact (si un compte est créé) : Nom d'utilisateur, adresse e-mail, mot de passe chiffré.</li>
-                    <li>Contenu Utilisateur (si applicable) : Textes, photos, ou autres contenus que vous téléchargez ou créez dans l'Application.</li>
+                    {/* MISE À JOUR : Clarification sur la condition de collecte */}
+                    <li>Données d'identité et de contact (lorsque l'utilisateur choisit de créer un compte) : Nom d'utilisateur, adresse e-mail, mot de passe chiffré.</li>
+                    {/* MISE À JOUR : Clarification sur le contenu utilisateur */}
+                    <li>Contenu Utilisateur (le cas échéant : messages dans les discussions, commentaires sur les sorties, descriptions de profils) : Textes, photos, ou autres contenus que vous téléchargez ou créez dans l'Application.</li>
                 </ul>
             </div>
-             <div>
+              <div>
                 <h3 className="font-semibold">2.2. Informations Collectées Automatiquement</h3>
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                     <li>Données d'utilisation : Informations sur la manière dont vous interagissez avec l'Application (pages vues, fonctionnalités utilisées, fréquence d'accès, etc.).</li>
-                    <li>Données techniques : Adresse IP, type d'appareil mobile, système d'exploitation, identifiants uniques de l'appareil (par exemple, IDFA, Android ID).</li>
-                    <li>Données de localisation (si l'utilisateur y a consenti) : Localisation géographique précise via GPS ou moins précise via l'adresse IP.</li>
+                    {/* MISE À JOUR : Clarification des exemples d'identifiants techniques */}
+                    <li>Données techniques : Adresse IP, type d'appareil mobile, système d'exploitation, identifiants uniques de l'appareil (tels que : IDFA pour iOS, Android ID pour Android).</li>
+                    {/* MISE À JOUR : Clarification sur le consentement explicite de l'utilisateur */}
+                    <li>Données de localisation (si l'utilisateur a donné son consentement explicite, par exemple via l'activation du GPS de son appareil) : Localisation géographique précise via GPS ou moins précise via l'adresse IP.</li>
                     <li>Cookies et technologies similaires : Utilisés pour améliorer l'expérience utilisateur et analyser l'utilisation de l'Application.</li>
                 </ul>
             </div>

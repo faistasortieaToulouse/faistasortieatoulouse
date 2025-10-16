@@ -6,7 +6,7 @@ export function Footer() {
             <div className="container mx-auto px-4 md:px-8">
                 <div className="flex flex-col items-center justify-center text-center">
                     <p className="text-sm text-muted-foreground mb-4">
-                        © 2025 Tolosa. Tous droits réservés.
+                        © 2025 Happy People 31. Tous droits réservés.
                     </p>
                     <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
                         <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">

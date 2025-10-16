@@ -64,7 +64,7 @@ const rawCategories = [
     {
         title: "Événements gratuits des bars associatifs",
         links: [
-            "http://lapasserelle-negreneys.org/", "https://www.facebook.com/lapasserellenegreneys/events", "https://www.sozinho.org/agenda/", "https://www.placecommune.fr/prog1",
+            "http://lapasserelle-negreneys.org/", "https://www.facebook.com/lapasserellenegreneys/events", "https://www.sozinho.org/agenda/", "https://www.placecommune.fr/programmation",
             "https://www.maisonmalepere.fr/programmation", "https://cafe-lastronef.fr/programme/",
         ],
     },
@@ -84,9 +84,9 @@ const rawCategories = [
     {
         title: "Événements des orchestres, bals et concerts",
         links: [
-            "https://conservatoire.toulouse.fr/agenda/", "http://www.orchestre-h2o.fr", "https://orchestre.ut-capitole.fr/accueil/concerts", "https://www.out-toulouse.fr/saison-en-cours",
+            "https://conservatoire.toulouse.fr/agenda/", "http://www.orchestre-h2o.fr", "https://orchestre.ut-capitole.fr/accueil/concerts", "https://www.out-toulouse.fr/",
             "https://philharmonia-tolosa.fr/?cat=5", "https://orchestre-opus31.fr/events/", "http://ensemble-orchestral-pierre-de-fermat.fr/concerts-a-venir.php", "https://www.comdt.org/saison/les-concerts/",
-            "https://agendatrad.org/calendrier/France/Occitanie", "https://www.facebook.com/groups/221534187648", "https://www.diversdanses.org/", "https://www.facebook.com/Diversdanse/?locale=fr_FR",
+            "https://agendatrad.org/calendrier/France/Occitanie", "https://www.facebook.com/groups/221534187648", "https://www.diversdanses.com/", "https://www.facebook.com/Diversdanse/?locale=fr_FR",
             "https://www.facebook.com/page.bombes.2.bal/?locale=fr_FR", "https://toulouse-les-orgues.org/",
         ],
     },
@@ -144,7 +144,7 @@ const rawCategories = [
         title: "Événements de botanique",
         links: [
             "http://lacaravanedescueilleurs.fr/stages-ateliers/", "https://www.hautegaronnetourisme.com/resultats-de-recherche/?search=botanique", "https://arbresetpaysagesdautan.fr",
-            "https://www.mairie-revel.fr/agenda/", "https://www.destination-belledonne.com/offres/balade-botanique-contee-comestibles-medicinales-de-juillet-revel-fr-5407688/#tariffs",
+            "https://www.mairie-revel.fr/agenda/",
             "https://www.eventbrite.fr/d/france--toulouse/botanique/", "https://www.billetweb.fr/balade-botanique-comestibles-medicinales-daout1", "https://www.mairie-revel.fr/agenda/",
             "https://tourisme.hautstolosans.fr/fr/diffusio/fetes-et-manifestations/rv-aux-jardins-visite-du-jardin-pedagogique-grenade-sur-garonne_TFOFMAMID031V50VXJB",
         ],
@@ -158,13 +158,13 @@ const rawCategories = [
     {
         title: "Événements de Festivals",
         links: [
-            "https://www.jds.fr/toulouse/agenda/manifestations-fetes-festivals-137_B", "https://31.agendaculturel.fr/festival/", "https://www.helloasso.com/e/reg/occitanie/dep/haute-garonne/ville/toulouse/act/festival",
+            "https://www.jds.fr/toulouse/agenda/manifestations-fetes-festivals-137_B", "https://www.helloasso.com/e/reg/occitanie/dep/haute-garonne/ville/toulouse/act/festival",
         ],
     },
     {
         title: "Événements de Noël",
         links: [
-            "https://www.jds.fr/toulouse/agenda/concert-de-l-avent-et-de-noel-270_B", "https://www.unidivers.fr/event/theatre-du-capitole-toulouse-2022-12-10t2000000100/", "https://31.agendaculturel.fr/festival/spectacles-de-noel-toulouse.html",
+            "https://www.jds.fr/toulouse/agenda/concert-de-l-avent-et-de-noel-270_B", "https://31.agendaculturel.fr/festival/spectacles-de-noel-toulouse.html",
             "https://toulouse-les-orgues.org/evenement/concert-de-noel/",
         ],
     },

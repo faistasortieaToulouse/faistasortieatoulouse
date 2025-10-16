@@ -56,7 +56,7 @@ export default function HelpPage() {
                 Oui, l'utilisation de l'application et la participation aux
                 sorties organisées par la communauté sont entièrement
                 gratuites. Certaines sorties peuvent inclure des activités
-                payantes (cinéma, restaurant, etc.), mais cela est toujours
+                payantes (musée, restaurant, etc.), mais cela est toujours
                 clairement indiqué par l'organisateur.
               </AccordionContent>
             </AccordionItem>
