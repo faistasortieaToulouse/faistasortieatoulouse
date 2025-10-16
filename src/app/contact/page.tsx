@@ -10,18 +10,33 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useRef, useCallback } from 'react'; // <-- NOUVEL IMPORT
 
+// Déclaration globale pour le type du widget Turnstile (nécessaire pour TypeScript)
+declare global {
+  interface Window {
+    turnstile: {
+      reset: (widgetIdOrContainer: string | HTMLElement) => void;
+    };
+  }
+}
+
+// Schéma Zod : AJOUT du champ Turnstile pour la validation
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères." }),
   email: z.string().email({ message: "Veuillez entrer une adresse email valide." }),
   subject: z.string().min(5, { message: "Le sujet doit contenir au moins 5 caractères." }),
   message: z.string().min(10, { message: "Le message doit contenir au moins 10 caractères." }),
+  // Champ Turnstile : requis pour la soumission
+  'cf-turnstile-response': z.string().min(1, { message: "Veuillez compléter la vérification anti-bot." }),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
   const { toast } = useToast();
+  // Référence pour pouvoir réinitialiser le widget Turnstile après l'envoi
+  const turnstileRef = useRef<HTMLDivElement>(null); 
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -30,31 +45,64 @@ export default function ContactPage() {
       email: '',
       subject: '',
       message: '',
+      'cf-turnstile-response': '', // Initialisation du champ Turnstile
     },
   });
 
-  function onSubmit(data: ContactFormValues) {
-    const mailtoLink = `mailto:tolosa31@free.fr?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(
-      `Nom: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
-    )}`;
+  const onSubmit = useCallback(async (data: ContactFormValues) => {
     
+    // Le token est déjà dans `data['cf-turnstile-response']` grâce à Zod et form.handleSubmit
+
     try {
-        window.location.href = mailtoLink;
-        toast({
-            title: 'Redirection vers votre client email',
-            description: "Veuillez envoyer l'email depuis votre application de messagerie.",
+        // Envoi des données (y compris le jeton Turnstile) à l'API Route sécurisée
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
+        
+        const result = await response.json();
+
+        if (response.ok) {
+            toast({
+                title: 'Message envoyé avec succès !',
+                description: 'Nous vous répondrons dès que possible.',
+            });
+            // Réinitialisation du formulaire et du widget après succès
+            form.reset({
+                name: '',
+                email: '',
+                subject: '',
+                message: '',
+                'cf-turnstile-response': '',
+            });
+            if (window.turnstile && turnstileRef.current) {
+                window.turnstile.reset(turnstileRef.current);
+            }
+        } else {
+            // Afficher le message d'erreur du serveur (ex: vérification anti-bot échouée)
+            toast({
+                variant: 'destructive',
+                title: 'Échec de l\'envoi',
+                description: result.message || 'Une erreur est survenue lors de l\'envoi du message. Réessayez.',
+            });
+        }
     } catch (error) {
+        console.error("Erreur réseau:", error);
         toast({
             variant: 'destructive',
-            title: 'Erreur',
-            description: "Impossible d'ouvrir le client de messagerie. Veuillez envoyer un email manuellement à tolosa31@free.fr.",
+            title: 'Erreur réseau',
+            description: "Impossible de contacter le serveur. Vérifiez votre connexion.",
         });
     }
-  }
+  }, [form, toast]);
+
 
   return (
     <div className="p-4 md:p-8">
+      {/* ... (Header inchangé) ... */}
       <header className="mb-8">
         <h1 className="font-headline text-4xl font-bold text-primary">Nous contacter</h1>
         <p className="mt-2 text-muted-foreground">
@@ -66,11 +114,12 @@ export default function ContactPage() {
         <CardHeader>
           <CardTitle>Formulaire de contact</CardTitle>
           <CardDescription>
-            Remplissez les champs ci-dessous. Cela ouvrira votre application d'email.
+            Remplissez les champs ci-dessous. Votre email de réception est sécurisé.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
+            {/* IMPORTANT : onSubmit appelle la fonction ASYNCHRONE et SÉCURISÉE */}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
@@ -128,9 +177,42 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              
+              {/* ---------------------------------------------------- */}
+              {/* 1. CHAMP CACHÉ RHF POUR LE TOKEN TURNSTILE */}
+              <FormField
+                control={form.control}
+                name="cf-turnstile-response"
+                render={({ field }) => (
+                  <FormItem>
+                    {/* Le message d'erreur s'affichera ici si le jeton manque */}
+                    <FormMessage /> 
+                    {/* Le champ est caché car le widget lui-même le remplira */}
+                    <FormControl>
+                      <Input type="hidden" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              {/* 2. WIDGET CLOUDFLARE TURNSTILE */}
+              <div className="flex justify-center pt-2">
+                <div
+                    ref={turnstileRef}
+                    className="cf-turnstile"
+                    data-sitekey="0x4AAAAAAB67F6RPRZZDOgEg" // <-- REMPLACER !
+                    data-theme="auto"
+                    // Ces callbacks sont essentiels pour que RHF sache quand le jeton est là
+                    data-callback={(token: string) => form.setValue('cf-turnstile-response', token, { shouldValidate: true })}
+                    data-error-callback={() => form.setValue('cf-turnstile-response', '', { shouldValidate: true })}
+                    data-expired-callback={() => form.setValue('cf-turnstile-response', '', { shouldValidate: true })}
+                ></div>
+              </div>
+              {/* ---------------------------------------------------- */}
+              
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
-                Envoyer le message
+                {form.formState.isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
               </Button>
             </form>
           </Form>
