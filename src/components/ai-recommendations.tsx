@@ -105,19 +105,23 @@ const ToastPrimitives = {
             {children}
         </div>
     )),
-    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
-            {children}
-        </div>
-    )),
+    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => {
+        const rootRef = useRef<HTMLDivElement>(null);
+        // Simuler les attributs de données Radix si nécessaire
+        return (
+            <div ref={rootRef} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
+                {children}
+            </div>
+        );
+    }),
     Title: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
         <div ref={ref} className={cn("text-sm font-semibold", className)} {...props}>{children}</div>
     )),
     Description: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
         <div ref={ref} className={cn("text-sm opacity-90", className)} {...props}>{children}</div>
     )),
-    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
-        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900", className)} {...props}>
+    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, onClick, ...props }, ref) => (
+        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900 focus:opacity-100", className)} onClick={onClick} {...props}>
             {children || <X className="h-4 w-4" />}
         </button>
     )),
@@ -144,13 +148,10 @@ type Toast = {
     action?: React.ReactElement<typeof ToastPrimitives.Action>;
 } & ToastProps;
 
-type ToastProps = {
-    // Prop extension Radix non utilisées dans le mock
-};
+type ToastProps = {}; // Gardé vide pour la simplicité
 
 type ActionType =
     | { type: 'ADD_TOAST'; toast: Toast }
-    | { type: 'UPDATE_TOAST'; toast: Partial<Toast> }
     | { type: 'DISMISS_TOAST'; toastId?: string };
 
 const defaultToastOptions: Partial<Toast> = {
@@ -172,7 +173,7 @@ const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
     }
 };
 
-// 2.1. Le Context et le Hook useToast (la logique manquante)
+// 2.1. Le Context et le Hook useToast
 const ToastContext = createContext<{ toasts: Toast[]; toast: (props: Partial<Toast>) => { id: string }; dismiss: (toastId?: string) => void } | undefined>(undefined);
 
 function ToastProvider({ children }: ComponentProps) {
@@ -208,9 +209,11 @@ function ToastProvider({ children }: ComponentProps) {
 const useToast = () => {
     const context = useContext(ToastContext);
     if (!context) {
-        // Fallback si le Provider n'est pas utilisé (ne devrait pas arriver ici)
-        console.error("useToast must be used within a ToastProvider");
-        return { toasts: [], toast: () => ({ id: '' }), dismiss: () => {} };
+        // Fallback si le Provider n'est pas utilisé
+        return { toasts: [], toast: (props: Partial<Toast>) => { 
+            console.warn("[Toast Mock] Toast called outside of provider:", props);
+            return { id: generateId() };
+        }, dismiss: () => {} };
     }
     return context;
 };
@@ -233,24 +236,16 @@ const Toast = React.forwardRef<
     React.ElementRef<typeof ToastPrimitives.Root>,
     React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void }
 >(({ className, variant, onOpenChange, ...props }, ref) => {
-    const { dismiss } = useToast();
     const isDestructive = variant === 'destructive';
     
-    // Pour simuler la fermeture, on utilise useEffect
-    useEffect(() => {
-        // Si onOpenChange est défini, on pourrait gérer la disparition ici,
-        // mais pour le mock, le timer dans useToast est suffisant.
-    }, [onOpenChange]);
-
     return (
         <ToastPrimitives.Root
             ref={ref}
             className={cn(
                 toastVariants({ variant }), 
                 className,
-                isDestructive ? 'border-red-600' : 'border-gray-200' // Classes pour la couleur
+                isDestructive ? 'border-red-600' : 'border-gray-200'
             )}
-            onPointerDownOutside={(event: any) => event.preventDefault()} // Empêche l'interaction externe
             {...props}
         >
             {props.children}
@@ -264,21 +259,19 @@ const ToastClose = ({ id }: { id: string }) => {
     return (
         <ToastPrimitives.Close
             onClick={() => dismiss(id)}
-            className="absolute right-2 top-2 rounded-md p-1 text-gray-500 opacity-100 transition-opacity hover:text-gray-900 focus:opacity-100"
         />
     );
 };
 
 // 2.3. Toaster (Basé sur le code fourni)
 function Toaster() {
-    const { toasts, dismiss } = useToast();
+    const { toasts } = useToast();
 
     return (
         <ToastPrimitives.Provider>
-            {toasts.map(function ({ id, title, description, action, ...props }) {
-                const handleClose = () => dismiss(id);
+            {toasts.map(function ({ id, title, description, action, variant, ...props }) {
                 return (
-                    <Toast key={id} onOpenChange={handleClose} {...props}>
+                    <Toast key={id} id={id} variant={variant} {...props}>
                         <div className="grid gap-1">
                             {title && <ToastPrimitives.Title>{title}</ToastPrimitives.Title>}
                             {description && (
@@ -312,10 +305,11 @@ interface AiRecommendationsProps {
 }
 
 // -----------------------------------------------------
-// 4. COMPOSANT PRINCIPAL
+// 4. COMPOSANT PRINCIPAL (EXPORTE COMME EXPORTATION NOMMÉE)
 // -----------------------------------------------------
 
-export default function AiRecommendations({ eventData }: AiRecommendationsProps) {
+// FIX: Changement de 'export default function' à 'export function'
+export function AiRecommendations({ eventData }: AiRecommendationsProps) {
   const [recommendations, setRecommendations] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast(); 
@@ -394,70 +388,80 @@ export default function AiRecommendations({ eventData }: AiRecommendationsProps)
   // --- RENDU DU COMPOSANT ---
   return (
     // NOTE: Le ToastProvider doit encapsuler le composant qui utilise useToast
-    <ToastProvider> 
-        <Card className="max-w-xl mx-auto my-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-              <Sparkles className="w-6 h-6" />
-              Recommandations d'Événements IA
-            </CardTitle>
-            <CardDescription>
-              Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+    <Card className="max-w-xl mx-auto my-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+          <Sparkles className="w-6 h-6" />
+          Recommandations d'Événements IA
+        </CardTitle>
+        <CardDescription>
+          Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        
+        <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             
-            <div className="space-y-4">
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                
-                <FormItem>
-                  <FormLabel>Vos préférences</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
-                      {...form.register("userPreferences")} // Utilisation directe de register
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  {form.formState.errors.userPreferences && (
-                    <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
-                  )}
-                </FormItem>
+            <FormItem>
+              <FormLabel>Vos préférences</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
+                  {...form.register("userPreferences")} // Utilisation directe de register
+                  disabled={isLoading}
+                />
+              </FormControl>
+              {form.formState.errors.userPreferences && (
+                <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
+              )}
+            </FormItem>
 
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? (
-                    <div className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Analyse en cours...
-                    </div>
-                  ) : 'Obtenir des recommandations'}
-                </Button>
-              </form>
-            </div>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyse en cours...
+                </div>
+              ) : 'Obtenir des recommandations'}
+            </Button>
+          </form>
+        </div>
 
-            {(isLoading || recommendations) && (
-              <div className="mt-6">
-                <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
-                {isLoading ? (
-                  <div className="space-y-2 mt-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                ) : (
-                    <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
-                        {recommendations}
-                    </div>
-                )}
+        {(isLoading || recommendations) && (
+          <div className="mt-6">
+            <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
+            {isLoading ? (
+              <div className="space-y-2 mt-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
               </div>
+            ) : (
+                <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
+                    {recommendations}
+                </div>
             )}
-          </CardContent>
-        </Card>
-        <Toaster /> {/* Le Toaster est rendu à la racine pour capturer les appels toast() */}
-    </ToastProvider>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
+}
+
+// -----------------------------------------------------
+// Le wrapper qui contient le Provider et le Toaster
+// -----------------------------------------------------
+
+export default function AppWrapper(props: AiRecommendationsProps) {
+    return (
+        <ToastProvider>
+            <AiRecommendations {...props} />
+            <Toaster /> 
+        </ToastProvider>
+    );
 }
