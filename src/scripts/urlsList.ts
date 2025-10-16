@@ -1,14 +1,17 @@
 // urlsList.ts
 
-// Type pour la liste des URLs. La clé est l'URL, la valeur est le statut/commentaire.
-export type UrlStatusList = {
-    [url: string]: string; // Clé: URL, Valeur: Statut ou Commentaire
+interface Link {
+    url: string;
+    description: string;
 }
 
-// ------------------------------------------------------------------------------------
-// -- Liste des URLs mise à jour avec les remplacements et les statuts "OK" --
-// ------------------------------------------------------------------------------------
-export const urlStatusList: UrlStatusList = {
+interface Category {
+    name: string;
+    links: Link[];
+}
+
+// Liste complète et dédoublée (mais incluant les répertoires/chemins différents) des 205 URLs
+const rawUrls: string[] = [
     "https://www.toulousebouge.com": "",
     "https://www.clutchmag.fr/evenements": "",
     "https://www.lepetittou.com/activite/culture/": "",
@@ -244,30 +247,18 @@ export const urlStatusList: UrlStatusList = {
     "https://www.komoot.com/discover/Toulouse/@43.6046000,1.4451000/tours?sport=hike": "",
     "https://fr.wikiloc.com/wikiloc/map.do?sw=43.2371%2C0.9537&ne=43.9215%2C2.0483&place=Toulouse": "",
     "https://www.visorando.com/?component=rando&task=searchCircuitV2&loc=Toulouse": "OK" 
-};
+];
 
+// Mappe les URLs brutes en objets Link pour le script
+const allLinks: Link[] = rawUrls.map(url => ({
+    url: url,
+    description: "URL à vérifier pour la validité et la disponibilité.",
+}));
 
-// --- STRUCTURE D'EXPORT (POUR LA COMPATIBILITÉ AVEC LA STRUCTURE Category[]) ---
-
-interface Link {
-    url: string;
-    description: string;
-    status?: string;
-}
-
-interface Category {
-    name: string;
-    links: Link[];
-}
-
+// Crée la structure Category pour l'export
 export const categories: Category[] = [
     {
         name: "Liste complète des URLs à vérifier (y compris les chemins)",
-        links: Object.entries(urlStatusList).map(([url, status]) => ({
-            url: url,
-            // La description utilise un statut simple pour la compatibilité, sinon laisse vide
-            description: "URL à vérifier pour la validité et la disponibilité.",
-            status: status === "OK" ? "OK" : (status === "" ? "EN_ATTENTE" : status)
-        })),
+        links: allLinks,
     },
 ];

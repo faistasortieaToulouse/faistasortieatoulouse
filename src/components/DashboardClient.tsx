@@ -202,6 +202,7 @@ const upcomingEventsCount = useMemo(() => {
       <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
 
             {/* NOUVEAU CONTENEUR pour les boutons. Utilisez 'flex-wrap' ici si vous voulez qu'ils restent sur une seule ligne sur grand écran, sinon utilisez 'flex-col' */}
+
                 <div className="flex flex-wrap justify-center gap-4 w-full"> 
 
         {/* 1. Lien Google Play (TWA Android) */}
@@ -227,11 +228,13 @@ const upcomingEventsCount = useMemo(() => {
           className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
         >
           <Store className="h-5 w-5" />
+
    <span className="leading-tight">
     Télécharger le fichier APK (TWA)
     <br />
     <span className="text-sm font-normal opacity-90">pour Android</span>
   </span>
+
         </Link>
 
         {/* 2. Lien/Instructions pour PWA (Apple/iOS) */}
