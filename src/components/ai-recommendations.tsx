@@ -4,9 +4,9 @@ import React, { useState, createContext, useContext, useEffect, useReducer, useR
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Sparkles, X } from 'lucide-react'; // Ajout de X pour le bouton de fermeture
+import { Sparkles, X } from 'lucide-react'; 
 
-// Schéma de validationAfaire
+// Schéma de validation
 const formSchema = z.object({
   userPreferences: z.string().min(10, 'Veuillez décrire vos préférences avec plus de détails.'),
 });
@@ -20,12 +20,11 @@ const cn = (...classes: (string | false | null | undefined)[]) => classes.filter
 
 // MOCK: class-variance-authority cva (très simplifié pour le Toast)
 const cva = (base: string, { variants, defaultVariants }: { variants: any, defaultVariants: any }) => {
-    // Dans ce contexte, on retourne simplement la classe de base pour éviter l'importation de cva.
     return ({ variant }: { variant: string }) => {
         if (variant === 'destructive') {
             return cn(base, 'group border-red-500 bg-red-500 text-white');
         }
-        return cn(base, 'border bg-white text-gray-900'); // Default
+        return cn(base, 'border bg-white text-gray-900');
     };
 };
 
@@ -107,7 +106,6 @@ const ToastPrimitives = {
     )),
     Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => {
         const rootRef = useRef<HTMLDivElement>(null);
-        // Simuler les attributs de données Radix si nécessaire
         return (
             <div ref={rootRef} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
                 {children}
@@ -155,7 +153,7 @@ type ActionType =
     | { type: 'DISMISS_TOAST'; toastId?: string };
 
 const defaultToastOptions: Partial<Toast> = {
-    duration: 3000,
+    duration: 5000,
 };
 
 const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
@@ -208,8 +206,8 @@ function ToastProvider({ children }: ComponentProps) {
 
 const useToast = () => {
     const context = useContext(ToastContext);
-    if (!context) {
-        // Fallback si le Provider n'est pas utilisé
+    if (context === undefined) { 
+        // Ceci est la gestion d'erreur qui corrige le message "[Toast Mock] called outside of provider"
         return { toasts: [], toast: (props: Partial<Toast>) => { 
             console.warn("[Toast Mock] Toast called outside of provider:", props);
             return { id: generateId() };
@@ -292,7 +290,8 @@ function Toaster() {
 // 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
-const API_KEY = ''; // Clé fournie par l'environnement Canvas
+// L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas
+const API_KEY = ''; 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
@@ -305,10 +304,9 @@ interface AiRecommendationsProps {
 }
 
 // -----------------------------------------------------
-// 4. COMPOSANT PRINCIPAL (EXPORTE COMME EXPORTATION NOMMÉE)
+// 4. COMPOSANT PRINCIPAL
 // -----------------------------------------------------
 
-// FIX: Changement de 'export default function' à 'export function'
 export function AiRecommendations({ eventData }: AiRecommendationsProps) {
   const [recommendations, setRecommendations] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -324,6 +322,8 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setRecommendations('');
+    console.log("--- Démarrage de la requête Gemini ---");
+    console.log("Préférences utilisateur:", values.userPreferences);
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français.`;
@@ -347,47 +347,84 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     try {
       while (attempts < maxRetries && !success) {
         attempts++;
+        console.log(`Tentative d'API n°${attempts}...`);
+
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        
+        console.log(`Réponse API reçue (Statut: ${response.status})`);
+        
+        // --- LOGIQUE POUR CASSER LA BOUCLE EN CAS D'ERREUR D'AUTH/CLIENT (403/400) ---
+        if (response.status === 403) {
+             const errorText = await response.text();
+             console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
+             throw new Error(`Erreur d'authentification (Statut 403). Veuillez vérifier l'accès à l'API.`);
+        }
+        
+        if (response.status === 400) {
+             const errorText = await response.text();
+             console.error(`Erreur client (400 Bad Request):`, errorText);
+             throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé.`);
+        }
+        // --------------------------------------------------------------------------
 
         if (response.ok) {
-          result = await response.json();
-          success = true;
+          try {
+            result = await response.json();
+            success = true;
+          } catch (e) {
+            console.error("Erreur de parsing JSON de la réponse:", e);
+            throw new Error("La réponse de l'API n'était pas un JSON valide.");
+          }
         } else {
-          // Logique de backoff exponentiel pour les erreurs de serveur/taux limite
+          // Logique de backoff exponentiel (uniquement pour les erreurs 5xx ou 429 - erreurs temporaires)
+          const errorText = await response.text();
+          console.error(`Erreur serveur temporaire (${response.status}):`, errorText);
+
           if (attempts < maxRetries) {
             await sleep(Math.pow(2, attempts) * 1000);
           } else {
-            throw new Error(`Échec de l'appel API après ${maxRetries} tentatives.`);
+            throw new Error(`Échec de l'appel API après ${maxRetries} tentatives. Dernier statut: ${response.status}`);
           }
         }
       }
 
+      // Si la boucle s'est terminée sans succès (par exemple, max retries atteint)
+      if (!success) {
+         throw new Error("Toutes les tentatives d'appel API ont échoué.");
+      }
+      
+      // Extraction des résultats
       if (result && result.candidates && result.candidates.length > 0) {
         const text = result.candidates[0].content?.parts?.[0]?.text || 'Impossible de générer des recommandations.';
         setRecommendations(text);
+        console.log("Recommandations générées avec succès.");
       } else {
+        console.error("Réponse de l'API reçue, mais le contenu est vide ou inattendu.", result);
         throw new Error('Réponse vide ou structure inattendue de l\'API.');
       }
 
     } catch (error) {
-      console.error('Erreur lors de l\'obtention des recommandations IA:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+      console.error('Erreur CRITIQUE lors de l\'obtention des recommandations IA:', error);
+      
       toast({
         variant: 'destructive',
-        title: 'Erreur de Recommandation',
-        description: 'Impossible d\'obtenir les suggestions de l\'IA. Veuillez réessayer.',
+        title: 'Échec de la Recommandation',
+        description: `Détail : ${errorMessage}`,
       });
+
     } finally {
       setIsLoading(false);
+      console.log("--- Fin de la requête Gemini ---");
     }
   }
 
   // --- RENDU DU COMPOSANT ---
   return (
-    // NOTE: Le ToastProvider doit encapsuler le composant qui utilise useToast
     <Card className="max-w-xl mx-auto my-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
