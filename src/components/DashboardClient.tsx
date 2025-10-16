@@ -200,6 +200,9 @@ const upcomingEventsCount = useMemo(() => {
 
       {/* NOUVELLE SECTION À LA FIN POUR TÉLÉCHARGEMENT/PARTAGE */}
       <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
+
+            {/* NOUVEAU CONTENEUR pour les boutons. Utilisez 'flex-wrap' ici si vous voulez qu'ils restent sur une seule ligne sur grand écran, sinon utilisez 'flex-col' */}
+        <div className="flex flex-wrap justify-center gap-4 w-full"> 
         
         {/* 1. Lien Google Play (TWA Android) */}
         <Link 
@@ -233,8 +236,9 @@ const upcomingEventsCount = useMemo(() => {
           className="flex items-center space-x-2 p-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
         >
           <Apple className="h-5 w-5" />
-          <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
+          <span className="font-semibold">Installer l'Appli sur iPhone pour Androïd (PWA)</span>
         </Link>
+            </div>
 
         {/* 3. Bouton de Partage */}
         <Button 
