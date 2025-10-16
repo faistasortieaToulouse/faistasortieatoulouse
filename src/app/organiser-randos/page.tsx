@@ -30,13 +30,13 @@ interface HikingLink {
 
 /** Liste des liens pour la randonnée. */
 const rawLinks: HikingLink[] = [
-    { title: "FFRandonnée - Fédération Française de la Randonnée Pédestre", url: "ffrandonnee.fr", description: "Le site officiel pour trouver des itinéraires homologués et des informations pratiques." },
+    { title: "FFRandonnée - Fédération Française de la Randonnée Pédestre", url: "www.ffrandonnee.fr", description: "Le site officiel pour trouver des itinéraires homologués et des informations pratiques." },
     { title: "Visorando", url: "visorando.com", description: "Des milliers d'idées de randonnées partout en France avec cartes et fiches détaillées." },
     { title: "AllTrails", url: "alltrails.com", description: "Application populaire avec une grande communauté et des avis sur de nombreux sentiers." },
     { title: "OpenTopoMap", url: "opentopomap.org", description: "Carte topographique libre basée sur les données d'OpenStreetMap." },
     { title: "OpenStreetMap", url: "openstreetmap.org", description: "La carte libre et collaborative mondiale, une source de données essentielle pour de nombreuses cartes de randonnée." },
     { title: "Météo France Montagne", url: "meteofrance.com/previsions-meteo-montagne", description: "Prévisions météorologiques spécifiques pour les massifs montagneux." },
-    { title: "Météo France Occitanie", url: "meteofrance.com/previsions-meteo-france/occitanie/regiR76", description: "Prévisions météorologiques pour la région Occitanie." },
+    { title: "Météo France Occitanie", url: "meteofrance.com/previsions-meteo-france/occitanie/regin11", description: "Prévisions météorologiques pour la région Occitanie." },
     { title: "HexaTrek", url: "www.hexatrek.com/", description: "Le sentier de grande randonnée qui traverse la France." },
     { title: "MonGR", url: "www.mongr.fr/", description: "Le site de la FFRandonnée dédié aux itinéraires de Grande Randonnée (GR®)." },
     { title: "IGNrando", url: "ignrando.fr/", description: "Le portail de l'Institut Géographique National pour trouver et partager des parcours." },
