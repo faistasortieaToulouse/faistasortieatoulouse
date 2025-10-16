@@ -37,7 +37,7 @@ export default function LegalPage() {
             <CardTitle>Contact</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Pour toute question, vous pouvez nous contacter à l'adresse email suivante : tolosa31@free.fr.</p>
+            <p>Pour toute question, veuillez utiliser le formulaire de contact afin de nous contacter.</p>
           </CardContent>
         </Card>
 
