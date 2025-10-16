@@ -227,7 +227,7 @@ const upcomingEventsCount = useMemo(() => {
           className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
         >
           <Store className="h-5 w-5" />
-          <span className="font-semibold">Télécharger le fichier APK (TWA)</span>
+          <span className="font-semibold">Télécharger le fichier APK (TWA) pour Androïd</span>
         </Link>
 
         {/* 2. Lien/Instructions pour PWA (Apple/iOS) */}
@@ -236,7 +236,7 @@ const upcomingEventsCount = useMemo(() => {
           className="flex items-center space-x-2 p-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
         >
           <Apple className="h-5 w-5" />
-          <span className="font-semibold">Installer l'Appli sur iPhone pour Androïd (PWA)</span>
+          <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
         </Link>
 
         {/* 3. Bouton de Partage */}
