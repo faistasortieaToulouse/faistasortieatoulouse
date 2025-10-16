@@ -1,19 +1,10 @@
 'use client';
 
-import React, { useState } from 'react'; // Importez React pour utiliser useState
+import React, { useState, createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Sparkles } from 'lucide-react';
-
-// NOTE: Les imports de composants Shadcn/ui sont conservés mais doivent exister dans le chemin spécifié.
-// Dans un environnement à fichier unique, ces composants seraient généralement définis ici.
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Textarea } from './ui/textarea';
-import { useToast } from './hooks/use-toast'; // Changé à './hooks/use-toast' pour la portabilité
-import { Skeleton } from './ui/skeleton';
+import { Sparkles, X } from 'lucide-react'; // Ajout de X pour le bouton de fermeture
 
 // Schéma de validation
 const formSchema = z.object({
@@ -21,7 +12,291 @@ const formSchema = z.object({
 });
 
 // -----------------------------------------------------
-// LOGIQUE DE L'API GEMINI INTÉGRÉE (Remplacement de recommendEvents)
+// MOCK DES UTILS ET DÉPENDANCES POUR LA COMPILATION EN UN SEUL FICHIER
+// -----------------------------------------------------
+
+// MOCK: Fonction utilitaire cn (classnames)
+const cn = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(' ');
+
+// MOCK: class-variance-authority cva (très simplifié pour le Toast)
+const cva = (base: string, { variants, defaultVariants }: { variants: any, defaultVariants: any }) => {
+    // Dans ce contexte, on retourne simplement la classe de base pour éviter l'importation de cva.
+    return ({ variant }: { variant: string }) => {
+        if (variant === 'destructive') {
+            return cn(base, 'group border-red-500 bg-red-500 text-white');
+        }
+        return cn(base, 'border bg-white text-gray-900'); // Default
+    };
+};
+
+// Type pour les props génériques de style
+type ComponentProps = { children: React.ReactNode, className?: string };
+
+// -----------------------------------------------------
+// 1. COMPOSANTS UI DE BASE (Card, Button, Textarea, Skeleton, Form Mocks)
+// -----------------------------------------------------
+
+// 1.1. Button (avec gestion du style de chargement/désactivé)
+const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }>(({ className, children, disabled, ...props }, ref) => (
+    <button
+        ref={ref}
+        disabled={disabled}
+        className={cn(
+            'flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+            disabled ? 'bg-indigo-400 cursor-not-allowed text-white/80' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md',
+            className
+        )}
+        {...props}
+    >
+        {children}
+    </button>
+));
+
+// 1.2. Card Structure
+const Card = ({ children, className }: ComponentProps) => (
+    <div className={cn('rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50', className)}>
+        {children}
+    </div>
+);
+const CardHeader = ({ children, className }: ComponentProps) => (
+    <div className={cn('flex flex-col space-y-1.5 p-6', className)}>{children}</div>
+);
+const CardTitle = ({ children, className }: ComponentProps) => (
+    <h3 className={cn('font-bold tracking-tight text-xl', className)}>{children}</h3>
+);
+const CardDescription = ({ children, className }: ComponentProps) => (
+    <p className={cn('text-sm text-gray-500 dark:text-gray-400', className)}>{children}</p>
+);
+const CardContent = ({ children, className }: ComponentProps) => (
+    <div className={cn('p-6 pt-0', className)}>{children}</div>
+);
+
+// 1.3. Textarea
+const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(({ className, ...props }, ref) => (
+    <textarea
+        ref={ref}
+        className={cn('flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px] transition duration-150', className)}
+        {...props}
+    />
+));
+
+// 1.4. Form Components (Simplifié pour l'utilisation directe de register)
+const Form = ({ children }: ComponentProps) => <>{children}</>;
+const FormItem = ({ children, className }: ComponentProps) => <div className={cn('space-y-1', className)}>{children}</div>;
+const FormLabel = ({ children, className }: ComponentProps) => <label className={cn('text-sm font-medium leading-none mb-1 block', className)}>{children}</label>;
+const FormControl = ({ children }: ComponentProps) => <>{children}</>;
+const FormMessage = ({ children, className }: ComponentProps) => <p className={cn('text-sm font-medium text-red-500 mt-1', className)}>{children}</p>;
+
+// 1.5. Skeleton
+const Skeleton = ({ className }: { className?: string }) => (
+    <div className={cn('animate-pulse rounded-md bg-gray-200 dark:bg-gray-700', className)} />
+);
+
+
+// -----------------------------------------------------
+// 2. SYSTÈME DE TOAST COMPLET (Basé sur le code fourni)
+// -----------------------------------------------------
+
+// MOCK: Les primitives Radix sont simulées par de simples divs.
+const ToastPrimitives = {
+    Provider: ({ children }: ComponentProps) => <>{children}</>,
+    Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className)} {...props}>
+            {children}
+        </div>
+    )),
+    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
+            {children}
+        </div>
+    )),
+    Title: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("text-sm font-semibold", className)} {...props}>{children}</div>
+    )),
+    Description: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("text-sm opacity-90", className)} {...props}>{children}</div>
+    )),
+    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
+        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900", className)} {...props}>
+            {children || <X className="h-4 w-4" />}
+        </button>
+    )),
+    Action: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
+        <button ref={ref} className={cn("inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium", className)} {...props}>
+            {children}
+        </button>
+    )),
+};
+
+// Constantes et types pour useToast
+type ToastVariant = 'default' | 'destructive';
+let TOAST_COUNT = 0;
+function generateId() {
+    return `toast-${TOAST_COUNT++}`;
+}
+
+type Toast = {
+    id: string;
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    variant?: ToastVariant;
+    duration?: number;
+    action?: React.ReactElement<typeof ToastPrimitives.Action>;
+} & ToastProps;
+
+type ToastProps = {
+    // Prop extension Radix non utilisées dans le mock
+};
+
+type ActionType =
+    | { type: 'ADD_TOAST'; toast: Toast }
+    | { type: 'UPDATE_TOAST'; toast: Partial<Toast> }
+    | { type: 'DISMISS_TOAST'; toastId?: string };
+
+const defaultToastOptions: Partial<Toast> = {
+    duration: 3000,
+};
+
+const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
+    switch (action.type) {
+        case 'ADD_TOAST':
+            return [action.toast, ...state];
+        case 'DISMISS_TOAST':
+            const { toastId } = action;
+            if (toastId) {
+                return state.filter(t => t.id !== toastId);
+            }
+            return state;
+        default:
+            return state;
+    }
+};
+
+// 2.1. Le Context et le Hook useToast (la logique manquante)
+const ToastContext = createContext<{ toasts: Toast[]; toast: (props: Partial<Toast>) => { id: string }; dismiss: (toastId?: string) => void } | undefined>(undefined);
+
+function ToastProvider({ children }: ComponentProps) {
+    const [state, dispatch] = useReducer(toastReducer, []);
+    const ref = useRef<number[]>([]);
+
+    const dismiss = (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId });
+
+    const toast = (props: Partial<Toast>) => {
+        const id = generateId();
+        const toast = { ...defaultToastOptions, ...props, id };
+        dispatch({ type: 'ADD_TOAST', toast });
+
+        if (toast.duration) {
+            const timeout = setTimeout(() => dismiss(id), toast.duration);
+            ref.current.push(timeout as unknown as number);
+        }
+
+        return { id };
+    };
+
+    useEffect(() => {
+        return () => {
+            ref.current.forEach(timeout => clearTimeout(timeout));
+        };
+    }, []);
+
+    const value = { toasts: state, toast, dismiss };
+
+    return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+}
+
+const useToast = () => {
+    const context = useContext(ToastContext);
+    if (!context) {
+        // Fallback si le Provider n'est pas utilisé (ne devrait pas arriver ici)
+        console.error("useToast must be used within a ToastProvider");
+        return { toasts: [], toast: () => ({ id: '' }), dismiss: () => {} };
+    }
+    return context;
+};
+
+// 2.2. Composants Toast UI (Simplifiés à partir de votre code toast.tsx)
+const toastVariants = cva(
+    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all",
+    {
+        variants: {
+            variant: {
+                default: "border bg-white text-gray-900",
+                destructive: "destructive group border-red-500 bg-red-500 text-white",
+            },
+        },
+        defaultVariants: { variant: "default" },
+    }
+);
+
+const Toast = React.forwardRef<
+    React.ElementRef<typeof ToastPrimitives.Root>,
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void }
+>(({ className, variant, onOpenChange, ...props }, ref) => {
+    const { dismiss } = useToast();
+    const isDestructive = variant === 'destructive';
+    
+    // Pour simuler la fermeture, on utilise useEffect
+    useEffect(() => {
+        // Si onOpenChange est défini, on pourrait gérer la disparition ici,
+        // mais pour le mock, le timer dans useToast est suffisant.
+    }, [onOpenChange]);
+
+    return (
+        <ToastPrimitives.Root
+            ref={ref}
+            className={cn(
+                toastVariants({ variant }), 
+                className,
+                isDestructive ? 'border-red-600' : 'border-gray-200' // Classes pour la couleur
+            )}
+            onPointerDownOutside={(event: any) => event.preventDefault()} // Empêche l'interaction externe
+            {...props}
+        >
+            {props.children}
+        </ToastPrimitives.Root>
+    );
+});
+Toast.displayName = 'Toast';
+
+const ToastClose = ({ id }: { id: string }) => {
+    const { dismiss } = useToast();
+    return (
+        <ToastPrimitives.Close
+            onClick={() => dismiss(id)}
+            className="absolute right-2 top-2 rounded-md p-1 text-gray-500 opacity-100 transition-opacity hover:text-gray-900 focus:opacity-100"
+        />
+    );
+};
+
+// 2.3. Toaster (Basé sur le code fourni)
+function Toaster() {
+    const { toasts, dismiss } = useToast();
+
+    return (
+        <ToastPrimitives.Provider>
+            {toasts.map(function ({ id, title, description, action, ...props }) {
+                const handleClose = () => dismiss(id);
+                return (
+                    <Toast key={id} onOpenChange={handleClose} {...props}>
+                        <div className="grid gap-1">
+                            {title && <ToastPrimitives.Title>{title}</ToastPrimitives.Title>}
+                            {description && (
+                                <ToastPrimitives.Description>{description}</ToastPrimitives.Description>
+                            )}
+                        </div>
+                        {action}
+                        <ToastClose id={id} />
+                    </Toast>
+                );
+            })}
+            <ToastPrimitives.Viewport className='fixed top-0 right-0 z-[100]' />
+        </ToastPrimitives.Provider>
+    );
+}
+
+// -----------------------------------------------------
+// 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
 const API_KEY = ''; // Clé fournie par l'environnement Canvas
@@ -36,11 +311,13 @@ interface AiRecommendationsProps {
   eventData: string;
 }
 
-// FIX: Changement d'exportation en 'default' pour résoudre les problèmes d'importation
+// -----------------------------------------------------
+// 4. COMPOSANT PRINCIPAL
+// -----------------------------------------------------
+
 export default function AiRecommendations({ eventData }: AiRecommendationsProps) {
   const [recommendations, setRecommendations] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  // NOTE: On suppose que useToast est disponible via un chemin local ou un mock.
   const { toast } = useToast(); 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -106,77 +383,81 @@ export default function AiRecommendations({ eventData }: AiRecommendationsProps)
       console.error('Erreur lors de l\'obtention des recommandations IA:', error);
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: 'Impossible d\'obtenir les recommandations. Veuillez réessayer.',
+        title: 'Erreur de Recommandation',
+        description: 'Impossible d\'obtenir les suggestions de l\'IA. Veuillez réessayer.',
       });
     } finally {
       setIsLoading(false);
     }
   }
 
+  // --- RENDU DU COMPOSANT ---
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="text-indigo-600 dark:text-indigo-400" />
-          Recommandations d'Événements IA
-        </CardTitle>
-        <CardDescription>
-          Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="userPreferences"
-              render={({ field }) => (
+    // NOTE: Le ToastProvider doit encapsuler le composant qui utilise useToast
+    <ToastProvider> 
+        <Card className="max-w-xl mx-auto my-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+              <Sparkles className="w-6 h-6" />
+              Recommandations d'Événements IA
+            </CardTitle>
+            <CardDescription>
+              Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            
+            <div className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                
                 <FormItem>
                   <FormLabel>Vos préférences</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
-                      {...field}
+                      {...form.register("userPreferences")} // Utilisation directe de register
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <FormMessage />
+                  {form.formState.errors.userPreferences && (
+                    <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
+                  )}
                 </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading} className="w-full bg-indigo-600 hover:bg-indigo-700">
-              {isLoading ? (
-                <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyse en cours...
-                </div>
-              ) : 'Obtenir des recommandations'}
-            </Button>
-          </form>
-        </Form>
 
-        {(isLoading || recommendations) && (
-          <div className="mt-6">
-            <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
-            {isLoading ? (
-              <div className="space-y-2 mt-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <div className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Analyse en cours...
+                    </div>
+                  ) : 'Obtenir des recommandations'}
+                </Button>
+              </form>
+            </div>
+
+            {(isLoading || recommendations) && (
+              <div className="mt-6">
+                <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
+                {isLoading ? (
+                  <div className="space-y-2 mt-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                ) : (
+                    <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
+                        {recommendations}
+                    </div>
+                )}
               </div>
-            ) : (
-                <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
-                    {recommendations}
-                </div>
             )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+        <Toaster /> {/* Le Toaster est rendu à la racine pour capturer les appels toast() */}
+    </ToastProvider>
   );
 }
