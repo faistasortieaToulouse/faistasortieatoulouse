@@ -110,7 +110,7 @@ const totalMembersCount = membersData.length;
           <p className="mt-2 text-accent">
             Application pour faire des sorties à Toulouse : discute des sorties, échange et organise.
           </p>
-          <p className="mt-2 text-accent">tout est gratuit et sans limite !</p>
+          <p className="mt-2 text-accent">Tout est gratuit et sans limite !</p>
           <p className="mt-2 text-accent">Avec FTS on est bien dans la ville rose !</p>
         </div>
         <div className="relative w-24 h-24 flex-shrink-0">
