@@ -238,7 +238,6 @@ const upcomingEventsCount = useMemo(() => {
           <Apple className="h-5 w-5" />
           <span className="font-semibold">Installer l'Appli sur iPhone pour Androïd (PWA)</span>
         </Link>
-            </div>
 
         {/* 3. Bouton de Partage */}
         <Button 
@@ -248,6 +247,8 @@ const upcomingEventsCount = useMemo(() => {
           <Share2 className="h-5 w-5" />
           <span className="font-semibold">Partager l'application</span>
         </Button>
+
+           </div>
 
       </section>
 
