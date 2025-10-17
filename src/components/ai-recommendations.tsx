@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
 // NOTE IMPORTANTE SUR L'AUTHENTIFICATION:
-// L'environnement d'exécution Canvas fournit automatiquement la clé API de l'utilisateur.
-// Nous laissons API_KEY à "" (chaîne vide) pour une utilisation sécurisée sans exposer la clé.
-// Si vous utilisez Vercel, assurez-vous que votre clé est préfixée par NEXT_PUBLIC_
-// (ex: NEXT_PUBLIC_GEMINI_API_KEY) pour qu'elle soit accessible côté client.
-const API_KEY = ""; // Laisser vide pour l'injection sécurisée par l'environnement.
+// 1. L'environnement Canvas tente d'injecter automatiquement la clé API de l'utilisateur.
+// 2. Si vous utilisez Next.js/Vercel, le code côté client doit lire les variables
+//    préfixées par NEXT_PUBLIC_. Nous allons tenter de lire la variable standard
+//    (NEXT_PUBLIC_GEMINI_API_KEY) et laisser la clé vide si elle n'est pas trouvée,
+//    comptant sur le mécanisme d'injection sécurisé du Canvas.
+const API_KEY = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_GEMINI_API_KEY
+  ? process.env.NEXT_PUBLIC_GEMINI_API_KEY
+  : ""; 
 
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
 
@@ -134,7 +137,7 @@ export const AiRecommendations = () => {
       }
 
       try {
-        // L'URL de l'API utilise la clé API vide, comptant sur l'environnement pour l'injection.
+        // L'URL de l'API utilise la clé API, soit celle de l'environnement, soit celle de Next.js
         const response = await fetch(`${API_URL}?key=${API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -144,7 +147,7 @@ export const AiRecommendations = () => {
         if (!response.ok) {
           // Si l'erreur est un 403, cela indique un problème de configuration de la clé au niveau de l'utilisateur.
           if (response.status === 403) {
-            throw new Error(`Statut 403: Permission refusée. Vérifiez que la clé API est correctement configurée (GEMINI_API_KEY) et autorisée.`);
+            throw new Error(`Statut 403: Permission refusée. Vérifiez que la clé API est correctement configurée (NEXT_PUBLIC_GEMINI_API_KEY) et autorisée.`);
           }
           // Pour les autres erreurs, essayez la reconnexion jusqu'à 3 fois
           if (retryCount < 3) {
