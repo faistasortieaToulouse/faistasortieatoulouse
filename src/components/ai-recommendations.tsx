@@ -122,6 +122,7 @@ export const AiRecommendations = () => {
     setIsLoading(true);
     setRecommendation('Génération en cours...');
 
+    // Le prompt système assure une réponse courte et en français, parfaite pour le style "recommandation".
     const systemPrompt = "Vous êtes un expert en recommandations créatives. Créez une suggestion unique et inspirante d'environ 150 mots, adaptée à l'activité et au contexte fournis par l'utilisateur. Répondez uniquement avec la recommandation en français. Utilisez un ton enthousiaste.";
     const userQuery = `Activité: ${activity}. Contexte: ${context}. Générez une recommandation détaillée.`;
 
@@ -193,7 +194,7 @@ export const AiRecommendations = () => {
           Générateur de Recommandations IA
         </h1>
 
-        {/* MODIFICATION ICI : Suppression de la grille pour un agencement vertical */}
+        {/* Agencement vertical */}
         <div className="space-y-8">
           
           {/* Section 1: Entrées utilisateur (La Question) */}
@@ -234,7 +235,7 @@ export const AiRecommendations = () => {
           {/* Section 2: Résultat de l'IA (S'affiche dessous) */}
           <Card>
             <h2 className="text-2xl font-bold mb-6 text-indigo-600 dark:text-indigo-400">2. Recommandation Personnalisée</h2>
-            <div className="min-h-[250px] bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 overflow-y-auto">
+            <div className="min-h-[250px] max-h-[400px] bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 overflow-y-auto">
               {recommendation ? (
                 <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed">
                   {recommendation}
