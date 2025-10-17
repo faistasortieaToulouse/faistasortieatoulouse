@@ -32,7 +32,7 @@ const zodResolver = (schema: any) => ({ // Mock simple de zodResolver
 
 // Icônes Lucide-React
 const Sparkles = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78.13-1.5.47-2.13.95l-2.64 2.64c-.63.48-1.35.82-2.13.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78.13-1.5.47-2.13.95l-2.64 2.64c-.63.48-1.35-.82-2.13-.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
 );
 const X = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -63,9 +63,7 @@ const cva = (base: string, { variants, defaultVariants }: { variants: any, defau
 // Type pour les props génériques de style
 type ComponentProps = { children: React.ReactNode, className?: string };
 
-// -----------------------------------------------------
 // 1. COMPOSANTS UI DE BASE (Card, Button, Textarea, Skeleton, Form Mocks)
-// -----------------------------------------------------
 
 // 1.1. Button (avec gestion du style de chargement/désactivé)
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }>(({ className, children, disabled, ...props }, ref) => (
@@ -328,15 +326,19 @@ function Toaster() {
 }
 
 // -----------------------------------------------------
-// 3. LOGIQUE DE L'API GEMINI
+// 3. LOGIQUE DE L'API GEMINI (MISE À JOUR)
 // -----------------------------------------------------
 
-// L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas
-const API_KEY = ''; 
+// L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas.
+// On fait une vérification au cas où l'environnement l'expose globalement sous un autre nom.
+const API_KEY = (typeof window !== 'undefined' && (window as any).GEMINI_API_KEY) || ''; 
+
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
-// Rétabli : Nous incluons toujours le paramètre ?key= pour que l'environnement puisse l'intercepter
+// Fonction pour construire l'URL de l'API avec la clé
 const buildApiUrl = () => {
+    // Si la clé est vide (cas d'injection par l'environnement), l'URL contiendra quand même '?key=',
+    // ce qui est nécessaire pour que la plateforme l'intercepte et l'ajoute.
     return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 };
 
@@ -369,11 +371,11 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     setIsLoading(true);
     setRecommendations('');
     console.log("--- Démarrage de la requête Gemini ---");
-    console.log("Préférences utilisateur:", values.userPreferences);
     
     // Obtenir l'URL de l'API
     const apiUrl = buildApiUrl();
     console.log(`URL d'appel: ${apiUrl}`);
+    console.log(`Clé API utilisée (vérifiez si elle est vide/valide) : ${API_KEY.length > 0 ? 'Oui (masquée)' : 'Non/Doit être injectée'}`);
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français en utilisant le format Markdown pour une meilleure lisibilité.`;
@@ -407,17 +409,17 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         
         console.log(`Réponse API reçue (Statut: ${response.status})`);
         
-        // --- LOGIQUE POUR CASSER LA BOUCLE EN CAS D'ERREUR D'AUTH/CLIENT (403/400) ---
+        // --- LOGIQUE POUR ERREUR CRITIQUE (403/400) ---
         if (response.status === 403) {
-             const errorText = await response.text();
-             console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-             throw new Error(`Erreur d'authentification (Statut 403). L'API exige une identité d'appelant établie. (Clé API manquante)`);
+           const errorText = await response.text();
+           console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
+           throw new Error(`Erreur d'authentification (Statut 403). La clé fournie est invalide ou manquante. Veuillez vérifier que votre clé est correctement configurée ou ajoutée à l'URL via '?key=VOTRE_CLÉ'.`);
         }
         
         if (response.status === 400) {
-             const errorText = await response.text();
-             console.error(`Erreur client (400 Bad Request):`, errorText);
-             throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé.`);
+           const errorText = await response.text();
+           console.error(`Erreur client (400 Bad Request):`, errorText);
+           throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé. Consultez la console pour plus de détails.`);
         }
         // --------------------------------------------------------------------------
 
@@ -553,7 +555,6 @@ const MOCK_EVENT_DATA = JSON.stringify([
 // Le wrapper qui contient le Provider et le Toaster
 // -----------------------------------------------------
 
-// Retire props de la signature pour rendre le composant autonome
 export default function AppWrapper() {
     return (
         <ToastProvider>
