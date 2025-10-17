@@ -36,7 +36,7 @@ const zodResolver = (schema: any) => {
 
 // Icônes Lucide-React
 const Sparkles = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78.13-1.5.47-2.13.95l-2.64 2.64c-.63.48-1.35-.82-2.13-.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64 2.64c-.63.48-1.35-.82-2.13-.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
 );
 const X = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -119,7 +119,8 @@ Textarea.displayName = 'Textarea';
 const Form = ({ children }: ComponentProps) => <>{children}</>;
 const FormItem = ({ children, className }: ComponentProps) => <div className={cn('space-y-1', className)}>{children}</div>;
 const FormLabel = ({ children, className }: ComponentProps) => <label className={cn('text-sm font-medium leading-none mb-1 block', className)}>{children}</label>;
-const FormControl = ({ children }: ComponentProps) => <>{children}</FormControl>;
+// CORRECTION : Fermeture de la balise du Fragment </> au lieu de </FormControl>
+const FormControl = ({ children }: ComponentProps) => <>{children}</>; 
 const FormMessage = ({ children, className }: ComponentProps) => <p className={cn('text-sm font-medium text-red-500 mt-1', className)}>{children}</p>;
 
 // 1.5. Skeleton
