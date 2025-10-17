@@ -6,13 +6,16 @@ import { useForm } from 'react-hook-form';
 const z = {
     object: (schema: any) => schema,
     string: () => ({
-        min: (_: number, message: string) => ({ min: 10, message }),
+        min: (length: number, message: string) => ({ min: length, message }),
     }),
 };
-const zodResolver = (schema: any) => ({ // Mock simple de zodResolver
-    resolver: async (values: any) => {
+
+// CORRECTION CRITIQUE: Le mock doit retourner la fonction de validation directement.
+const zodResolver = (schema: any) => {
+    return async (values: any) => {
         try {
-            if (values.userPreferences && values.userPreferences.length < 10) {
+            // Simulation de la validation basée sur le schéma simple défini
+            if (values.userPreferences.length < 10) {
                 return {
                     values: {},
                     errors: {
@@ -25,10 +28,11 @@ const zodResolver = (schema: any) => ({ // Mock simple de zodResolver
             }
             return { values, errors: {} };
         } catch (e) {
+            console.error("Erreur dans le mock de validation", e);
             return { values: {}, errors: { global: { type: 'manual', message: 'Erreur de validation' } } };
         }
-    },
-});
+    };
+};
 
 // Icônes Lucide-React
 const Sparkles = (props: React.SVGProps<SVGSVGElement>) => (
@@ -318,7 +322,6 @@ function Toaster() {
                         </div>
                         {action}
                         <ToastClose id={id} />
-                    </Toast>
                 );
             })}
         </ToastPrimitives.Provider>
@@ -413,7 +416,7 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         if (response.status === 403) {
            const errorText = await response.text();
            console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-           throw new Error(`Erreur d'authentification (Statut 403). La clé fournie est invalide ou manquante. Veuillez vérifier que votre clé est correctement configurée ou ajoutée à l'URL via '?key=VOTRE_CLÉ'.`);
+           throw new Error(`Erreur d'authentification (Statut 403). La clé fournie est invalide ou manquante. Vérifiez que la clé est correctement injectée.`);
         }
         
         if (response.status === 400) {
