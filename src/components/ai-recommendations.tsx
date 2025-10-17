@@ -129,10 +129,11 @@ const Skeleton = ({ className }: { className?: string }) => (
 
 
 // -----------------------------------------------------
-// 2. SYSTÈME DE TOAST COMPLET
+// 2. SYSTÈME DE TOAST COMPLET (Correction de la structure)
 // -----------------------------------------------------
 
-const ToastPrimitives = {
+// Renommage pour éviter le conflit JSX
+const ToastExports = {
     Provider: ({ children }: ComponentProps) => <>{children}</>,
     Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
         <div ref={ref} className={cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className)} {...props}>
@@ -164,12 +165,15 @@ const ToastPrimitives = {
         </button>
     )),
 };
-ToastPrimitives.Viewport.displayName = 'ToastViewport';
-ToastPrimitives.Root.displayName = 'ToastRoot';
-ToastPrimitives.Title.displayName = 'ToastTitle';
-ToastPrimitives.Description.displayName = 'ToastDescription';
-ToastPrimitives.Close.displayName = 'ToastClosePrimitive';
-ToastPrimitives.Action.displayName = 'ToastActionPrimitive';
+ToastExports.Viewport.displayName = 'ToastViewport';
+ToastExports.Root.displayName = 'ToastRoot';
+ToastExports.Title.displayName = 'ToastTitle';
+ToastExports.Description.displayName = 'ToastDescription';
+ToastExports.Close.displayName = 'ToastClosePrimitive';
+ToastExports.Action.displayName = 'ToastActionPrimitive';
+
+// Destructuration des primitives pour les rendre disponibles directement
+const { Provider, Viewport, Root, Title, Description, Close, Action } = ToastExports;
 
 
 type ToastVariant = 'default' | 'destructive';
@@ -184,7 +188,7 @@ type Toast = {
     description?: React.ReactNode;
     variant?: ToastVariant;
     duration?: number;
-    action?: React.ReactElement<typeof ToastPrimitives.Action>;
+    action?: React.ReactElement<typeof Action>;
 };
 
 type ActionType =
@@ -246,7 +250,8 @@ function ToastProvider({ children }: ComponentProps) {
 
     const value = { toasts: state, toast, dismiss };
 
-    return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+    // Utilise le composant Provider exporté par ToastExports
+    return <Provider value={value}>{children}</Provider>;
 }
 
 const useToast = () => {
@@ -275,15 +280,15 @@ const toastVariants = cva(
 );
 
 const Toast = React.forwardRef<
-    React.ElementRef<typeof ToastPrimitives.Root>,
-    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void, id: string }
+    React.ElementRef<typeof Root>,
+    React.ComponentPropsWithoutRef<typeof Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void, id: string }
 >(({ className, variant, id, ...props }, ref) => {
     const isDestructive = variant === 'destructive';
     // Utilise le style via la fonction mock cva/toastVariants
     const variantClass = toastVariants({ variant });
     
     return (
-        <ToastPrimitives.Root
+        <Root
             ref={ref}
             className={cn(
                 variantClass, 
@@ -299,7 +304,7 @@ Toast.displayName = 'Toast';
 const ToastClose = ({ id }: { id: string }) => {
     const { dismiss } = useToast();
     return (
-        <ToastPrimitives.Close
+        <Close
             onClick={() => dismiss(id)}
         />
     );
@@ -309,27 +314,29 @@ function Toaster() {
     const { toasts } = useToast();
 
     return (
-        <ToastPrimitives.Provider>
-            <ToastPrimitives.Viewport className='fixed top-0 right-0 z-[100]' />
+        <>
+            {/* Utilise les composants destrcuturés (Viewport, Title, etc.) */}
+            <Viewport className='fixed top-0 right-0 z-[100]' />
             {toasts.map(function ({ id, title, description, action, variant, ...props }) {
                 return (
                     <Toast key={id} id={id} variant={variant} {...props}>
                         <div className="grid gap-1">
-                            {title && <ToastPrimitives.Title>{title}</ToastPrimitives.Title>}
+                            {title && <Title>{title}</Title>}
                             {description && (
-                                <ToastPrimitives.Description>{description}</ToastPrimitives.Description>
+                                <Description>{description}</Description>
                             )}
                         </div>
                         {action}
                         <ToastClose id={id} />
+                    </Toast>
                 );
             })}
-        </ToastPrimitives.Provider>
+        </>
     );
 }
 
 // -----------------------------------------------------
-// 3. LOGIQUE DE L'API GEMINI (MISE À JOUR)
+// 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
 // L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas.
