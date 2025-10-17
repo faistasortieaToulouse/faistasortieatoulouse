@@ -93,7 +93,7 @@ const useToast = () => {
  * Composant principal de l'application de recommandation IA.
  * Utilise l'API Gemini pour générer des recommandations basées sur les entrées utilisateur.
  */
-const AiRecommendations = () => {
+export const AiRecommendations = () => { // <--- MODIFICATION ICI : Ajout de 'export'
   const [activity, setActivity] = useState('');
   const [context, setContext] = useState('');
   const [recommendation, setRecommendation] = useState('');
@@ -257,5 +257,3 @@ const AiRecommendations = () => {
     </div>
   );
 };
-
-export default AiRecommendations;
