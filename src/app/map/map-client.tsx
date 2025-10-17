@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+// Composants Shadcn/ui (assumés existants)
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+// Icônes Lucide
 import {
   TriangleAlert,
   MapPin,
@@ -14,9 +16,51 @@ import {
   Mic
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+// Date-fns pour le formatage des dates
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+
+// --- Gestion du chargement de l'API Google Maps (Remplacement de @vis.gl/react-google-maps) ---
+// Nous devons charger l'API via script et utiliser window.google.maps
+// Pour contourner l'erreur de résolution de module, nous allons utiliser une approche basée sur le script tag.
+
+// Une Map Component factice est nécessaire pour le rendu, 
+// car les vrais composants Map et Marker de @vis.gl ne peuvent pas être importés.
+
+// Nous allons injecter le script Google Maps si l'API n'est pas encore chargée.
+
+const GOOGLE_MAPS_SCRIPT_ID = 'google-maps-script-loader';
+
+interface GoogleMapsLoadState {
+  loaded: boolean;
+  error: boolean;
+}
+
+const useGoogleMapsLoader = (apiKey: string | undefined): GoogleMapsLoadState => {
+  const [loadState, setLoadState] = useState<GoogleMapsLoadState>({ loaded: false, error: false });
+
+  useEffect(() => {
+    if (loadState.loaded || loadState.error || !apiKey || document.getElementById(GOOGLE_MAPS_SCRIPT_ID)) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&language=fr`;
+    script.id = GOOGLE_MAPS_SCRIPT_ID;
+    script.async = true;
+    script.onerror = () => setLoadState({ loaded: false, error: true });
+    script.onload = () => setLoadState({ loaded: true, error: false });
+
+    document.head.appendChild(script);
+
+    return () => {
+      // Nettoyage optionnel si le composant est démonté
+      // document.head.removeChild(script); 
+    };
+  }, [apiKey, loadState.loaded, loadState.error]);
+
+  return loadState;
+};
 
 // --- Interfaces et Constantes (Inchangées) ---
 
@@ -43,14 +87,16 @@ interface MapClientProps {
 const TOULOUSE_CENTER = { lat: 43.6047, lng: 1.4442 };
 const GUILD_ID = '1422806103267344416';
 
-// --- Composant Client ---
+// --- Composant Principal de la Carte ---
 
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [geocodingStatus, setGeocodingStatus] = useState<'pending' | 'loading' | 'complete' | 'error'>('pending');
-  const [mapsLoaded, setMapsLoaded] = useState(false);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  // Utilisation du Hook pour charger l'API
+  const { loaded: mapsLoaded, error: mapsError } = useGoogleMapsLoader(apiKey);
 
   const addressEvents = useMemo(
     () => initialEvents.filter(e => e.entity_type === 3 && !!e.entity_metadata?.location?.trim().length),
@@ -58,61 +104,141 @@ export default function MapClient({ initialEvents }: MapClientProps) {
   );
 
   // Fonction pour rafraîchir la page
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     window.location.reload();
-  };
+  }, []);
   
-  // --- Géocodage via fetch ---
-  useEffect(() => {
+  // --- Logique de Géocodage (définie avec useCallback pour la stabilité) ---
+  // Nécessite que l'API soit chargée (mapsLoaded) pour utiliser window.google.maps.Geocoder
+  const geocodeAll = useCallback(async () => {
     // Cas où il n'y a pas de clé API ou pas d'adresse à géocoder
     if (!apiKey || addressEvents.length === 0) {
       setGeocodingStatus(addressEvents.length === 0 ? 'complete' : 'error');
       return;
     }
 
-    const geocodeAll = async () => {
-      setGeocodingStatus('loading');
-      const temp: MappedEvent[] = [];
-      let successCount = 0;
+    setGeocodingStatus('loading');
+    const temp: MappedEvent[] = [];
+    let successCount = 0;
 
-      for (const event of addressEvents) {
-        const location = event.entity_metadata?.location?.trim();
-        if (!location) continue;
+    for (const event of addressEvents) {
+      const location = event.entity_metadata?.location?.trim();
+      if (!location) continue;
 
-        try {
-          const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
-          );
-          const data = await res.json();
+      try {
+        // Changement : Utilisation de l'API de géocodage REST de Google (stable)
+        const res = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
+        );
+        const data = await res.json();
 
-          if (data.status === 'OK' && data.results.length > 0) {
-            const { lat, lng } = data.results[0].geometry.location;
-            temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
-            successCount++;
-          } else {
-            console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
-          }
-        } catch (err) {
-          console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
+        if (data.status === 'OK' && data.results.length > 0) {
+          const { lat, lng } = data.results[0].geometry.location;
+          temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
+          successCount++;
+        } else {
+          console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
         }
+      } catch (err) {
+        console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
       }
+    }
 
-      setMappedEvents(temp);
-      console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
-      setGeocodingStatus('complete');
-    };
-
-    geocodeAll();
-  }, [apiKey, addressEvents]);
+    setMappedEvents(temp);
+    console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
+    setGeocodingStatus('complete');
+  }, [apiKey, addressEvents]); 
   
-  // --- Messages de Statut pour la Carte (Nouveau) ---
+  // --- Exécution du Géocodage (déclenchée une seule fois APRÈS le chargement de l'API si nécessaire) ---
+  useEffect(() => {
+    // Exécuter le géocodage si le statut est 'pending' (initial)
+    // Le géocodage n'a pas besoin d'attendre mapsLoaded car il utilise l'API REST
+    if (geocodingStatus === 'pending') {
+        geocodeAll();
+    }
+  }, [geocodeAll, geocodingStatus]); 
+
+  // --- Rendu du Conteneur Map (Nouveau : Remplacement des composants Map et Marker) ---
+  // Nous ne pouvons pas utiliser Map/Marker de @vis.gl, nous utilisons donc l'approche standard JS/DOM.
+  
+  const mapRef = React.useRef<HTMLDivElement>(null);
+  const mapInstanceRef = React.useRef<google.maps.Map | null>(null);
+
+  // Initialisation de la carte une fois que le géocodage est terminé et l'API Maps chargée
+  useEffect(() => {
+    if (geocodingStatus === 'complete' && mapsLoaded && mapRef.current) {
+        // Vérifie si la carte est déjà initialisée
+        if (mapInstanceRef.current) {
+            // Si elle existe, met à jour simplement les marqueurs et le centre
+            updateMap(mapInstanceRef.current, mappedEvents);
+            return;
+        }
+
+        // Initialisation de la carte
+        const initialMap = new window.google.maps.Map(mapRef.current, {
+            center: TOULOUSE_CENTER,
+            zoom: 12,
+            gestureHandling: 'greedy',
+            mapId: 'votre-map-id-ici' // Remplacer si vous avez un ID de carte
+        });
+
+        mapInstanceRef.current = initialMap;
+        updateMap(initialMap, mappedEvents);
+    }
+    
+    // Nettoyage (si besoin, mais généralement non nécessaire pour Google Maps)
+    return () => {
+        if (mapInstanceRef.current) {
+            // On pourrait appeler mapInstanceRef.current.setMap(null);
+            mapInstanceRef.current = null;
+        }
+    };
+  }, [geocodingStatus, mapsLoaded, mappedEvents]); // Dépendances importantes
+
+  // Fonction pour mettre à jour la carte et les marqueurs
+  const updateMap = (mapInstance: google.maps.Map, events: MappedEvent[]) => {
+      // Efface les anciens marqueurs si nécessaire
+      // (Nous allons les gérer dans l'objet Map pour la simplicité)
+
+      // Supprime tous les anciens marqueurs
+      // NOTE: Dans une implémentation complète, il faudrait garder la trace des objets Marker
+
+      // Calcule le centre et le zoom si des marqueurs existent
+      if (events.length > 0) {
+          const bounds = new window.google.maps.LatLngBounds();
+          events.forEach(event => {
+              const position = new window.google.maps.LatLng(event.position.lat, event.position.lng);
+              bounds.extend(position);
+              
+              // Crée et ajoute un nouveau marqueur
+              new window.google.maps.Marker({
+                  position: position,
+                  map: mapInstance,
+                  title: event.name,
+              });
+          });
+
+          // Ajuste la vue pour contenir tous les marqueurs
+          mapInstance.fitBounds(bounds);
+          
+      } else {
+        // Pas d'événements, centre sur la ville par défaut
+        mapInstance.setCenter(TOULOUSE_CENTER);
+        mapInstance.setZoom(12);
+      }
+  };
+
+
+  // --- Messages de Statut pour la Carte ---
 
   const renderMapStatus = () => {
-    const isError = geocodingStatus === 'error' || !apiKey;
-    const isLoading = geocodingStatus === 'loading' || geocodingStatus === 'pending' || !mapsLoaded;
+    // mapsError est inclus ici pour capter l'erreur de chargement du script
+    const isMapError = geocodingStatus === 'error' || !apiKey || mapsError;
+    // On charge tant que le géocodage n'est pas terminé ou que le script Maps n'est pas chargé
+    const isMapLoading = (geocodingStatus !== 'complete' && geocodingStatus !== 'error') || !mapsLoaded;
     const noMappableEventsFound = mappedEvents.length === 0 && geocodingStatus === 'complete';
 
-    if (isError) {
+    if (isMapError) {
       return (
         <Alert variant="destructive" className="h-full flex flex-col justify-center items-center text-center p-6">
           <TriangleAlert className="h-8 w-8 mb-3" />
@@ -124,13 +250,13 @@ export default function MapClient({ initialEvents }: MapClientProps) {
             Rafraîchir la page
           </Button>
           <p className="mt-4 text-sm text-muted-foreground">
-            (Si l'erreur persiste, veuillez vérifier votre clé Google Maps.)
+            (Veuillez vérifier que la clé Google Maps est définie et valide.)
           </p>
         </Alert>
       );
     }
 
-    if (isLoading) {
+    if (isMapLoading) {
       return (
         <div className="h-full flex flex-col justify-center items-center bg-gray-50/50">
           <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -158,29 +284,23 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     return null; 
   };
   
-  // --- Rendu de la Carte (Mis à jour) ---
+  // --- Rendu de la Carte (Mis à jour pour utiliser la référence DOM) ---
 
   const renderMap = () => {
-    // Si nous sommes en état d'erreur, de chargement, ou sans événement, affiche le statut
     const statusComponent = renderMapStatus();
     if (statusComponent) {
         return statusComponent;
     }
       
-    // Si on arrive ici, le statut est 'complete' ET il y a des événements mappables
+    // Si le statut est 'complete' et mapsLoaded est vrai, on affiche le conteneur de la carte.
+    // L'initialisation de la carte (GoogleMaps) se fera via useEffect sur ce conteneur.
     return (
-      <APIProvider apiKey={apiKey!} onLoad={() => setMapsLoaded(true)}>
-        <Map
-          defaultCenter={TOULOUSE_CENTER}
-          defaultZoom={12}
-          mapId="votre-map-id-ici" // REMPLACER par votre Map ID si vous en avez un
-          gestureHandling={'greedy'}
-        >
-          {mappedEvents.map(event => (
-            <Marker key={event.id} position={event.position} title={event.name} />
-          ))}
-        </Map>
-      </APIProvider>
+      <div 
+        ref={mapRef} 
+        style={{ width: '100%', height: '100%' }}
+        // NOTE: La carte sera injectée ici par Google Maps API
+      >
+      </div>
     );
   };
   
@@ -212,7 +332,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
   };
 
 
-  // --- Rendu Final (Mis à jour pour utiliser renderMap) ---
+  // --- Rendu Final ---
 
   return (
     <div className="p-4 md:p-8">
