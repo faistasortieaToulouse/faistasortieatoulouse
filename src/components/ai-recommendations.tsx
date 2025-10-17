@@ -191,9 +191,11 @@ export const AiRecommendations = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-10 font-sans">
       {ToastComponent}
       <div className="max-w-4xl mx-auto space-y-8">
+        {/*
         <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white text-center mb-6">
           Générateur de Recommandations IA
         </h1>
+        */}
 
         {/* Agencement vertical */}
         <div className="space-y-8">
