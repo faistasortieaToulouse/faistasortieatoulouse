@@ -132,10 +132,21 @@ const upcomingEventsCount = useMemo(() => {
 
       {/* Main Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
 {/* Colonne gauche */}
 <div className="flex flex-col gap-8">
   <DiscordWidget />
   <DiscordChannelList channels={discordData?.channels} />
+
+  {/* 🧩 Sondages Actifs sur Discord — déplacé ici */}
+  <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+    <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
+    <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+      <div className="min-h-[100px]">
+        <DiscordPolls polls={discordPolls} />
+      </div>
+    </div>
+  </div>
 
   {/* Total des membres du serveur */}
   <Card className="relative p-4 flex flex-col justify-between h-28">
@@ -169,15 +180,6 @@ const upcomingEventsCount = useMemo(() => {
             </div>
           </div>
 
-          {/* Sondages */}
-          <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-            <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
-            <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-              <div className="min-h-[100px]">
-                <DiscordPolls polls={discordPolls} />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
