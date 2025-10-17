@@ -54,7 +54,7 @@ export default function ContactPage() {
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     
     // Désactiver le formulaire
-    form.clearErrors(); // Optionnel mais aide
+    form.clearErrors();
 
     try {
         // Envoi des données (y compris le jeton Turnstile) à l'API Route sécurisée
@@ -83,7 +83,6 @@ export default function ContactPage() {
             });
             // Réinitialisation du widget Turnstile
             if (window.turnstile && turnstileRef.current) {
-                // Utilise la référence DOM pour réinitialiser
                 window.turnstile.reset(turnstileRef.current); 
             }
         } else {
@@ -108,6 +107,8 @@ export default function ContactPage() {
     }
   }, [form, toast]);
 
+  // Extraction manuelle des erreurs pour le champ Turnstile
+  const turnstileError = form.formState.errors['cf-turnstile-response']?.message;
 
   return (
     <div className="p-4 md:p-8">
@@ -129,6 +130,7 @@ export default function ContactPage() {
           <Form {...form}>
             {/* IMPORTANT : onSubmit appelle la fonction ASYNCHRONE et SÉCURISÉE */}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Champs standards (avec la correction #418) */}
               <FormField
                 control={form.control}
                 name="name"
@@ -136,7 +138,6 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Votre nom</FormLabel>
                     <FormControl>
-                      {/* FIX #418: Assurez-vous que value est toujours une string */}
                       <Input placeholder="Jean Dupont" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
@@ -150,7 +151,6 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Votre email</FormLabel>
                     <FormControl>
-                       {/* FIX #418: Assurez-vous que value est toujours une string */}
                       <Input placeholder="jean.dupont@exemple.com" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
@@ -164,7 +164,6 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Sujet</FormLabel>
                     <FormControl>
-                       {/* FIX #418: Assurez-vous que value est toujours une string */}
                       <Input placeholder="Suggestion pour l'application" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
@@ -182,7 +181,6 @@ export default function ContactPage() {
                         placeholder="Bonjour, je vous contacte car..."
                         rows={5}
                         {...field}
-                        // FIX #418: Assurez-vous que value est toujours une string
                         value={field.value ?? ''}
                       />
                     </FormControl>
@@ -191,26 +189,24 @@ export default function ContactPage() {
                 )}
               />
               
-              {/* 1. CHAMP CACHÉ RHF POUR LE TOKEN TURNSTILE */}
+              {/* ---------------------------------------------------- */}
+              {/* 1. CHAMP CACHÉ RHF POUR LE TOKEN TURNSTILE (Structure minimale pour Next.js) */}
               <FormField
                 control={form.control}
                 name="cf-turnstile-response"
+                // Ce champ n'a PAS de FormMessage interne pour éviter le conflit React.Children.only
                 render={({ field }) => (
-                  <FormItem>
-                    {/* Le FormLabel est ajouté et masqué pour respecter la structure standard de FormItem */}
-                    <FormLabel className="sr-only">Vérification Anti-bot</FormLabel>
+                  <FormItem className="hidden"> {/* Le FormItem est masqué, mais sa structure est valide */}
                     <FormControl>
-                      {/* Le champ est caché car le widget lui-même le remplira */}
-                      <Input type="hidden" {...field} value={field.value ?? ''} /> {/* FIX #418 ici aussi */}
+                      {/* Le champ est caché, il reçoit le jeton de la callback Turnstile */}
+                      <Input type="hidden" {...field} value={field.value ?? ''} />
                     </FormControl>
-                    {/* Le message d'erreur s'affichera ici si le jeton manque */}
-                    <FormMessage /> 
                   </FormItem>
                 )}
               />
               
               {/* 2. WIDGET CLOUDFLARE TURNSTILE */}
-              <div className="flex justify-center pt-2">
+              <div className="flex flex-col items-center pt-2">
                 <div
                     ref={turnstileRef}
                     className="cf-turnstile"
@@ -221,7 +217,13 @@ export default function ContactPage() {
                     data-error-callback={() => form.setValue('cf-turnstile-response', '', { shouldValidate: true })}
                     data-expired-callback={() => form.setValue('cf-turnstile-response', '', { shouldValidate: true })}
                 ></div>
+
+                {/* Affichage du message d'erreur MANUEL pour le Turnstile */}
+                {turnstileError && (
+                    <p className="text-sm font-medium text-destructive mt-2">{turnstileError}</p>
+                )}
               </div>
+              {/* ---------------------------------------------------- */}
                             
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
