@@ -53,48 +53,49 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     [initialEvents]
   );
 
-  // --- Géocodage ---
-  useEffect(() => {
-    if (!apiKey || addressEvents.length === 0) return;
+  // --- Géocodage via fetch ---
+useEffect(() => {
+  if (!apiKey || addressEvents.length === 0) {
+    setGeocodingStatus(addressEvents.length === 0 ? 'complete' : 'error');
+    return;
+  }
 
-    const interval = setInterval(() => {
-      if (window.google?.maps?.Geocoder) {
-        clearInterval(interval);
-        setGeocodingStatus('loading');
+  const geocodeAll = async () => {
+    setGeocodingStatus('loading');
+    const temp: MappedEvent[] = [];
+    let successCount = 0;
 
-        const geocoder = new window.google.maps.Geocoder();
-        const temp: MappedEvent[] = [];
-        let done = 0;
+    for (const event of addressEvents) {
+      const location = event.entity_metadata?.location?.trim();
+      if (!location) continue;
 
-        addressEvents.forEach(event => {
-          const location = event.entity_metadata?.location;
-          if (!location) {
-            done++;
-            return;
-          }
+      try {
+        const res = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
+        );
+        const data = await res.json();
 
-          geocoder.geocode({ address: location }, (results, status) => {
-            done++;
-            if (status === 'OK' && results && results[0]) {
-              const lat = results[0].geometry.location.lat();
-              const lng = results[0].geometry.location.lng();
-              temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
-            } else {
-              temp.push({ ...event, position: { lat: 0, lng: 0 }, isGeocoded: false });
-              console.warn(`⚠️ Géocodage échoué pour "${event.name}" (${status})`);
-            }
-
-            if (done === addressEvents.length) {
-              setMappedEvents(temp.filter(e => e.isGeocoded));
-              setGeocodingStatus('complete');
-            }
-          });
-        });
+        if (data.status === 'OK' && data.results.length > 0) {
+          const { lat, lng } = data.results[0].geometry.location;
+          temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
+          successCount++;
+          console.log(`✅ Géocodage réussi pour "${event.name}": ${lat}, ${lng}`);
+        } else {
+          console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
+        }
+      } catch (err) {
+        console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
       }
-    }, 500);
+    }
 
-    return () => clearInterval(interval);
-  }, [apiKey, addressEvents]);
+    setMappedEvents(temp);
+    console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
+    setGeocodingStatus('complete');
+  };
+
+  geocodeAll();
+}, [apiKey, addressEvents]);
+
 
   // --- Détails d’un événement ---
   const getLocationDetails = (event: DiscordEvent) => {
@@ -286,4 +287,3 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     </div>
   );
 }
-
