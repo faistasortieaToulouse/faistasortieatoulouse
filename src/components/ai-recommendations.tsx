@@ -119,7 +119,6 @@ Textarea.displayName = 'Textarea';
 const Form = ({ children }: ComponentProps) => <>{children}</>;
 const FormItem = ({ children, className }: ComponentProps) => <div className={cn('space-y-1', className)}>{children}</div>;
 const FormLabel = ({ children, className }: ComponentProps) => <label className={cn('text-sm font-medium leading-none mb-1 block', className)}>{children}</label>;
-// CORRECTION : Fermeture de la balise du Fragment </> au lieu de </FormControl>
 const FormControl = ({ children }: ComponentProps) => <>{children}</>; 
 const FormMessage = ({ children, className }: ComponentProps) => <p className={cn('text-sm font-medium text-red-500 mt-1', className)}>{children}</p>;
 
@@ -260,7 +259,7 @@ const useToast = () => {
     if (context === undefined) { 
         // Fallback pour le mode sans Provider
         return { toasts: [], toast: (props: Partial<Toast>) => { 
-            console.warn("[Toast Mock] Toast called outside of provider:", props);
+            console.warn("Le hook useToast est appelé hors de son Provider. Ceci est un avertissement de développement, le Toast sera ignoré.", props);
             return { id: generateId() };
         }, dismiss: () => {} };
     }
@@ -340,8 +339,6 @@ function Toaster() {
 // 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
-// CHANGEMENT CLÉ ICI : Nous définissons explicitement la clé comme une chaîne vide pour permettre
-// à la plateforme d'injection de clé d'exécution (runtime) de la fournir pour ce modèle par défaut.
 const API_KEY = ""; 
 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
@@ -567,6 +564,18 @@ const MOCK_EVENT_DATA = JSON.stringify([
 // -----------------------------------------------------
 
 export default function AppWrapper() {
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Utilisez useEffect pour garantir que le rendu est client-side
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        // Affiche un indicateur de chargement léger pour éviter les erreurs de synchronisation
+        return <div className="flex justify-center items-center h-40 text-gray-500">Chargement de l'application...</div>;
+    }
+
     return (
         <ToastProvider>
             {/* Passe les données factices pour garantir la compilabilité */}
