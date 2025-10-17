@@ -289,12 +289,24 @@ function Toaster() {
 // -----------------------------------------------------
 
 // L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas
-const API_KEY = ''; 
+// Cette variable sera mise à jour au runtime par la logique ci-dessous si l'on est en local
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
-// Rétabli : Nous incluons toujours le paramètre ?key= pour que l'environnement puisse l'intercepter
+// Variable d'état globale pour stocker la clé API pour les appels
+let customApiKey = ''; 
+
+/**
+ * Construit l'URL de l'API en utilisant la clé custom si elle est définie.
+ * En environnement Canvas, `API_KEY` est vide mais l'URL est interceptée et l'authentification est gérée par le conteneur.
+ * En local, nous utilisons `customApiKey` si elle est définie.
+ */
 const buildApiUrl = () => {
-    return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+    // Si customApiKey est définie (en local ou via URL), nous l'utilisons dans l'URL.
+    if (customApiKey) {
+        return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${customApiKey}`;
+    }
+    // Sinon, on retourne l'URL générique (qui fonctionnera dans Canvas)
+    return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
 };
 
 // Fonction utilitaire pour l'attente
@@ -314,6 +326,18 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast(); 
 
+  // Initialisation de la clé API pour l'environnement local
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiKey = urlParams.get('apiKey');
+        if (apiKey) {
+            customApiKey = apiKey;
+            console.log("Clé API détectée dans l'URL. Utilisation de la clé locale.");
+        }
+    }
+  }, []);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -327,9 +351,12 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     console.log("--- Démarrage de la requête Gemini ---");
     console.log("Préférences utilisateur:", values.userPreferences);
     
-    // Obtenir l'URL de l'API (maintenant incluant toujours ?key=)
+    // Obtenir l'URL de l'API (maintenant incluant la clé si elle est trouvée en local)
     const apiUrl = buildApiUrl();
-    console.log(`URL d'appel: ${apiUrl}`);
+    console.log(`URL d'appel: ${apiUrl.substring(0, apiUrl.indexOf('key=') + 4)}...`); // Masquer la clé dans la console
+
+    // NOTE: Nous ne faisons plus de vérification stricte ici et laissons le fetch gérer le 403
+    // car c'est le comportement le plus précis pour un environnement de production non-Canvas.
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français.`;
@@ -367,8 +394,8 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         if (response.status === 403) {
              const errorText = await response.text();
              console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-             // L'erreur est maintenant plus explicite pour l'utilisateur
-             throw new Error(`Erreur d'authentification (Statut 403). L'API exige une identité d'appelant établie. (Clé API manquante)`);
+             // Message d'erreur plus clair pour la production/déploiement externe
+             throw new Error(`Échec d'authentification (Statut 403). L'API exige une clé valide. Si vous n'êtes pas dans l'environnement Canvas, vous devez ajouter '?apiKey=VOTRE_CLÉ' à l'URL.`);
         }
         
         if (response.status === 400) {
