@@ -3,16 +3,18 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+// Assurez-vous que les imports des composants Shadcn sont corrects pour votre structure
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useRef, useCallback } from 'react'; // <-- NOUVEL IMPORT
+// Remplacez par le hook de toast que vous utilisez (shadcn/ui)
+import { useToast } from '@/hooks/use-toast'; 
+import { useRef, useCallback } from 'react'; 
 
-// Déclaration globale pour le type du widget Turnstile (nécessaire pour TypeScript)
+// Déclaration globale pour le type du widget Turnstile
 declare global {
   interface Window {
     turnstile: {
@@ -51,7 +53,8 @@ export default function ContactPage() {
 
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     
-    // Le token est déjà dans `data['cf-turnstile-response']` grâce à Zod et form.handleSubmit
+    // Désactiver le formulaire
+    form.clearErrors(); // Optionnel mais aide
 
     try {
         // Envoi des données (y compris le jeton Turnstile) à l'API Route sécurisée
@@ -78,16 +81,22 @@ export default function ContactPage() {
                 message: '',
                 'cf-turnstile-response': '',
             });
+            // Réinitialisation du widget Turnstile
             if (window.turnstile && turnstileRef.current) {
-                window.turnstile.reset(turnstileRef.current);
+                // Utilise la référence DOM pour réinitialiser
+                window.turnstile.reset(turnstileRef.current); 
             }
         } else {
-            // Afficher le message d'erreur du serveur (ex: vérification anti-bot échouée)
+            // Afficher le message d'erreur du serveur
             toast({
                 variant: 'destructive',
                 title: 'Échec de l\'envoi',
                 description: result.message || 'Une erreur est survenue lors de l\'envoi du message. Réessayez.',
             });
+            // Réinitialisation du widget Turnstile même en cas d'échec d'envoi API
+            if (window.turnstile && turnstileRef.current) {
+                window.turnstile.reset(turnstileRef.current);
+            }
         }
     } catch (error) {
         console.error("Erreur réseau:", error);
@@ -102,7 +111,6 @@ export default function ContactPage() {
 
   return (
     <div className="p-4 md:p-8">
-      {/* ... (Header inchangé) ... */}
       <header className="mb-8">
         <h1 className="font-headline text-4xl font-bold text-primary">Nous contacter</h1>
         <p className="mt-2 text-muted-foreground">
@@ -128,7 +136,8 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Votre nom</FormLabel>
                     <FormControl>
-                      <Input placeholder="Jean Dupont" {...field} />
+                      {/* FIX #418: Assurez-vous que value est toujours une string */}
+                      <Input placeholder="Jean Dupont" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -141,7 +150,8 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Votre email</FormLabel>
                     <FormControl>
-                      <Input placeholder="jean.dupont@exemple.com" {...field} />
+                       {/* FIX #418: Assurez-vous que value est toujours une string */}
+                      <Input placeholder="jean.dupont@exemple.com" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,7 +164,8 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Sujet</FormLabel>
                     <FormControl>
-                      <Input placeholder="Suggestion pour l'application" {...field} />
+                       {/* FIX #418: Assurez-vous que value est toujours une string */}
+                      <Input placeholder="Suggestion pour l'application" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,6 +182,8 @@ export default function ContactPage() {
                         placeholder="Bonjour, je vous contacte car..."
                         rows={5}
                         {...field}
+                        // FIX #418: Assurez-vous que value est toujours une string
+                        value={field.value ?? ''}
                       />
                     </FormControl>
                     <FormMessage />
@@ -178,7 +191,6 @@ export default function ContactPage() {
                 )}
               />
               
-              {/* ---------------------------------------------------- */}
               {/* 1. CHAMP CACHÉ RHF POUR LE TOKEN TURNSTILE */}
               <FormField
                 control={form.control}
@@ -189,7 +201,7 @@ export default function ContactPage() {
                     <FormMessage /> 
                     {/* Le champ est caché car le widget lui-même le remplira */}
                     <FormControl>
-                      <Input type="hidden" {...field} />
+                      <Input type="hidden" {...field} value={field.value ?? ''} /> {/* FIX #418 ici aussi */}
                     </FormControl>
                   </FormItem>
                 )}
@@ -200,7 +212,7 @@ export default function ContactPage() {
                 <div
                     ref={turnstileRef}
                     className="cf-turnstile"
-                    data-sitekey="0x4AAAAAAB67F6RPRZZDOgEg" // <-- REMPLACER !
+                    data-sitekey="0x4AAAAAAB67F6RPRZZDOgEg" // Votre Site Key Cloudflare
                     data-theme="auto"
                     // Ces callbacks sont essentiels pour que RHF sache quand le jeton est là
                     data-callback={(token: string) => form.setValue('cf-turnstile-response', token, { shouldValidate: true })}
@@ -208,8 +220,7 @@ export default function ContactPage() {
                     data-expired-callback={() => form.setValue('cf-turnstile-response', '', { shouldValidate: true })}
                 ></div>
               </div>
-              {/* ---------------------------------------------------- */}
-              
+                            
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
                 {form.formState.isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
