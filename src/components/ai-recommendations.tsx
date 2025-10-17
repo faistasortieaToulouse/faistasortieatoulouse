@@ -2,13 +2,17 @@ import React, { useState, useMemo, useCallback } from 'react';
 
 // NOTE IMPORTANTE SUR L'AUTHENTIFICATION:
 // 1. L'environnement Canvas tente d'injecter automatiquement la clé API de l'utilisateur.
-// 2. Si vous utilisez Next.js/Vercel, le code côté client doit lire les variables
-//    préfixées par NEXT_PUBLIC_. Nous allons tenter de lire la variable standard
-//    (NEXT_PUBLIC_GEMINI_API_KEY) et laisser la clé vide si elle n'est pas trouvée,
-//    comptant sur le mécanisme d'injection sécurisé du Canvas.
+// 2. Si vous utilisez Next.js/Vercel, le code côté client DOIT lire la variable
+//    avec le nom standard.
 const API_KEY = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_GEMINI_API_KEY
   ? process.env.NEXT_PUBLIC_GEMINI_API_KEY
   : ""; 
+
+// *** DEBOGAGE TEMPORAIRE ***
+// La ligne ci-dessus utilise maintenant la variable standard: NEXT_PUBLIC_GEMINI_API_KEY.
+// Si le 403 persiste APRES avoir redéployé Vercel, la clé elle-même est désactivée.
+// NE PAS insérer la clé en dur ici pour la sécurité.
+// **************************
 
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
 
