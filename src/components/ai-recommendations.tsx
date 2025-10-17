@@ -339,9 +339,8 @@ function Toaster() {
 // 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
-// L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas.
-// On fait une vérification au cas où l'environnement l'expose globalement sous un autre nom.
-const API_KEY = (typeof window !== 'undefined' && (window as any).GEMINI_API_KEY) || ''; 
+// CHANGEMENT ICI: La clé est maintenant récupérée via GEMINI_SERVICE_ACCOUNT_KEY
+const API_KEY = (typeof window !== 'undefined' && (window as any).GEMINI_SERVICE_ACCOUNT_KEY) || '';
 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
@@ -385,7 +384,7 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     // Obtenir l'URL de l'API
     const apiUrl = buildApiUrl();
     console.log(`URL d'appel: ${apiUrl}`);
-    console.log(`Clé API utilisée (vérifiez si elle est vide/valide) : ${API_KEY.length > 0 ? 'Oui (masquée)' : 'Non/Doit être injectée'}`);
+    console.log(`Clé API utilisée (GEMINI_SERVICE_ACCOUNT_KEY): ${API_KEY.length > 0 ? 'Oui (masquée)' : 'Non/Doit être injectée'}`);
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français en utilisant le format Markdown pour une meilleure lisibilité.`;
