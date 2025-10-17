@@ -64,6 +64,17 @@ const upcomingEventsCount = useMemo(() => {
   }).length;
 }, [eventsData]);
 
+  // 💥 NOUVEAU : Formate les données des événements pour le prompt IA 💥
+const eventDataString = useMemo(() => {
+    if (!eventsData || eventsData.length === 0) {
+        return "Aucun événement Discord trouvé.";
+    }
+    // Formate le tableau d'événements en une chaîne de caractères structurée
+    return eventsData.map(ev => 
+        `Titre: ${ev.name} | Date: ${new Date(ev.scheduled_start_time).toLocaleString('fr-FR')} | Description: ${ev.description || 'Pas de description.'}`
+    ).join('\n---\n');
+}, [eventsData]);
+
   // Fonction pour gérer le partage de l'application
   const handleShare = async () => {
     if (navigator.share) {
@@ -165,6 +176,11 @@ const upcomingEventsCount = useMemo(() => {
         />
         {/* ---------------------------------------------------- */}
           </div>
+
+            {/* AJOUT DE LA PROP eventDataString */}
+                    <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+  <AiRecommendations eventData={eventDataString} /> 
+                                </div>
 
           {/* Événements à venir */}
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
