@@ -1,25 +1,20 @@
 // /app/api/gemini/route.ts
-// C'est ici que l'appel secret à l'API Gemini est effectué.
+// Assurez-vous d'avoir installé le package @google/genai
 
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 
-// ⚠️ La variable d'environnement qui contient le JSON de votre Compte de Service
+// ⚠️ Variable d'environnement définie sur Vercel
 const SERVICE_ACCOUNT_KEY = process.env.GEMINI_SERVICE_ACCOUNT_KEY; 
 
 if (!SERVICE_ACCOUNT_KEY) {
-  // Cette erreur sera visible dans les logs de Vercel/Next.js
-  console.error("Erreur de configuration : GEMINI_SERVICE_ACCOUNT_KEY est manquant.");
+  console.error("Configuration manquante : GEMINI_SERVICE_ACCOUNT_KEY n'est pas définie.");
 }
 
-// Initialisation du client Google GenAI
 let ai: GoogleGenAI | null = null;
 try {
     if (SERVICE_ACCOUNT_KEY) {
-        // Le contenu de la variable est le JSON de la clé du compte de service
         const credentials = JSON.parse(SERVICE_ACCOUNT_KEY);
-        
-        // Initialisation avec les crédentiels
         ai = new GoogleGenAI({ credentials });
     }
 } catch (e) {
@@ -29,35 +24,34 @@ try {
 
 export async function POST(request: Request) {
   if (!ai) {
-    // Erreur si la configuration de la clé a échoué
     return new NextResponse("Configuration d'API Gemini manquante ou invalide.", { status: 500 });
   }
 
   try {
-    // On récupère les données envoyées par le frontend
+    // Récupération des données du frontend
     const { prompt, eventData } = await request.json(); 
     
     if (!prompt) {
         return new NextResponse("Le prompt (requête utilisateur) est requis.", { status: 400 });
     }
     
-    // Contexte enrichi pour Gemini
+    // Prompt enrichi
     const finalPrompt = `
       Je suis à Toulouse et je cherche une recommandation de sortie.
       Mon profil/ma requête : "${prompt}"
-      Voici les événements Discord actuellement disponibles, tu dois te baser sur ces données si tu peux :
+      Voici les événements Discord actuellement disponibles, analyse-les pour une suggestion. Si aucun n'est pertinent, propose une idée locale originale :
+      Événements Discord:
       ${eventData}
       
-      Analyse ces informations et suggère la meilleure sortie à Toulouse. La réponse doit être directe et conviviale.
+      Ta réponse doit être directe, conviviale, et ne doit pas inclure les données Discord brutes.
     `;
 
     // Appel à l'API Gemini
     const response = await ai.generateContent({
-      model: "gemini-2.5-flash", // Modèle rapide et polyvalent
+      model: "gemini-2.5-flash", 
       contents: finalPrompt,
     });
 
-    // Retourner uniquement le texte généré au frontend
     return NextResponse.json({ result: response.text });
   } catch (error) {
     console.error("Erreur lors de l'appel à Gemini :", error);
