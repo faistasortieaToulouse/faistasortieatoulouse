@@ -170,17 +170,11 @@ const eventDataString = useMemo(() => {
               Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
             </p>
 {/* 🚀 AJOUTEZ CETTE LIGNE (ou ces lignes) POUR L'IA 🚀 */}
-        <AiRecommendationsWrapper 
-            // C'est la prop cruciale : on envoie les données brutes des événements Discord en JSON string
-            eventData={eventsData ? JSON.stringify(eventsData) : '[]'}
-        />
+  {/* AJOUT DE LA PROP eventDataString */}
+  <AiRecommendations eventData={eventDataString} /> 
         {/* ---------------------------------------------------- */}
           </div>
 
-            {/* AJOUT DE LA PROP eventDataString */}
-                    <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-  <AiRecommendations eventData={eventDataString} /> 
-                                </div>
 
           {/* Événements à venir */}
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
