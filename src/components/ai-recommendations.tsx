@@ -1,11 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
 // NOTE IMPORTANTE SUR L'AUTHENTIFICATION:
-// 1. Utilisez la clé GEMINI_API_KEY (celle qui commence par "AI...")
-// 2. Pour les tests, insérez-la ci-dessous.
-// 3. AVERTISSEMENT: Exposer une clé API directement dans le code client est TRÈS DANGEREUX.
-//    Pour la production, utilisez une route API côté serveur (Proxy) pour masquer la clé.
-const API_KEY = "AIzaSyDnjkO40_whQ8wY4Sc1ywBZfPkS5KvbTek"; // <<< INSÉREZ VOTRE CLÉ "AI..." ICI POUR TESTER
+// L'environnement d'exécution Canvas fournit automatiquement la clé API de l'utilisateur.
+// Laissez API_KEY à "" (chaîne vide) pour une utilisation sécurisée et automatique dans ce contexte.
+const API_KEY = "";
 
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
 
@@ -101,15 +99,8 @@ export const AiRecommendations = () => {
   const { toast, ToastComponent } = useToast();
 
   const handleGenerateRecommendation = useCallback(async () => {
-    if (!API_KEY) {
-      toast({
-        title: "Erreur d'API",
-        description: "Veuillez insérer votre GEMINI_API_KEY dans le code pour commencer.",
-        variant: 'destructive',
-      });
-      return;
-    }
-
+    // La vérification de la clé API a été retirée, car elle est gérée par l'environnement Canvas.
+    
     if (!activity || !context) {
       toast({
         title: "Champs manquants",
@@ -148,9 +139,9 @@ export const AiRecommendations = () => {
         });
 
         if (!response.ok) {
-          // Si l'erreur est un 403, c'est probablement un problème de clé API
+          // Si l'erreur est un 403, cela peut toujours indiquer un problème de configuration de la clé au niveau de l'utilisateur.
           if (response.status === 403) {
-            throw new Error(`Statut 403: Permission refusée. Vérifiez que la clé API est correcte et active.`);
+            throw new Error(`Statut 403: Permission refusée. Vérifiez que la clé API est correcte et a les autorisations nécessaires.`);
           }
           // Pour les autres erreurs, essayez la reconnexion jusqu'à 3 fois
           if (retryCount < 3) {
