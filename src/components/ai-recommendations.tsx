@@ -29,11 +29,16 @@ const Card = ({ children, className = '' }) => (
 /** MOCK: Simule le bouton. */
 const Button = ({ children, onClick, disabled, className = '', variant = 'default' }) => (
   <button
+    // Ajout de type="button" pour éviter toute soumission de formulaire implicite sur mobile
+    type="button" 
     onClick={onClick}
     disabled={disabled}
+    // 'touch-manipulation' est déjà présente. Ajout de 'cursor-pointer'
+    // et s'assurer que l'état 'active' est visible.
     className={`
       w-full py-3 px-4 rounded-xl text-lg font-semibold transition duration-200
-      ${variant === 'default' ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}
+      touch-manipulation cursor-pointer
+      ${variant === 'default' ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800' : 'bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400'}
       ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       ${className}
     `}
