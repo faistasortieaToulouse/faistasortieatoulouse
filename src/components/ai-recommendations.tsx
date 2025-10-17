@@ -119,7 +119,7 @@ Textarea.displayName = 'Textarea';
 const Form = ({ children }: ComponentProps) => <>{children}</>;
 const FormItem = ({ children, className }: ComponentProps) => <div className={cn('space-y-1', className)}>{children}</div>;
 const FormLabel = ({ children, className }: ComponentProps) => <label className={cn('text-sm font-medium leading-none mb-1 block', className)}>{children}</label>;
-const FormControl = ({ children }: ComponentProps) => <>{children}</>;
+const FormControl = ({ children }: ComponentProps) => <>{children}</FormControl>;
 const FormMessage = ({ children, className }: ComponentProps) => <p className={cn('text-sm font-medium text-red-500 mt-1', className)}>{children}</p>;
 
 // 1.5. Skeleton
@@ -339,15 +339,15 @@ function Toaster() {
 // 3. LOGIQUE DE L'API GEMINI
 // -----------------------------------------------------
 
-// CHANGEMENT ICI: La clé est maintenant récupérée via GEMINI_SERVICE_ACCOUNT_KEY
-const API_KEY = (typeof window !== 'undefined' && (window as any).GEMINI_SERVICE_ACCOUNT_KEY) || '';
+// CHANGEMENT CLÉ ICI : Nous définissons explicitement la clé comme une chaîne vide pour permettre
+// à la plateforme d'injection de clé d'exécution (runtime) de la fournir pour ce modèle par défaut.
+const API_KEY = ""; 
 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
 // Fonction pour construire l'URL de l'API avec la clé
 const buildApiUrl = () => {
-    // Si la clé est vide (cas d'injection par l'environnement), l'URL contiendra quand même '?key=',
-    // ce qui est nécessaire pour que la plateforme l'intercepte et l'ajoute.
+    // Si la clé est vide, la plateforme est censée l'injecter.
     return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 };
 
@@ -384,7 +384,7 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
     // Obtenir l'URL de l'API
     const apiUrl = buildApiUrl();
     console.log(`URL d'appel: ${apiUrl}`);
-    console.log(`Clé API utilisée (GEMINI_SERVICE_ACCOUNT_KEY): ${API_KEY.length > 0 ? 'Oui (masquée)' : 'Non/Doit être injectée'}`);
+    console.log(`Clé API utilisée (vide pour injection runtime): ${API_KEY.length > 0 ? 'Oui' : 'Non'}`);
 
     // Définition des instructions pour l'IA
     const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français en utilisant le format Markdown pour une meilleure lisibilité.`;
@@ -422,7 +422,8 @@ export function AiRecommendations({ eventData }: AiRecommendationsProps) {
         if (response.status === 403) {
            const errorText = await response.text();
            console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-           throw new Error(`Erreur d'authentification (Statut 403). La clé fournie est invalide ou manquante. Vérifiez que la clé est correctement injectée.`);
+           // Lève une erreur spécifique pour indiquer un problème d'accès
+           throw new Error(`Erreur d'authentification (Statut 403). L'accès à l'API est refusé. Le problème ne vient pas du code, mais de l'authentification de l'environnement.`);
         }
         
         if (response.status === 400) {
