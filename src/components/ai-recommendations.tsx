@@ -93,7 +93,7 @@ const useToast = () => {
  * Composant principal de l'application de recommandation IA.
  * Utilise l'API Gemini pour générer des recommandations basées sur les entrées utilisateur.
  */
-export const AiRecommendations = () => { // <--- MODIFICATION ICI : Ajout de 'export'
+export const AiRecommendations = () => {
   const [activity, setActivity] = useState('');
   const [context, setContext] = useState('');
   const [recommendation, setRecommendation] = useState('');
@@ -193,10 +193,12 @@ export const AiRecommendations = () => { // <--- MODIFICATION ICI : Ajout de 'ex
           Générateur de Recommandations IA
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Section 1: Entrées utilisateur */}
-          <Card className="lg:col-span-1 border border-indigo-200 dark:border-indigo-800">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">1. Vos Critères</h2>
+        {/* MODIFICATION ICI : Suppression de la grille pour un agencement vertical */}
+        <div className="space-y-8">
+          
+          {/* Section 1: Entrées utilisateur (La Question) */}
+          <Card className="border border-indigo-200 dark:border-indigo-800">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">1. Votre Demande à l'IA</h2>
             <div className="space-y-6">
               <Input
                 label="Activité ou But (Ex: 'Trouver un film', 'Planifier des vacances', 'Écrire une chanson')"
@@ -229,8 +231,8 @@ export const AiRecommendations = () => { // <--- MODIFICATION ICI : Ajout de 'ex
             </div>
           </Card>
 
-          {/* Section 2: Résultat de l'IA */}
-          <Card className="lg:col-span-1">
+          {/* Section 2: Résultat de l'IA (S'affiche dessous) */}
+          <Card>
             <h2 className="text-2xl font-bold mb-6 text-indigo-600 dark:text-indigo-400">2. Recommandation Personnalisée</h2>
             <div className="min-h-[250px] bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 overflow-y-auto">
               {recommendation ? (
