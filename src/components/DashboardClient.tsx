@@ -64,17 +64,6 @@ const upcomingEventsCount = useMemo(() => {
   }).length;
 }, [eventsData]);
 
-  // 💥 NOUVEAU : Formate les données des événements pour le prompt IA 💥
-const eventDataString = useMemo(() => {
-    if (!eventsData || eventsData.length === 0) {
-        return "Aucun événement Discord trouvé.";
-    }
-    // Formate le tableau d'événements en une chaîne de caractères structurée
-    return eventsData.map(ev => 
-        `Titre: ${ev.name} | Date: ${new Date(ev.scheduled_start_time).toLocaleString('fr-FR')} | Description: ${ev.description || 'Pas de description.'}`
-    ).join('\n---\n');
-}, [eventsData]);
-
   // Fonction pour gérer le partage de l'application
   const handleShare = async () => {
     if (navigator.share) {
@@ -169,12 +158,8 @@ const eventDataString = useMemo(() => {
             <p className="text-sm text-gray-500 mb-4">
               Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
             </p>
-{/* 🚀 AJOUTEZ CETTE LIGNE (ou ces lignes) POUR L'IA 🚀 */}
-  {/* AJOUT DE LA PROP eventDataString */}
-  <AiRecommendations eventData={eventDataString} /> 
-        {/* ---------------------------------------------------- */}
+            <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
           </div>
-
 
           {/* Événements à venir */}
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
