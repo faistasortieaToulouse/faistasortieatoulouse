@@ -158,7 +158,12 @@ const upcomingEventsCount = useMemo(() => {
             <p className="text-sm text-gray-500 mb-4">
               Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
             </p>
-            <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
+{/* 🚀 AJOUTEZ CETTE LIGNE (ou ces lignes) POUR L'IA 🚀 */}
+        <AiRecommendationsWrapper 
+            // C'est la prop cruciale : on envoie les données brutes des événements Discord en JSON string
+            eventData={eventsData ? JSON.stringify(eventsData) : '[]'}
+        />
+        {/* ---------------------------------------------------- */}
           </div>
 
           {/* Événements à venir */}
