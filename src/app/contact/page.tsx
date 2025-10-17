@@ -197,12 +197,14 @@ export default function ContactPage() {
                 name="cf-turnstile-response"
                 render={({ field }) => (
                   <FormItem>
-                    {/* Le message d'erreur s'affichera ici si le jeton manque */}
-                    <FormMessage /> 
-                    {/* Le champ est caché car le widget lui-même le remplira */}
+                    {/* Le FormLabel est ajouté et masqué pour respecter la structure standard de FormItem */}
+                    <FormLabel className="sr-only">Vérification Anti-bot</FormLabel>
                     <FormControl>
+                      {/* Le champ est caché car le widget lui-même le remplira */}
                       <Input type="hidden" {...field} value={field.value ?? ''} /> {/* FIX #418 ici aussi */}
                     </FormControl>
+                    {/* Le message d'erreur s'affichera ici si le jeton manque */}
+                    <FormMessage /> 
                   </FormItem>
                 )}
               />
