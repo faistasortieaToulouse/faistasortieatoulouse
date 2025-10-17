@@ -1,586 +1,261 @@
-'use client';
+import React, { useState, useMemo, useCallback } from 'react';
 
-import React, { useState, createContext, useContext, useEffect, useReducer, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-// Mocks pour les dépendances externes
-const z = {
-    object: (schema: any) => schema,
-    string: () => ({
-        min: (length: number, message: string) => ({ min: length, message }),
-    }),
-};
+// NOTE IMPORTANTE SUR L'AUTHENTIFICATION:
+// 1. Utilisez la clé GEMINI_API_KEY (celle qui commence par "AI...")
+// 2. Pour les tests, insérez-la ci-dessous.
+// 3. AVERTISSEMENT: Exposer une clé API directement dans le code client est TRÈS DANGEREUX.
+//    Pour la production, utilisez une route API côté serveur (Proxy) pour masquer la clé.
+const API_KEY = "AIzaSyDnjkO40_whQ8wY4Sc1ywBZfPkS5KvbTek"; // <<< INSÉREZ VOTRE CLÉ "AI..." ICI POUR TESTER
 
-// CORRECTION CRITIQUE: Le mock doit retourner la fonction de validation directement.
-const zodResolver = (schema: any) => {
-    return async (values: any) => {
-        try {
-            // Simulation de la validation basée sur le schéma simple défini
-            if (values.userPreferences.length < 10) {
-                return {
-                    values: {},
-                    errors: {
-                        userPreferences: {
-                            type: 'min',
-                            message: 'Veuillez décrire vos préférences avec plus de détails.',
-                        },
-                    },
-                };
-            }
-            return { values, errors: {} };
-        } catch (e) {
-            console.error("Erreur dans le mock de validation", e);
-            return { values: {}, errors: { global: { type: 'manual', message: 'Erreur de validation' } } };
-        }
-    };
-};
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
 
-// Icônes Lucide-React
-const Sparkles = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64 2.64c-.63.48-1.35-.82-2.13-.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
-);
-const X = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+// --- Mocks pour simuler les dépendances Shadcn/UI/React-Hook-Form/Zod ---
+// Dans un environnement réel, ces éléments seraient importés.
+
+/** MOCK: Simule le composant de carte. */
+const Card = ({ children, className = '' }) => (
+  <div className={`bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 md:p-8 ${className}`}>
+    {children}
+  </div>
 );
 
-// Schéma de validation
-const formSchema = z.object({
-  userPreferences: z.string().min(10, 'Veuillez décrire vos préférences avec plus de détails.'),
-});
-
-// -----------------------------------------------------
-// MOCK DES UTILS ET DÉPENDANCES POUR LA COMPILATION EN UN SEUL FICHIER
-// -----------------------------------------------------
-
-// MOCK: Fonction utilitaire cn (classnames)
-const cn = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(' ');
-
-// MOCK: class-variance-authority cva (très simplifié pour le Toast)
-const cva = (base: string, { variants, defaultVariants }: { variants: any, defaultVariants: any }) => {
-    return ({ variant }: { variant: string | undefined }) => {
-        if (variant === 'destructive') {
-            return cn(base, 'group border-red-500 bg-red-500 text-white');
-        }
-        return cn(base, 'border bg-white text-gray-900');
-    };
-};
-
-// Type pour les props génériques de style
-type ComponentProps = { children: React.ReactNode, className?: string };
-
-// 1. COMPOSANTS UI DE BASE (Card, Button, Textarea, Skeleton, Form Mocks)
-
-// 1.1. Button (avec gestion du style de chargement/désactivé)
-const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }>(({ className, children, disabled, ...props }, ref) => (
-    <button
-        ref={ref}
-        disabled={disabled}
-        className={cn(
-            'flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-            disabled ? 'bg-indigo-400 cursor-not-allowed text-white/80' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md',
-            className
-        )}
-        {...props}
-    >
-        {children}
-    </button>
-));
-Button.displayName = 'Button';
-
-// 1.2. Card Structure
-const Card = ({ children, className }: ComponentProps) => (
-    <div className={cn('rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50', className)}>
-        {children}
-    </div>
-);
-const CardHeader = ({ children, className }: ComponentProps) => (
-    <div className={cn('flex flex-col space-y-1.5 p-6', className)}>{children}</div>
-);
-const CardTitle = ({ children, className }: ComponentProps) => (
-    <h3 className={cn('font-bold tracking-tight text-xl', className)}>{children}</h3>
-);
-const CardDescription = ({ children, className }: ComponentProps) => (
-    <p className={cn('text-sm text-gray-500 dark:text-gray-400', className)}>{children}</p>
-);
-const CardContent = ({ children, className }: ComponentProps) => (
-    <div className={cn('p-6 pt-0', className)}>{children}</div>
+/** MOCK: Simule le bouton. */
+const Button = ({ children, onClick, disabled, className = '', variant = 'default' }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`
+      w-full py-3 px-4 rounded-xl text-lg font-semibold transition duration-200
+      ${variant === 'default' ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}
+      ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      ${className}
+    `}
+  >
+    {children}
+  </button>
 );
 
-// 1.3. Textarea
-const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(({ className, ...props }, ref) => (
-    <textarea
-        ref={ref}
-        className={cn('flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px] transition duration-150', className)}
-        {...props}
-    />
-));
-Textarea.displayName = 'Textarea';
-
-// 1.4. Form Components (Simplifié pour l'utilisation directe de register)
-const Form = ({ children }: ComponentProps) => <>{children}</>;
-const FormItem = ({ children, className }: ComponentProps) => <div className={cn('space-y-1', className)}>{children}</div>;
-const FormLabel = ({ children, className }: ComponentProps) => <label className={cn('text-sm font-medium leading-none mb-1 block', className)}>{children}</label>;
-const FormControl = ({ children }: ComponentProps) => <>{children}</>; 
-const FormMessage = ({ children, className }: ComponentProps) => <p className={cn('text-sm font-medium text-red-500 mt-1', className)}>{children}</p>;
-
-// 1.5. Skeleton
-const Skeleton = ({ className }: { className?: string }) => (
-    <div className={cn('animate-pulse rounded-md bg-gray-200 dark:bg-gray-700', className)} />
+/** MOCK: Simule le champ de saisie. */
+const Input = ({ label, value, onChange, placeholder, type = 'text', disabled }) => (
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition duration-150"
+    />
+  </div>
 );
 
+/** MOCK: Simule le composant de zone de texte. */
+const Textarea = ({ label, value, onChange, placeholder, rows = 5, disabled }) => (
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">{label}</label>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      disabled={disabled}
+      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition duration-150"
+    />
+  </div>
+);
 
-// -----------------------------------------------------
-// 2. SYSTÈME DE TOAST COMPLET (Correction de la structure)
-// -----------------------------------------------------
-
-// Renommage pour éviter le conflit JSX
-const ToastExports = {
-    Provider: ({ children }: ComponentProps) => <>{children}</>,
-    Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className)} {...props}>
-            {children}
-        </div>
-    )),
-    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => {
-        const rootRef = useRef<HTMLDivElement>(null);
-        return (
-            <div ref={rootRef} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
-                {children}
-            </div>
-        );
-    }),
-    Title: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("text-sm font-semibold", className)} {...props}>{children}</div>
-    )),
-    Description: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("text-sm opacity-90", className)} {...props}>{children}</div>
-    )),
-    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, onClick, ...props }, ref) => (
-        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900 focus:opacity-100", className)} onClick={onClick} {...props}>
-            {children || <X className="h-4 w-4" />}
-        </button>
-    )),
-    Action: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
-        <button ref={ref} className={cn("inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium", className)} {...props}>
-            {children}
-        </button>
-    )),
-};
-ToastExports.Viewport.displayName = 'ToastViewport';
-ToastExports.Root.displayName = 'ToastRoot';
-ToastExports.Title.displayName = 'ToastTitle';
-ToastExports.Description.displayName = 'ToastDescription';
-ToastExports.Close.displayName = 'ToastClosePrimitive';
-ToastExports.Action.displayName = 'ToastActionPrimitive';
-
-// Destructuration des primitives pour les rendre disponibles directement
-const { Provider, Viewport, Root, Title, Description, Close, Action } = ToastExports;
-
-
-type ToastVariant = 'default' | 'destructive';
-let TOAST_COUNT = 0;
-function generateId() {
-    return `toast-${TOAST_COUNT++}`;
-}
-
-type Toast = {
-    id: string;
-    title?: React.ReactNode;
-    description?: React.ReactNode;
-    variant?: ToastVariant;
-    duration?: number;
-    action?: React.ReactElement<typeof Action>;
-};
-
-type ActionType =
-    | { type: 'ADD_TOAST'; toast: Toast }
-    | { type: 'DISMISS_TOAST'; toastId?: string };
-
-const defaultToastOptions: Partial<Toast> = {
-    duration: 5000,
-};
-
-const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
-    switch (action.type) {
-        case 'ADD_TOAST':
-            return [action.toast, ...state];
-        case 'DISMISS_TOAST':
-            const { toastId } = action;
-            if (toastId) {
-                return state.filter(t => t.id !== toastId);
-            }
-            return state;
-        default:
-            return state;
-    }
-};
-
-const ToastContext = createContext<{ toasts: Toast[]; toast: (props: Partial<Toast>) => { id: string }; dismiss: (toastId?: string) => void } | undefined>(undefined);
-
-function ToastProvider({ children }: ComponentProps) {
-    const [state, dispatch] = useReducer(toastReducer, []);
-    const ref = useRef<number[]>([]);
-
-    // Utilisation d'une fonction déclarée pour dismiss
-    function dismiss(toastId?: string) {
-        dispatch({ type: 'DISMISS_TOAST', toastId });
-    }
-
-    // Utilisation d'une fonction déclarée pour toast
-    function toast(props: Partial<Toast>) {
-        const id = generateId();
-        const newToast = { ...defaultToastOptions, ...props, id };
-        dispatch({ type: 'ADD_TOAST', toast: newToast });
-
-        if (newToast.duration) {
-            const timeout = setTimeout(() => dismiss(id), newToast.duration);
-            // Stockage du timeout ID (qui est un nombre dans le contexte du navigateur)
-            ref.current.push(timeout as number);
-        }
-
-        return { id };
-    }
-
-
-    useEffect(() => {
-        return () => {
-            // Nettoyage de tous les timeouts
-            ref.current.forEach(timeout => clearTimeout(timeout));
-        };
-    }, []);
-
-    const value = { toasts: state, toast, dismiss };
-
-    // Utilise le composant Provider exporté par ToastExports
-    return <Provider value={value}>{children}</Provider>;
-}
-
+/** MOCK: Simule le composant Toast pour les messages d'erreur/succès. */
 const useToast = () => {
-    const context = useContext(ToastContext);
-    if (context === undefined) { 
-        // Fallback pour le mode sans Provider
-        return { toasts: [], toast: (props: Partial<Toast>) => { 
-            console.warn("Le hook useToast est appelé hors de son Provider. Ceci est un avertissement de développement, le Toast sera ignoré.", props);
-            return { id: generateId() };
-        }, dismiss: () => {} };
-    }
-    return context;
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const toast = useCallback(({ title, description, variant = 'default' }) => {
+    setToastMessage({ title, description, variant });
+    setTimeout(() => setToastMessage(null), 5000); // Dissipe après 5 secondes
+  }, []);
+
+  const ToastComponent = toastMessage ? (
+    <div
+      className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-2xl transition-opacity duration-300
+        ${toastMessage.variant === 'destructive' ? 'bg-red-600 text-white' : 'bg-green-500 text-white'}
+      `}
+    >
+      <div className="font-bold">{toastMessage.title}</div>
+      <div className="text-sm">{toastMessage.description}</div>
+    </div>
+  ) : null;
+
+  return { toast, ToastComponent };
 };
+// --- Fin des Mocks ---
 
-const toastVariants = cva(
-    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all",
-    {
-        variants: {
-            variant: {
-                default: "border bg-white text-gray-900",
-                destructive: "destructive group border-red-500 bg-red-500 text-white",
-            },
-        },
-        defaultVariants: { variant: "default" },
-    }
-);
+/**
+ * Composant principal de l'application de recommandation IA.
+ * Utilise l'API Gemini pour générer des recommandations basées sur les entrées utilisateur.
+ */
+const AiRecommendations = () => {
+  const [activity, setActivity] = useState('');
+  const [context, setContext] = useState('');
+  const [recommendation, setRecommendation] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast, ToastComponent } = useToast();
 
-const Toast = React.forwardRef<
-    React.ElementRef<typeof Root>,
-    React.ComponentPropsWithoutRef<typeof Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void, id: string }
->(({ className, variant, id, ...props }, ref) => {
-    const isDestructive = variant === 'destructive';
-    // Utilise le style via la fonction mock cva/toastVariants
-    const variantClass = toastVariants({ variant });
-    
-    return (
-        <Root
-            ref={ref}
-            className={cn(
-                variantClass, 
-                className,
-                isDestructive ? 'border-red-600' : 'border-gray-200'
-            )}
-            {...props}
-        />
-    );
-});
-Toast.displayName = 'Toast';
-
-const ToastClose = ({ id }: { id: string }) => {
-    const { dismiss } = useToast();
-    return (
-        <Close
-            onClick={() => dismiss(id)}
-        />
-    );
-};
-
-function Toaster() {
-    const { toasts } = useToast();
-
-    return (
-        <>
-            {/* Utilise les composants destrcuturés (Viewport, Title, etc.) */}
-            <Viewport className='fixed top-0 right-0 z-[100]' />
-            {toasts.map(function ({ id, title, description, action, variant, ...props }) {
-                return (
-                    <Toast key={id} id={id} variant={variant} {...props}>
-                        <div className="grid gap-1">
-                            {title && <Title>{title}</Title>}
-                            {description && (
-                                <Description>{description}</Description>
-                            )}
-                        </div>
-                        {action}
-                        <ToastClose id={id} />
-                    </Toast>
-                );
-            })}
-        </>
-    );
-}
-
-// -----------------------------------------------------
-// 3. LOGIQUE DE L'API GEMINI
-// -----------------------------------------------------
-
-const API_KEY = ""; 
-
-const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
-
-// Fonction pour construire l'URL de l'API avec la clé
-const buildApiUrl = () => {
-    // Si la clé est vide, la plateforme est censée l'injecter.
-    return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-};
-
-// Fonction utilitaire pour l'attente
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Type pour les props du composant
-interface AiRecommendationsProps {
-  eventData: string;
-}
-
-// -----------------------------------------------------
-// 4. COMPOSANT PRINCIPAL
-// -----------------------------------------------------
-
-export function AiRecommendations({ eventData }: AiRecommendationsProps) {
-  const [recommendations, setRecommendations] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast(); 
-
-  // Configuration du formulaire
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      userPreferences: '',
-    },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    setRecommendations('');
-    console.log("--- Démarrage de la requête Gemini ---");
-    
-    // Obtenir l'URL de l'API
-    const apiUrl = buildApiUrl();
-    console.log(`URL d'appel: ${apiUrl}`);
-    console.log(`Clé API utilisée (vide pour injection runtime): ${API_KEY.length > 0 ? 'Oui' : 'Non'}`);
-
-    // Définition des instructions pour l'IA
-    const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français en utilisant le format Markdown pour une meilleure lisibilité.`;
-    
-    const userQuery = `En fonction des préférences de l'utilisateur: "${values.userPreferences}", suggérez des événements ou des sorties.`;
-
-    const payload = {
-      contents: [{ parts: [{ text: userQuery }] }],
-      // Activation de la recherche Google pour des informations actualisées
-      tools: [{ "google_search": {} }],
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-    };
-
-    let result = null;
-    let success = false;
-    let attempts = 0;
-    const maxRetries = 5;
-
-    try {
-      while (attempts < maxRetries && !success) {
-        attempts++;
-        console.log(`Tentative d'API n°${attempts}...`);
-
-        const response = await fetch(apiUrl, { // Utilisation de l'URL construite
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        console.log(`Réponse API reçue (Statut: ${response.status})`);
-        
-        // --- LOGIQUE POUR ERREUR CRITIQUE (403/400) ---
-        if (response.status === 403) {
-           const errorText = await response.text();
-           console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-           // Lève une erreur spécifique pour indiquer un problème d'accès
-           throw new Error(`Erreur d'authentification (Statut 403). L'accès à l'API est refusé. Le problème ne vient pas du code, mais de l'authentification de l'environnement.`);
-        }
-        
-        if (response.status === 400) {
-           const errorText = await response.text();
-           console.error(`Erreur client (400 Bad Request):`, errorText);
-           throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé. Consultez la console pour plus de détails.`);
-        }
-        // --------------------------------------------------------------------------
-
-        if (response.ok) {
-          try {
-            result = await response.json();
-            success = true;
-          } catch (e) {
-            console.error("Erreur de parsing JSON de la réponse:", e);
-            throw new Error("La réponse de l'API n'était pas un JSON valide.");
-          }
-        } else {
-          // Logique de backoff exponentiel (uniquement pour les erreurs 5xx ou 429 - erreurs temporaires)
-          const errorText = await response.text();
-          console.error(`Erreur serveur temporaire (${response.status}):`, errorText);
-
-          if (attempts < maxRetries) {
-            await sleep(Math.pow(2, attempts) * 1000);
-          } else {
-            throw new Error(`Échec de l'appel API après ${maxRetries} tentatives. Dernier statut: ${response.status}`);
-          }
-        }
-      }
-
-      // Si la boucle s'est terminée sans succès (par exemple, max retries atteint)
-      if (!success) {
-         throw new Error("Toutes les tentatives d'appel API ont échoué.");
-      }
-      
-      // Extraction des résultats
-      if (result && result.candidates && result.candidates.length > 0) {
-        const text = result.candidates[0].content?.parts?.[0]?.text || 'Impossible de générer des recommandations.';
-        setRecommendations(text);
-        console.log("Recommandations générées avec succès.");
-      } else {
-        console.error("Réponse de l'API reçue, mais le contenu est vide ou inattendu.", result);
-        throw new Error('Réponse vide ou structure inattendue de l\'API.');
-      }
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
-      console.error('Erreur CRITIQUE lors de l\'obtention des recommandations IA:', error);
-      
-      // Mise à jour du Toast pour afficher l'erreur
-      toast({
-        variant: 'destructive',
-        title: 'Échec de la Recommandation',
-        description: `Détail : ${errorMessage}`,
-      });
-
-    } finally {
-      setIsLoading(false);
-      console.log("--- Fin de la requête Gemini ---");
-    }
-  }
-
-  // --- RENDU DU COMPOSANT ---
-  return (
-    <Card className="max-w-xl mx-auto my-8 w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-          <Sparkles className="w-6 h-6" />
-          Recommandations d'Événements IA
-        </CardTitle>
-        <CardDescription>
-          Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        
-        <div className="space-y-4">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            
-            <FormItem>
-              <FormLabel>Vos préférences</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
-                  {...form.register("userPreferences")} // Utilisation directe de register
-                  disabled={isLoading}
-                />
-              </FormControl>
-              {form.formState.errors.userPreferences && (
-                <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
-              )}
-            </FormItem>
-
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? (
-                <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyse en cours...
-                </div>
-              ) : 'Obtenir des recommandations'}
-            </Button>
-          </form>
-        </div>
-
-        {(isLoading || recommendations) && (
-          <div className="mt-6">
-            <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
-            {isLoading ? (
-              <div className="space-y-2 mt-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            ) : (
-                <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
-                    {recommendations}
-                </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// Mock event data (French: Données d'événements factices)
-const MOCK_EVENT_DATA = JSON.stringify([
-  { "id": 1, "name": "Concert de Rock au Zénith", "date": "2025-10-25", "category": "Musique / Rock", "description": "Le groupe 'Les Fusées Rouges' en tournée mondiale. Ambiance garantie. Prix: 35€", "location": "Zénith Toulouse Métropole" },
-  { "id": 2, "name": "Exposition Picasso: L'Ère Bleue", "date": "2025-11-01", "category": "Culture / Art", "description": "Collection rare des œuvres du début de carrière de Picasso. Prix: 12€", "location": "Musée des Augustins" },
-  { "id": 3, "name": "Festival du Vin Naturel", "date": "2025-10-20", "category": "Gastronomie / Vin", "description": "Dégustation et rencontre avec des vignerons locaux. Prix: 25€", "location": "Halle de la Machine" },
-  { "id": 4, "name": "Match de Rugby: Stade Toulousain vs Bègles", "date": "2025-10-27", "category": "Sport / Rugby", "description": "Un grand classique du Top 14. Ambiance électrique assurée.", "location": "Stade Ernest-Wallon" }
-]);
-
-// -----------------------------------------------------
-// Le wrapper qui contient le Provider et le Toaster
-// -----------------------------------------------------
-
-export default function AppWrapper() {
-    const [isMounted, setIsMounted] = useState(false);
-
-    // Utilisez useEffect pour garantir que le rendu est client-side
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted) {
-        // Affiche un indicateur de chargement léger pour éviter les erreurs de synchronisation
-        return <div className="flex justify-center items-center h-40 text-gray-500">Chargement de l'application...</div>;
+  const handleGenerateRecommendation = useCallback(async () => {
+    if (!API_KEY) {
+      toast({
+        title: "Erreur d'API",
+        description: "Veuillez insérer votre GEMINI_API_KEY dans le code pour commencer.",
+        variant: 'destructive',
+      });
+      return;
     }
 
-    return (
-        <ToastProvider>
-            {/* Passe les données factices pour garantir la compilabilité */}
-            <AiRecommendations eventData={MOCK_EVENT_DATA} />
-            <Toaster /> 
-        </ToastProvider>
-    );
-}
+    if (!activity || !context) {
+      toast({
+        title: "Champs manquants",
+        description: "Veuillez décrire l'activité et le contexte pour obtenir une recommandation.",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setRecommendation('Génération en cours...');
+
+    const systemPrompt = "Vous êtes un expert en recommandations créatives. Créez une suggestion unique et inspirante d'environ 150 mots, adaptée à l'activité et au contexte fournis par l'utilisateur. Répondez uniquement avec la recommandation en français. Utilisez un ton enthousiaste.";
+    const userQuery = `Activité: ${activity}. Contexte: ${context}. Générez une recommandation détaillée.`;
+
+    const payload = {
+      contents: [{ parts: [{ text: userQuery }] }],
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+    };
+
+    const callApi = async (retryCount = 0) => {
+      const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000; // Délai exponentiel + jitter
+      if (retryCount > 0) {
+        console.log(`Tentative de reconnexion n°${retryCount}. Délai: ${delay.toFixed(0)}ms`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      try {
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          // Si l'erreur est un 403, c'est probablement un problème de clé API
+          if (response.status === 403) {
+            throw new Error(`Statut 403: Permission refusée. Vérifiez que la clé API est correcte et active.`);
+          }
+          // Pour les autres erreurs, essayez la reconnexion jusqu'à 3 fois
+          if (retryCount < 3) {
+            return callApi(retryCount + 1);
+          }
+          throw new Error(`Échec de la requête API avec le statut: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Impossible de générer la recommandation. Veuillez réessayer.";
+
+        setRecommendation(generatedText);
+        toast({ title: "Succès", description: "Recommandation générée avec succès!", variant: 'default' });
+
+      } catch (error) {
+        console.error("Erreur lors de l'appel à l'API Gemini:", error);
+        setRecommendation(`Erreur: ${error.message}.`);
+        toast({
+          title: "Erreur de génération",
+          description: error.message,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    callApi();
+  }, [activity, context, toast]);
+
+  // Utilisez useMemo pour le prompt final affiché à l'utilisateur
+  const finalPrompt = useMemo(() => {
+    return `Activité: ${activity || '[Non spécifiée]'}\nContexte: ${context || '[Non spécifié]'}`;
+  }, [activity, context]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-10 font-sans">
+      {ToastComponent}
+      <div className="max-w-4xl mx-auto space-y-8">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white text-center mb-6">
+          Générateur de Recommandations IA
+        </h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Section 1: Entrées utilisateur */}
+          <Card className="lg:col-span-1 border border-indigo-200 dark:border-indigo-800">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">1. Vos Critères</h2>
+            <div className="space-y-6">
+              <Input
+                label="Activité ou But (Ex: 'Trouver un film', 'Planifier des vacances', 'Écrire une chanson')"
+                value={activity}
+                onChange={setActivity}
+                placeholder="Décrivez votre objectif principal..."
+                disabled={isLoading}
+              />
+              <Textarea
+                label="Contexte (Ex: 'Je suis fatigué et il pleut', 'Budget illimité et besoin d'aventure', 'Style Blues')"
+                value={context}
+                onChange={setContext}
+                placeholder="Ajoutez des détails pour affiner la recommandation..."
+                rows={4}
+                disabled={isLoading}
+              />
+              <Button onClick={handleGenerateRecommendation} disabled={isLoading}>
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Génération en cours...
+                  </span>
+                ) : (
+                  'Générer la Recommandation'
+                )}
+              </Button>
+            </div>
+          </Card>
+
+          {/* Section 2: Résultat de l'IA */}
+          <Card className="lg:col-span-1">
+            <h2 className="text-2xl font-bold mb-6 text-indigo-600 dark:text-indigo-400">2. Recommandation Personnalisée</h2>
+            <div className="min-h-[250px] bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 overflow-y-auto">
+              {recommendation ? (
+                <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed">
+                  {recommendation}
+                </p>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 italic">
+                  Entrez vos critères et cliquez sur "Générer" pour recevoir une suggestion unique de l'IA.
+                </p>
+              )}
+            </div>
+
+            {/* Affichage du Prompt pour debug/vérification */}
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Prompt utilisé (pour référence) :</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                    {finalPrompt}
+                </p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AiRecommendations;
