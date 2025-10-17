@@ -2,13 +2,45 @@
 
 import React, { useState, createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Sparkles, X } from 'lucide-react'; 
+// Mocks pour les dépendances externes
+const z = {
+    object: (schema: any) => schema,
+    string: () => ({
+        min: (_: number, message: string) => ({ min: 10, message }),
+    }),
+};
+const zodResolver = (schema: any) => ({ // Mock simple de zodResolver
+    resolver: async (values: any) => {
+        try {
+            if (values.userPreferences && values.userPreferences.length < 10) {
+                return {
+                    values: {},
+                    errors: {
+                        userPreferences: {
+                            type: 'min',
+                            message: 'Veuillez décrire vos préférences avec plus de détails.',
+                        },
+                    },
+                };
+            }
+            return { values, errors: {} };
+        } catch (e) {
+            return { values: {}, errors: { global: { type: 'manual', message: 'Erreur de validation' } } };
+        }
+    },
+});
+
+// Icônes Lucide-React
+const Sparkles = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11h.01"/><path d="M10 18h4"/><path d="M3.23 11c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5c.78-.13 1.5-.47 2.13-.95L11 3.23c.63-.48 1.35-.82 2.13-.95A3.89 3.89 0 0 1 18.5 5.5c.78.13 1.5.47 2.13.95l2.64 2.64c.48.63.82 1.35.95 2.13A3.89 3.89 0 0 1 18.5 18.5c-.78.13-1.5.47-2.13.95l-2.64 2.64c-.63.48-1.35.82-2.13.95A3.89 3.89 0 0 1 5.5 18.5c-.78-.13-1.5-.47-2.13-.95l-2.64-2.64c-.48-.63-.82-1.35-.95-2.13A3.89 3.89 0 0 1 5.5 5.5Z"/></svg>
+);
+const X = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+);
 
 // Schéma de validation
 const formSchema = z.object({
-  userPreferences: z.string().min(10, 'Veuillez décrire vos préférences avec plus de détails.'),
+  userPreferences: z.string().min(10, 'Veuillez décrire vos préférences avec plus de détails.'),
 });
 
 // -----------------------------------------------------
@@ -20,12 +52,12 @@ const cn = (...classes: (string | false | null | undefined)[]) => classes.filter
 
 // MOCK: class-variance-authority cva (très simplifié pour le Toast)
 const cva = (base: string, { variants, defaultVariants }: { variants: any, defaultVariants: any }) => {
-    return ({ variant }: { variant: string }) => {
-        if (variant === 'destructive') {
-            return cn(base, 'group border-red-500 bg-red-500 text-white');
-        }
-        return cn(base, 'border bg-white text-gray-900');
-    };
+    return ({ variant }: { variant: string | undefined }) => {
+        if (variant === 'destructive') {
+            return cn(base, 'group border-red-500 bg-red-500 text-white');
+        }
+        return cn(base, 'border bg-white text-gray-900');
+    };
 };
 
 // Type pour les props génériques de style
@@ -37,47 +69,49 @@ type ComponentProps = { children: React.ReactNode, className?: string };
 
 // 1.1. Button (avec gestion du style de chargement/désactivé)
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }>(({ className, children, disabled, ...props }, ref) => (
-    <button
-        ref={ref}
-        disabled={disabled}
-        className={cn(
-            'flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-            disabled ? 'bg-indigo-400 cursor-not-allowed text-white/80' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md',
-            className
-        )}
-        {...props}
-    >
-        {children}
-    </button>
+    <button
+        ref={ref}
+        disabled={disabled}
+        className={cn(
+            'flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+            disabled ? 'bg-indigo-400 cursor-not-allowed text-white/80' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md',
+            className
+        )}
+        {...props}
+    >
+        {children}
+    </button>
 ));
+Button.displayName = 'Button';
 
 // 1.2. Card Structure
 const Card = ({ children, className }: ComponentProps) => (
-    <div className={cn('rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50', className)}>
-        {children}
-    </div>
+    <div className={cn('rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50', className)}>
+        {children}
+    </div>
 );
 const CardHeader = ({ children, className }: ComponentProps) => (
-    <div className={cn('flex flex-col space-y-1.5 p-6', className)}>{children}</div>
+    <div className={cn('flex flex-col space-y-1.5 p-6', className)}>{children}</div>
 );
 const CardTitle = ({ children, className }: ComponentProps) => (
-    <h3 className={cn('font-bold tracking-tight text-xl', className)}>{children}</h3>
+    <h3 className={cn('font-bold tracking-tight text-xl', className)}>{children}</h3>
 );
 const CardDescription = ({ children, className }: ComponentProps) => (
-    <p className={cn('text-sm text-gray-500 dark:text-gray-400', className)}>{children}</p>
+    <p className={cn('text-sm text-gray-500 dark:text-gray-400', className)}>{children}</p>
 );
 const CardContent = ({ children, className }: ComponentProps) => (
-    <div className={cn('p-6 pt-0', className)}>{children}</div>
+    <div className={cn('p-6 pt-0', className)}>{children}</div>
 );
 
 // 1.3. Textarea
 const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(({ className, ...props }, ref) => (
-    <textarea
-        ref={ref}
-        className={cn('flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px] transition duration-150', className)}
-        {...props}
-    />
+    <textarea
+        ref={ref}
+        className={cn('flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px] transition duration-150', className)}
+        {...props}
+    />
 ));
+Textarea.displayName = 'Textarea';
 
 // 1.4. Form Components (Simplifié pour l'utilisation directe de register)
 const Form = ({ children }: ComponentProps) => <>{children}</>;
@@ -88,7 +122,7 @@ const FormMessage = ({ children, className }: ComponentProps) => <p className={c
 
 // 1.5. Skeleton
 const Skeleton = ({ className }: { className?: string }) => (
-    <div className={cn('animate-pulse rounded-md bg-gray-200 dark:bg-gray-700', className)} />
+    <div className={cn('animate-pulse rounded-md bg-gray-200 dark:bg-gray-700', className)} />
 );
 
 
@@ -97,191 +131,200 @@ const Skeleton = ({ className }: { className?: string }) => (
 // -----------------------------------------------------
 
 const ToastPrimitives = {
-    Provider: ({ children }: ComponentProps) => <>{children}</>,
-    Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className)} {...props}>
-            {children}
-        </div>
-    )),
-    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => {
-        const rootRef = useRef<HTMLDivElement>(null);
-        return (
-            <div ref={rootRef} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
-                {children}
-            </div>
-        );
-    }),
-    Title: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("text-sm font-semibold", className)} {...props}>{children}</div>
-    )),
-    Description: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
-        <div ref={ref} className={cn("text-sm opacity-90", className)} {...props}>{children}</div>
-    )),
-    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, onClick, ...props }, ref) => (
-        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900 focus:opacity-100", className)} onClick={onClick} {...props}>
-            {children || <X className="h-4 w-4" />}
-        </button>
-    )),
-    Action: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
-        <button ref={ref} className={cn("inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium", className)} {...props}>
-            {children}
-        </button>
-    )),
+    Provider: ({ children }: ComponentProps) => <>{children}</>,
+    Viewport: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]", className)} {...props}>
+            {children}
+        </div>
+    )),
+    Root: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => {
+        const rootRef = useRef<HTMLDivElement>(null);
+        return (
+            <div ref={rootRef} className={cn("group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg", className)} {...props}>
+                {children}
+            </div>
+        );
+    }),
+    Title: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("text-sm font-semibold", className)} {...props}>{children}</div>
+    )),
+    Description: React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(({ className, children, ...props }, ref) => (
+        <div ref={ref} className={cn("text-sm opacity-90", className)} {...props}>{children}</div>
+    )),
+    Close: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, onClick, ...props }, ref) => (
+        <button ref={ref} className={cn("absolute right-2 top-2 rounded-md p-1 text-gray-500 transition-opacity hover:text-gray-900 focus:opacity-100", className)} onClick={onClick} {...props}>
+            {children || <X className="h-4 w-4" />}
+        </button>
+    )),
+    Action: React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(({ className, children, ...props }, ref) => (
+        <button ref={ref} className={cn("inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium", className)} {...props}>
+            {children}
+        </button>
+    )),
 };
+ToastPrimitives.Viewport.displayName = 'ToastViewport';
+ToastPrimitives.Root.displayName = 'ToastRoot';
+ToastPrimitives.Title.displayName = 'ToastTitle';
+ToastPrimitives.Description.displayName = 'ToastDescription';
+ToastPrimitives.Close.displayName = 'ToastClosePrimitive';
+ToastPrimitives.Action.displayName = 'ToastActionPrimitive';
+
 
 type ToastVariant = 'default' | 'destructive';
 let TOAST_COUNT = 0;
 function generateId() {
-    return `toast-${TOAST_COUNT++}`;
+    return `toast-${TOAST_COUNT++}`;
 }
 
 type Toast = {
-    id: string;
-    title?: React.ReactNode;
-    description?: React.ReactNode;
-    variant?: ToastVariant;
-    duration?: number;
-    action?: React.ReactElement<typeof ToastPrimitives.Action>;
+    id: string;
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    variant?: ToastVariant;
+    duration?: number;
+    action?: React.ReactElement<typeof ToastPrimitives.Action>;
 };
 
 type ActionType =
-    | { type: 'ADD_TOAST'; toast: Toast }
-    | { type: 'DISMISS_TOAST'; toastId?: string };
+    | { type: 'ADD_TOAST'; toast: Toast }
+    | { type: 'DISMISS_TOAST'; toastId?: string };
 
 const defaultToastOptions: Partial<Toast> = {
-    duration: 5000,
+    duration: 5000,
 };
 
 const toastReducer = (state: Toast[], action: ActionType): Toast[] => {
-    switch (action.type) {
-        case 'ADD_TOAST':
-            return [action.toast, ...state];
-        case 'DISMISS_TOAST':
-            const { toastId } = action;
-            if (toastId) {
-                return state.filter(t => t.id !== toastId);
-            }
-            return state;
-        default:
-            return state;
-    }
+    switch (action.type) {
+        case 'ADD_TOAST':
+            return [action.toast, ...state];
+        case 'DISMISS_TOAST':
+            const { toastId } = action;
+            if (toastId) {
+                return state.filter(t => t.id !== toastId);
+            }
+            return state;
+        default:
+            return state;
+    }
 };
 
 const ToastContext = createContext<{ toasts: Toast[]; toast: (props: Partial<Toast>) => { id: string }; dismiss: (toastId?: string) => void } | undefined>(undefined);
 
 function ToastProvider({ children }: ComponentProps) {
-    const [state, dispatch] = useReducer(toastReducer, []);
-    const ref = useRef<number[]>([]);
+    const [state, dispatch] = useReducer(toastReducer, []);
+    const ref = useRef<number[]>([]);
 
-    // FIX: Changement de l'assignation de fonction fléchée à une déclaration de fonction standard
-    // pour éviter l'erreur de compilation Next.js/SWC.
-    function dismiss(toastId?: string) {
-        dispatch({ type: 'DISMISS_TOAST', toastId });
-    }
+    // Utilisation d'une fonction déclarée pour dismiss
+    function dismiss(toastId?: string) {
+        dispatch({ type: 'DISMISS_TOAST', toastId });
+    }
 
-    // FIX: Changement de l'assignation de fonction fléchée à une déclaration de fonction standard
-    function toast(props: Partial<Toast>) {
-        const id = generateId();
-        const newToast = { ...defaultToastOptions, ...props, id };
-        dispatch({ type: 'ADD_TOAST', toast: newToast });
+    // Utilisation d'une fonction déclarée pour toast
+    function toast(props: Partial<Toast>) {
+        const id = generateId();
+        const newToast = { ...defaultToastOptions, ...props, id };
+        dispatch({ type: 'ADD_TOAST', toast: newToast });
 
-        if (newToast.duration) {
-            const timeout = setTimeout(() => dismiss(id), newToast.duration);
-            ref.current.push(timeout as unknown as number);
-        }
+        if (newToast.duration) {
+            const timeout = setTimeout(() => dismiss(id), newToast.duration);
+            // Stockage du timeout ID (qui est un nombre dans le contexte du navigateur)
+            ref.current.push(timeout as number);
+        }
 
-        return { id };
-    }
+        return { id };
+    }
 
 
-    useEffect(() => {
-        return () => {
-            ref.current.forEach(timeout => clearTimeout(timeout));
-        };
-    }, []);
+    useEffect(() => {
+        return () => {
+            // Nettoyage de tous les timeouts
+            ref.current.forEach(timeout => clearTimeout(timeout));
+        };
+    }, []);
 
-    const value = { toasts: state, toast, dismiss };
+    const value = { toasts: state, toast, dismiss };
 
-    return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+    return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
 const useToast = () => {
-    const context = useContext(ToastContext);
-    if (context === undefined) { 
-        return { toasts: [], toast: (props: Partial<Toast>) => { 
-            console.warn("[Toast Mock] Toast called outside of provider:", props);
-            return { id: generateId() };
-        }, dismiss: () => {} };
-    }
-    return context;
+    const context = useContext(ToastContext);
+    if (context === undefined) { 
+        // Fallback pour le mode sans Provider
+        return { toasts: [], toast: (props: Partial<Toast>) => { 
+            console.warn("[Toast Mock] Toast called outside of provider:", props);
+            return { id: generateId() };
+        }, dismiss: () => {} };
+    }
+    return context;
 };
 
 const toastVariants = cva(
-    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all",
-    {
-        variants: {
-            variant: {
-                default: "border bg-white text-gray-900",
-                destructive: "destructive group border-red-500 bg-red-500 text-white",
-            },
-        },
-        defaultVariants: { variant: "default" },
-    }
+    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all",
+    {
+        variants: {
+            variant: {
+                default: "border bg-white text-gray-900",
+                destructive: "destructive group border-red-500 bg-red-500 text-white",
+            },
+        },
+        defaultVariants: { variant: "default" },
+    }
 );
 
 const Toast = React.forwardRef<
-    React.ElementRef<typeof ToastPrimitives.Root>,
-    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void }
->(({ className, variant, onOpenChange, ...props }, ref) => {
-    const isDestructive = variant === 'destructive';
-    
-    return (
-        <ToastPrimitives.Root
-            ref={ref}
-            className={cn(
-                toastVariants({ variant }), 
-                className,
-                isDestructive ? 'border-red-600' : 'border-gray-200'
-            )}
-            {...props}
-        >
-            {props.children}
-        </ToastPrimitives.Root>
-    );
+    React.ElementRef<typeof ToastPrimitives.Root>,
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & { variant?: ToastVariant, onOpenChange?: (open: boolean) => void, id: string }
+>(({ className, variant, id, ...props }, ref) => {
+    const isDestructive = variant === 'destructive';
+    // Utilise le style via la fonction mock cva/toastVariants
+    const variantClass = toastVariants({ variant });
+    
+    return (
+        <ToastPrimitives.Root
+            ref={ref}
+            className={cn(
+                variantClass, 
+                className,
+                isDestructive ? 'border-red-600' : 'border-gray-200'
+            )}
+            {...props}
+        />
+    );
 });
 Toast.displayName = 'Toast';
 
 const ToastClose = ({ id }: { id: string }) => {
-    const { dismiss } = useToast();
-    return (
-        <ToastPrimitives.Close
-            onClick={() => dismiss(id)}
-        />
-    );
+    const { dismiss } = useToast();
+    return (
+        <ToastPrimitives.Close
+            onClick={() => dismiss(id)}
+        />
+    );
 };
 
 function Toaster() {
-    const { toasts } = useToast();
+    const { toasts } = useToast();
 
-    return (
-        <ToastPrimitives.Provider>
-            {toasts.map(function ({ id, title, description, action, variant, ...props }) {
-                return (
-                    <Toast key={id} id={id} variant={variant} {...props}>
-                        <div className="grid gap-1">
-                            {title && <ToastPrimitives.Title>{title}</ToastPrimitives.Title>}
-                            {description && (
-                                <ToastPrimitives.Description>{description}</ToastPrimitives.Description>
-                            )}
-                        </div>
-                        {action}
-                        <ToastClose id={id} />
-                    </Toast>
-                );
-            })}
-            <ToastPrimitives.Viewport className='fixed top-0 right-0 z-[100]' />
-        </ToastPrimitives.Provider>
-    );
+    return (
+        <ToastPrimitives.Provider>
+            <ToastPrimitives.Viewport className='fixed top-0 right-0 z-[100]' />
+            {toasts.map(function ({ id, title, description, action, variant, ...props }) {
+                return (
+                    <Toast key={id} id={id} variant={variant} {...props}>
+                        <div className="grid gap-1">
+                            {title && <ToastPrimitives.Title>{title}</ToastPrimitives.Title>}
+                            {description && (
+                                <ToastPrimitives.Description>{description}</ToastPrimitives.Description>
+                            )}
+                        </div>
+                        {action}
+                        <ToastClose id={id} />
+                    </Toast>
+                );
+            })}
+        </ToastPrimitives.Provider>
+    );
 }
 
 // -----------------------------------------------------
@@ -289,24 +332,12 @@ function Toaster() {
 // -----------------------------------------------------
 
 // L'API_KEY est laissée vide, car elle est censée être fournie par l'environnement Canvas
-// Cette variable sera mise à jour au runtime par la logique ci-dessous si l'on est en local
+const API_KEY = ''; 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
-// Variable d'état globale pour stocker la clé API pour les appels
-let customApiKey = ''; 
-
-/**
- * Construit l'URL de l'API en utilisant la clé custom si elle est définie.
- * En environnement Canvas, `API_KEY` est vide mais l'URL est interceptée et l'authentification est gérée par le conteneur.
- * En local, nous utilisons `customApiKey` si elle est définie.
- */
+// Rétabli : Nous incluons toujours le paramètre ?key= pour que l'environnement puisse l'intercepter
 const buildApiUrl = () => {
-    // Si customApiKey est définie (en local ou via URL), nous l'utilisons dans l'URL.
-    if (customApiKey) {
-        return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${customApiKey}`;
-    }
-    // Sinon, on retourne l'URL générique (qui fonctionnera dans Canvas)
-    return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 };
 
 // Fonction utilitaire pour l'attente
@@ -314,7 +345,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Type pour les props du composant
 interface AiRecommendationsProps {
-  eventData: string;
+  eventData: string;
 }
 
 // -----------------------------------------------------
@@ -322,218 +353,213 @@ interface AiRecommendationsProps {
 // -----------------------------------------------------
 
 export function AiRecommendations({ eventData }: AiRecommendationsProps) {
-  const [recommendations, setRecommendations] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast(); 
+  const [recommendations, setRecommendations] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast(); 
 
-  // Initialisation de la clé API pour l'environnement local
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const apiKey = urlParams.get('apiKey');
-        if (apiKey) {
-            customApiKey = apiKey;
-            console.log("Clé API détectée dans l'URL. Utilisation de la clé locale.");
-        }
-    }
-  }, []);
+  // Configuration du formulaire
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      userPreferences: '',
+    },
+  });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      userPreferences: '',
-    },
-  });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    setRecommendations('');
+    console.log("--- Démarrage de la requête Gemini ---");
+    console.log("Préférences utilisateur:", values.userPreferences);
+    
+    // Obtenir l'URL de l'API
+    const apiUrl = buildApiUrl();
+    console.log(`URL d'appel: ${apiUrl}`);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    setRecommendations('');
-    console.log("--- Démarrage de la requête Gemini ---");
-    console.log("Préférences utilisateur:", values.userPreferences);
-    
-    // Obtenir l'URL de l'API (maintenant incluant la clé si elle est trouvée en local)
-    const apiUrl = buildApiUrl();
-    console.log(`URL d'appel: ${apiUrl.substring(0, apiUrl.indexOf('key=') + 4)}...`); // Masquer la clé dans la console
+    // Définition des instructions pour l'IA
+    const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français en utilisant le format Markdown pour une meilleure lisibilité.`;
+    
+    const userQuery = `En fonction des préférences de l'utilisateur: "${values.userPreferences}", suggérez des événements ou des sorties.`;
 
-    // NOTE: Nous ne faisons plus de vérification stricte ici et laissons le fetch gérer le 403
-    // car c'est le comportement le plus précis pour un environnement de production non-Canvas.
+    const payload = {
+      contents: [{ parts: [{ text: userQuery }] }],
+      // Activation de la recherche Google pour des informations actualisées
+      tools: [{ "google_search": {} }],
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+    };
 
-    // Définition des instructions pour l'IA
-    const systemPrompt = `Vous êtes un expert en recommandations d'événements à Toulouse. L'utilisateur a fourni ses préférences. Utilisez les données d'événements structurées suivantes (format JSON) pour trouver les meilleures correspondances. Si les données sont non pertinentes ou absentes, utilisez la recherche Google pour suggérer des activités à jour à Toulouse. Les données d'événements brutes sont: ${eventData}. Fournissez une recommandation claire, détaillée et bien formatée pour l'utilisateur. Répondez en français.`;
-    
-    const userQuery = `En fonction des préférences de l'utilisateur: "${values.userPreferences}", suggérez des événements ou des sorties.`;
+    let result = null;
+    let success = false;
+    let attempts = 0;
+    const maxRetries = 5;
 
-    const payload = {
-      contents: [{ parts: [{ text: userQuery }] }],
-      // Activation de la recherche Google pour des informations actualisées
-      tools: [{ "google_search": {} }],
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-    };
+    try {
+      while (attempts < maxRetries && !success) {
+        attempts++;
+        console.log(`Tentative d'API n°${attempts}...`);
 
-    let result = null;
-    let success = false;
-    let attempts = 0;
-    const maxRetries = 5;
+        const response = await fetch(apiUrl, { // Utilisation de l'URL construite
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        console.log(`Réponse API reçue (Statut: ${response.status})`);
+        
+        // --- LOGIQUE POUR CASSER LA BOUCLE EN CAS D'ERREUR D'AUTH/CLIENT (403/400) ---
+        if (response.status === 403) {
+             const errorText = await response.text();
+             console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
+             throw new Error(`Erreur d'authentification (Statut 403). L'API exige une identité d'appelant établie. (Clé API manquante)`);
+        }
+        
+        if (response.status === 400) {
+             const errorText = await response.text();
+             console.error(`Erreur client (400 Bad Request):`, errorText);
+             throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé.`);
+        }
+        // --------------------------------------------------------------------------
 
-    try {
-      while (attempts < maxRetries && !success) {
-        attempts++;
-        console.log(`Tentative d'API n°${attempts}...`);
+        if (response.ok) {
+          try {
+            result = await response.json();
+            success = true;
+          } catch (e) {
+            console.error("Erreur de parsing JSON de la réponse:", e);
+            throw new Error("La réponse de l'API n'était pas un JSON valide.");
+          }
+        } else {
+          // Logique de backoff exponentiel (uniquement pour les erreurs 5xx ou 429 - erreurs temporaires)
+          const errorText = await response.text();
+          console.error(`Erreur serveur temporaire (${response.status}):`, errorText);
 
-        const response = await fetch(apiUrl, { // Utilisation de l'URL construite
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        console.log(`Réponse API reçue (Statut: ${response.status})`);
-        
-        // --- LOGIQUE POUR CASSER LA BOUCLE EN CAS D'ERREUR D'AUTH/CLIENT (403/400) ---
-        if (response.status === 403) {
-             const errorText = await response.text();
-             console.error(`Erreur d'authentification permanente (403 Forbidden):`, errorText);
-             // Message d'erreur plus clair pour la production/déploiement externe
-             throw new Error(`Échec d'authentification (Statut 403). L'API exige une clé valide. Si vous n'êtes pas dans l'environnement Canvas, vous devez ajouter '?apiKey=VOTRE_CLÉ' à l'URL.`);
-        }
-        
-        if (response.status === 400) {
-             const errorText = await response.text();
-             console.error(`Erreur client (400 Bad Request):`, errorText);
-             throw new Error(`Erreur de requête (Statut 400). Problème de format ou de paramètre envoyé.`);
-        }
-        // --------------------------------------------------------------------------
+          if (attempts < maxRetries) {
+            await sleep(Math.pow(2, attempts) * 1000);
+          } else {
+            throw new Error(`Échec de l'appel API après ${maxRetries} tentatives. Dernier statut: ${response.status}`);
+          }
+        }
+      }
 
-        if (response.ok) {
-          try {
-            result = await response.json();
-            success = true;
-          } catch (e) {
-            console.error("Erreur de parsing JSON de la réponse:", e);
-            throw new Error("La réponse de l'API n'était pas un JSON valide.");
-          }
-        } else {
-          // Logique de backoff exponentiel (uniquement pour les erreurs 5xx ou 429 - erreurs temporaires)
-          const errorText = await response.text();
-          console.error(`Erreur serveur temporaire (${response.status}):`, errorText);
+      // Si la boucle s'est terminée sans succès (par exemple, max retries atteint)
+      if (!success) {
+         throw new Error("Toutes les tentatives d'appel API ont échoué.");
+      }
+      
+      // Extraction des résultats
+      if (result && result.candidates && result.candidates.length > 0) {
+        const text = result.candidates[0].content?.parts?.[0]?.text || 'Impossible de générer des recommandations.';
+        setRecommendations(text);
+        console.log("Recommandations générées avec succès.");
+      } else {
+        console.error("Réponse de l'API reçue, mais le contenu est vide ou inattendu.", result);
+        throw new Error('Réponse vide ou structure inattendue de l\'API.');
+      }
 
-          if (attempts < maxRetries) {
-            await sleep(Math.pow(2, attempts) * 1000);
-          } else {
-            throw new Error(`Échec de l'appel API après ${maxRetries} tentatives. Dernier statut: ${response.status}`);
-          }
-        }
-      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+      console.error('Erreur CRITIQUE lors de l\'obtention des recommandations IA:', error);
+      
+      // Mise à jour du Toast pour afficher l'erreur
+      toast({
+        variant: 'destructive',
+        title: 'Échec de la Recommandation',
+        description: `Détail : ${errorMessage}`,
+      });
 
-      // Si la boucle s'est terminée sans succès (par exemple, max retries atteint)
-      if (!success) {
-         throw new Error("Toutes les tentatives d'appel API ont échoué.");
-      }
-      
-      // Extraction des résultats
-      if (result && result.candidates && result.candidates.length > 0) {
-        const text = result.candidates[0].content?.parts?.[0]?.text || 'Impossible de générer des recommandations.';
-        setRecommendations(text);
-        console.log("Recommandations générées avec succès.");
-      } else {
-        console.error("Réponse de l'API reçue, mais le contenu est vide ou inattendu.", result);
-        throw new Error('Réponse vide ou structure inattendue de l\'API.');
-      }
+    } finally {
+      setIsLoading(false);
+      console.log("--- Fin de la requête Gemini ---");
+    }
+  }
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
-      console.error('Erreur CRITIQUE lors de l\'obtention des recommandations IA:', error);
-      
-      // Mise à jour du Toast pour afficher l'erreur
-      toast({
-        variant: 'destructive',
-        title: 'Échec de la Recommandation',
-        description: `Détail : ${errorMessage}`,
-      });
+  // --- RENDU DU COMPOSANT ---
+  return (
+    <Card className="max-w-xl mx-auto my-8 w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+          <Sparkles className="w-6 h-6" />
+          Recommandations d'Événements IA
+        </CardTitle>
+        <CardDescription>
+          Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        
+        <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            
+            <FormItem>
+              <FormLabel>Vos préférences</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
+                  {...form.register("userPreferences")} // Utilisation directe de register
+                  disabled={isLoading}
+                />
+              </FormControl>
+              {form.formState.errors.userPreferences && (
+                <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
+              )}
+            </FormItem>
 
-    } finally {
-      setIsLoading(false);
-      console.log("--- Fin de la requête Gemini ---");
-    }
-  }
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
+                <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyse en cours...
+                </div>
+              ) : 'Obtenir des recommandations'}
+            </Button>
+          </form>
+        </div>
 
-  // --- RENDU DU COMPOSANT ---
-  return (
-    <Card className="max-w-xl mx-auto my-8">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-          <Sparkles className="w-6 h-6" />
-          Recommandations d'Événements IA
-        </CardTitle>
-        <CardDescription>
-          Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        
-        <div className="space-y-4">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            
-            <FormItem>
-              <FormLabel>Vos préférences</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Ex: J'aime les concerts de rock, les bars à vin et les expositions d'art moderne..."
-                  {...form.register("userPreferences")} // Utilisation directe de register
-                  disabled={isLoading}
-                />
-              </FormControl>
-              {form.formState.errors.userPreferences && (
-                <FormMessage>{form.formState.errors.userPreferences.message}</FormMessage>
-              )}
-            </FormItem>
-
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? (
-                <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyse en cours...
-                </div>
-              ) : 'Obtenir des recommandations'}
-            </Button>
-          </form>
-        </div>
-
-        {(isLoading || recommendations) && (
-          <div className="mt-6">
-            <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
-            {isLoading ? (
-              <div className="space-y-2 mt-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            ) : (
-                <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
-                    {recommendations}
-                </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+        {(isLoading || recommendations) && (
+          <div className="mt-6">
+            <h3 className="font-semibold text-lg text-gray-700 dark:text-gray-300">Suggestions pour vous :</h3>
+            {isLoading ? (
+              <div className="space-y-2 mt-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ) : (
+                <div className="mt-3 whitespace-pre-wrap rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 text-sm text-gray-800 dark:border-indigo-800 dark:bg-gray-800 dark:text-gray-200 shadow-inner">
+                    {recommendations}
+                </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
+
+// Mock event data (French: Données d'événements factices)
+const MOCK_EVENT_DATA = JSON.stringify([
+  { "id": 1, "name": "Concert de Rock au Zénith", "date": "2025-10-25", "category": "Musique / Rock", "description": "Le groupe 'Les Fusées Rouges' en tournée mondiale. Ambiance garantie. Prix: 35€", "location": "Zénith Toulouse Métropole" },
+  { "id": 2, "name": "Exposition Picasso: L'Ère Bleue", "date": "2025-11-01", "category": "Culture / Art", "description": "Collection rare des œuvres du début de carrière de Picasso. Prix: 12€", "location": "Musée des Augustins" },
+  { "id": 3, "name": "Festival du Vin Naturel", "date": "2025-10-20", "category": "Gastronomie / Vin", "description": "Dégustation et rencontre avec des vignerons locaux. Prix: 25€", "location": "Halle de la Machine" },
+  { "id": 4, "name": "Match de Rugby: Stade Toulousain vs Bègles", "date": "2025-10-27", "category": "Sport / Rugby", "description": "Un grand classique du Top 14. Ambiance électrique assurée.", "location": "Stade Ernest-Wallon" }
+]);
 
 // -----------------------------------------------------
 // Le wrapper qui contient le Provider et le Toaster
 // -----------------------------------------------------
 
-export default function AppWrapper(props: AiRecommendationsProps) {
-    return (
-        <ToastProvider>
-            <AiRecommendations {...props} />
-            <Toaster /> 
-        </ToastProvider>
-    );
+// Retire props de la signature pour rendre le composant autonome
+export default function AppWrapper() {
+    return (
+        <ToastProvider>
+            {/* Passe les données factices pour garantir la compilabilité */}
+            <AiRecommendations eventData={MOCK_EVENT_DATA} />
+            <Toaster /> 
+        </ToastProvider>
+    );
 }
