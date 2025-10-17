@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   TriangleAlert,
-  PartyPopper,
   MapPin,
   Info,
   Loader2,
@@ -18,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+
+// --- Interfaces et Constantes (Inchangées) ---
 
 interface DiscordEvent {
   id: string;
@@ -42,9 +43,12 @@ interface MapClientProps {
 const TOULOUSE_CENTER = { lat: 43.6047, lng: 1.4442 };
 const GUILD_ID = '1422806103267344416';
 
+// --- Composant Client ---
+
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [geocodingStatus, setGeocodingStatus] = useState<'pending' | 'loading' | 'complete' | 'error'>('pending');
+  const [mapsLoaded, setMapsLoaded] = useState(false);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -53,57 +57,142 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     [initialEvents]
   );
 
+  // Fonction pour rafraîchir la page
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+  
   // --- Géocodage via fetch ---
-useEffect(() => {
-  if (!apiKey || addressEvents.length === 0) {
-    setGeocodingStatus(addressEvents.length === 0 ? 'complete' : 'error');
-    return;
-  }
-
-  const geocodeAll = async () => {
-    setGeocodingStatus('loading');
-    const temp: MappedEvent[] = [];
-    let successCount = 0;
-
-    for (const event of addressEvents) {
-      const location = event.entity_metadata?.location?.trim();
-      if (!location) continue;
-
-      try {
-        const res = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
-        );
-        const data = await res.json();
-
-        if (data.status === 'OK' && data.results.length > 0) {
-          const { lat, lng } = data.results[0].geometry.location;
-          temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
-          successCount++;
-          console.log(`✅ Géocodage réussi pour "${event.name}": ${lat}, ${lng}`);
-        } else {
-          console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
-        }
-      } catch (err) {
-        console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
-      }
+  useEffect(() => {
+    // Cas où il n'y a pas de clé API ou pas d'adresse à géocoder
+    if (!apiKey || addressEvents.length === 0) {
+      setGeocodingStatus(addressEvents.length === 0 ? 'complete' : 'error');
+      return;
     }
 
-    setMappedEvents(temp);
-    console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
-    setGeocodingStatus('complete');
+    const geocodeAll = async () => {
+      setGeocodingStatus('loading');
+      const temp: MappedEvent[] = [];
+      let successCount = 0;
+
+      for (const event of addressEvents) {
+        const location = event.entity_metadata?.location?.trim();
+        if (!location) continue;
+
+        try {
+          const res = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
+          );
+          const data = await res.json();
+
+          if (data.status === 'OK' && data.results.length > 0) {
+            const { lat, lng } = data.results[0].geometry.location;
+            temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
+            successCount++;
+          } else {
+            console.warn(`⚠️ Géocodage échoué pour "${event.name}" ("${location}"):`, data.status, data.error_message);
+          }
+        } catch (err) {
+          console.error(`❌ Erreur géocodage pour "${event.name}" ("${location}"):`, err);
+        }
+      }
+
+      setMappedEvents(temp);
+      console.log(`Géocodage terminé: ${successCount} / ${addressEvents.length} événements géocodés avec succès.`);
+      setGeocodingStatus('complete');
+    };
+
+    geocodeAll();
+  }, [apiKey, addressEvents]);
+  
+  // --- Messages de Statut pour la Carte (Nouveau) ---
+
+  const renderMapStatus = () => {
+    const isError = geocodingStatus === 'error' || !apiKey;
+    const isLoading = geocodingStatus === 'loading' || geocodingStatus === 'pending' || !mapsLoaded;
+    const noMappableEventsFound = mappedEvents.length === 0 && geocodingStatus === 'complete';
+
+    if (isError) {
+      return (
+        <Alert variant="destructive" className="h-full flex flex-col justify-center items-center text-center p-6">
+          <TriangleAlert className="h-8 w-8 mb-3" />
+          <AlertTitle className="text-lg font-bold">Erreur de chargement ou de géocodage</AlertTitle>
+          <AlertDescription className="mt-2 mb-4">
+            Un problème est survenu lors du chargement des cartes ou de la conversion des adresses.
+          </AlertDescription>
+          <Button onClick={handleRefresh}>
+            Rafraîchir la page
+          </Button>
+          <p className="mt-4 text-sm text-muted-foreground">
+            (Si l'erreur persiste, veuillez vérifier votre clé Google Maps.)
+          </p>
+        </Alert>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className="h-full flex flex-col justify-center items-center bg-gray-50/50">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+          <p className="text-lg font-semibold text-primary">Chargement de la carte et géocodage des adresses...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Veuillez patienter, cette étape peut prendre quelques secondes si de nombreux événements doivent être localisés.
+          </p>
+        </div>
+      );
+    }
+    
+    if (noMappableEventsFound) {
+        return (
+            <Alert className="h-full flex flex-col justify-center items-center text-center p-6">
+                <Info className="h-8 w-8 mb-3 text-blue-500" />
+                <AlertTitle className="text-lg font-bold">Aucun événement avec localisation</AlertTitle>
+                <AlertDescription className="mt-2">
+                    Aucun événement à localiser (avec adresse physique) n'a été trouvé.
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    // Retourne null si tout est prêt pour afficher la carte
+    return null; 
   };
+  
+  // --- Rendu de la Carte (Mis à jour) ---
 
-  geocodeAll();
-}, [apiKey, addressEvents]);
+  const renderMap = () => {
+    // Si nous sommes en état d'erreur, de chargement, ou sans événement, affiche le statut
+    const statusComponent = renderMapStatus();
+    if (statusComponent) {
+        return statusComponent;
+    }
+      
+    // Si on arrive ici, le statut est 'complete' ET il y a des événements mappables
+    return (
+      <APIProvider apiKey={apiKey!} onLoad={() => setMapsLoaded(true)}>
+        <Map
+          defaultCenter={TOULOUSE_CENTER}
+          defaultZoom={12}
+          mapId="votre-map-id-ici" // REMPLACER par votre Map ID si vous en avez un
+          gestureHandling={'greedy'}
+        >
+          {mappedEvents.map(event => (
+            <Marker key={event.id} position={event.position} title={event.name} />
+          ))}
+        </Map>
+      </APIProvider>
+    );
+  };
+  
+  // --- Helpers pour l'affichage de la liste (Inchangé) ---
 
-
-  // --- Détails d’un événement ---
   const getLocationDetails = (event: DiscordEvent) => {
     if (event.entity_type === 3) {
       const location = event.entity_metadata?.location?.trim();
       return {
         icon: <MapPin className="h-4 w-4 text-green-600" />,
         text: location || 'Lieu externe non spécifié',
+        // Correction de l'erreur dans la construction du lien
         link: location
           ? location.startsWith('http')
             ? location
@@ -122,103 +211,18 @@ useEffect(() => {
     };
   };
 
-  // --- Carte ---
-  const renderMap = () => (
-    <APIProvider apiKey={apiKey!}>
-      <Map
-        defaultCenter={mappedEvents.length > 0 ? mappedEvents[0].position : TOULOUSE_CENTER}
-        defaultZoom={13}
-        mapId="toulouse-map"
-        gestureHandling="greedy"
-        disableDefaultUI
-        className="w-full h-full"
-      >
-        {mappedEvents.map(event => (
-          <Marker
-            key={event.id}
-            position={event.position}
-            title={`${event.name} - ${event.entity_metadata?.location}`}
-            icon={{
-              path: window.google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#EF4444',
-              fillOpacity: 0.9,
-              strokeWeight: 0
-            }}
-          />
-        ))}
-      </Map>
-    </APIProvider>
-  );
 
-  const renderMapStatus = () => {
-    if (!apiKey)
-      return (
-        <div className="flex h-full items-center justify-center bg-muted/50">
-          ❌ Clé API Google Maps manquante.
-        </div>
-      );
-    if (addressEvents.length === 0)
-      return (
-        <div className="flex h-full items-center justify-center bg-muted/50">
-          <Info className="h-5 w-5 mr-2 text-yellow-500" />
-          Aucun événement externe à afficher.
-        </div>
-      );
-    if (geocodingStatus === 'pending' || geocodingStatus === 'loading')
-      return (
-        <div className="flex h-full items-center justify-center bg-muted/50">
-          <Loader2 className="animate-spin h-5 w-5 text-primary mr-2" />
-          Chargement et géocodage de {addressEvents.length} événement(s)...
-        </div>
-      );
-    if (geocodingStatus === 'complete' && mappedEvents.length === 0)
-      return (
-        <div className="flex h-full items-center justify-center bg-muted/50">
-          <TriangleAlert className="h-5 w-5 text-red-500 mr-2" />
-          Tous les géocodages ont échoué.
-        </div>
-      );
-    if (geocodingStatus === 'error')
-      return (
-        <div className="flex h-full items-center justify-center bg-muted/50">
-          <TriangleAlert className="h-5 w-5 text-red-500 mr-2" />
-          Erreur de chargement de Google Maps.
-        </div>
-      );
+  // --- Rendu Final (Mis à jour pour utiliser renderMap) ---
 
-    return renderMap();
-  };
-
-  // --- Rendu principal ---
   return (
-    <div className="flex flex-col gap-8 p-4 md:p-8">
-      <header>
-        <h1 className="text-4xl font-bold text-primary">Carte Interactive</h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Localisation des événements externes "Fais Ta Sortie à Toulouse".
-        </p>
-      </header>
-
-      <Alert className="mb-4">
-        <PartyPopper className="h-4 w-4" />
-        <AlertTitle>Statut du géocodage</AlertTitle>
-        <AlertDescription>
-          {geocodingStatus === 'pending' && 'En attente du chargement de la carte...'}
-          {geocodingStatus === 'loading' && `Géocodage de ${addressEvents.length} événement(s)...`}
-          {geocodingStatus === 'complete' &&
-            `${mappedEvents.length} événement(s) géocodé(s) avec succès sur ${addressEvents.length}.`}
-        </AlertDescription>
-      </Alert>
-
-      {/* Carte */}
+    <div className="p-4 md:p-8">
       <Card>
         <CardContent className="p-0">
-          <div className="aspect-video w-full min-h-[500px]">{renderMapStatus()}</div>
+          {/* C'est ici que renderMap() affiche soit la carte, soit le statut */}
+          <div className="aspect-video w-full min-h-[500px]">{renderMap()}</div> 
         </CardContent>
       </Card>
 
-      {/* Liste des événements sous la carte */}
       <Card className="mt-4">
         <CardHeader>
           <CardTitle>Liste des événements à venir</CardTitle>
