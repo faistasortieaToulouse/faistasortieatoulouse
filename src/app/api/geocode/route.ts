@@ -4,45 +4,64 @@ const GOOGLE_MAPS_SERVER_KEY = process.env.GOOGLE_MAPS_SERVER_KEY;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const address = searchParams.get('address');
+  const address = searchParams.get('address')?.trim();
 
   if (!address) {
-    return NextResponse.json({ status: 'ERROR', error_message: 'Adresse manquante', results: [] });
-  }
-
-  console.log('Adresse à géocoder :', address);
-
-  if (!GOOGLE_MAPS_SERVER_KEY) {
-    console.error('Clé serveur Google Maps manquante !');
-    return NextResponse.json({ status: 'ERROR', error_message: 'Clé serveur manquante', results: [] });
+    return NextResponse.json({
+      status: 'ERROR',
+      error_message: 'Adresse manquante',
+      results: [],
+    });
   }
 
   try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_SERVER_KEY}`
-    );
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+      address
+    )}&components=country:FR&key=${GOOGLE_MAPS_SERVER_KEY}`;
 
-    if (!res.ok) {
-      console.error('Erreur HTTP Geocoding API', res.status, res.statusText);
-      return NextResponse.json({ status: 'ERROR', error_message: 'Erreur HTTP', results: [] });
-    }
+    console.log(`Géocodage : "${address}" → ${url}`);
 
+    const res = await fetch(url);
     const data = await res.json();
 
-    console.log('Résultat Geocoding API :', JSON.stringify(data, null, 2));
-
     if (data.status === 'OK' && data.results.length > 0) {
-      const location = data.results[0].geometry.location;
+      const result = data.results[0];
+
+      // Vérifie si l'adresse est en Haute-Garonne
+      const inHauteGaronne = result.address_components.some(comp =>
+        comp.types.includes('administrative_area_level_2') &&
+        comp.long_name.toLowerCase() === 'haute-garonne'
+      );
+
+      if (!inHauteGaronne) {
+        console.warn(`⚠️ Adresse hors Haute-Garonne ignorée : "${address}"`);
+        return NextResponse.json({
+          status: 'IGNORED',
+          error_message: 'Adresse hors Haute-Garonne',
+          results: [],
+        });
+      }
+
+      const location = result.geometry.location;
+      console.log(`✅ Adresse géocodée : "${address}" → lat:${location.lat}, lng:${location.lng}`);
       return NextResponse.json({
         status: 'OK',
-        results: [{ lat: location.lat, lng: location.lng }]
+        results: [{ lat: location.lat, lng: location.lng }],
+      });
+    } else {
+      console.warn(`❌ Adresse introuvable : "${address}" (status: ${data.status})`);
+      return NextResponse.json({
+        status: data.status,
+        error_message: data.error_message || 'Adresse introuvable',
+        results: [],
       });
     }
-
-    console.warn(`Adresse introuvable ou API échouée pour : "${address}"`, data.status);
-    return NextResponse.json({ status: data.status, results: [] });
   } catch (err: any) {
-    console.error('Exception Geocoding API :', err.message || err);
-    return NextResponse.json({ status: 'ERROR', error_message: err.message || 'Unknown error', results: [] });
+    console.error(`Erreur Geocoding API pour "${address}" :`, err);
+    return NextResponse.json({
+      status: 'ERROR',
+      error_message: err.message || 'Erreur inconnue',
+      results: [],
+    });
   }
 }

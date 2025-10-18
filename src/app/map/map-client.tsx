@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { TriangleAlert, MapPin, Info, Loader2, Calendar, Clock, ExternalLink, Mic } from 'lucide-react';
+import { MapPin, Info, Loader2, Calendar, Clock, ExternalLink, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -47,20 +47,20 @@ export default function MapClient({ initialEvents }: MapClientProps) {
       const location = event.entity_metadata?.location?.trim();
       if (!location) continue;
 
-      console.log('Géocodage pour :', location);
-
       try {
         const res = await fetch(`/api/geocode?address=${encodeURIComponent(location)}`);
         const data = await res.json();
 
         if (data.status === 'OK' && data.results.length > 0) {
           temp.push({ ...event, position: data.results[0], isGeocoded: true });
-          console.log(`✅ Adresse géocodée : ${location} → lat: ${data.results[0].lat}, lng: ${data.results[0].lng}`);
+          console.log(`✅ Géocodé : "${location}" → lat:${data.results[0].lat}, lng:${data.results[0].lng}`);
+        } else if (data.status === 'IGNORED') {
+          console.warn(`⚠️ Ignoré (hors Haute-Garonne) : "${location}"`);
         } else {
           console.warn(`❌ Adresse introuvable : "${location}"`);
         }
       } catch (err) {
-        console.error(`Erreur géocodage : "${location}"`, err);
+        console.error(`Erreur géocodage "${location}"`, err);
       }
     }
 
@@ -116,7 +116,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
           <Info className="h-8 w-8 mb-3 text-blue-500" />
           <AlertTitle>Aucun événement localisable</AlertTitle>
           <AlertDescription>
-            Aucun événement avec adresse physique n’a été trouvé ou la clé serveur est invalide.
+            Aucun événement avec adresse physique n’a été trouvé ou toutes sont hors Haute-Garonne.
           </AlertDescription>
           <Button onClick={handleRefresh} className="mt-2">Rafraîchir</Button>
         </Alert>
