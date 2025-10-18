@@ -20,6 +20,7 @@ interface DiscordEvent {
 interface MappedEvent extends DiscordEvent {
   position: { lat: number; lng: number };
   isGeocoded: boolean;
+  geocodeStatus: 'OK' | 'IGNORED' | 'NOT_FOUND';
 }
 
 interface MapClientProps {
@@ -51,14 +52,19 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         const res = await fetch(`/api/geocode?address=${encodeURIComponent(location)}`);
         const data = await res.json();
 
+        let status: 'OK' | 'IGNORED' | 'NOT_FOUND' = 'NOT_FOUND';
+
         if (data.status === 'OK' && data.results.length > 0) {
-          temp.push({ ...event, position: data.results[0], isGeocoded: true });
+          status = 'OK';
+          temp.push({ ...event, position: data.results[0], isGeocoded: true, geocodeStatus: status });
           console.log(`✅ Géocodé : "${location}" → lat:${data.results[0].lat}, lng:${data.results[0].lng}`);
         } else if (data.status === 'IGNORED') {
+          status = 'IGNORED';
           console.warn(`⚠️ Ignoré (hors Haute-Garonne) : "${location}"`);
         } else {
           console.warn(`❌ Adresse introuvable : "${location}"`);
         }
+
       } catch (err) {
         console.error(`Erreur géocodage "${location}"`, err);
       }

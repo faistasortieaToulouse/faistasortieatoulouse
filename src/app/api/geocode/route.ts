@@ -1,3 +1,4 @@
+// src/app/api/geocode/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 const GOOGLE_MAPS_SERVER_KEY = process.env.GOOGLE_MAPS_SERVER_KEY;
@@ -14,41 +15,23 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  if (!GOOGLE_MAPS_SERVER_KEY) {
+    return NextResponse.json({
+      status: 'ERROR',
+      error_message: 'Clé API Google Maps non définie',
+      results: [],
+    });
+  }
+
   try {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
       address
     )}&components=country:FR&key=${GOOGLE_MAPS_SERVER_KEY}`;
 
-    console.log(`Géocodage : "${address}" → ${url}`);
-
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.status === 'OK' && data.results.length > 0) {
-      const result = data.results[0];
-
-      // Vérifie si l'adresse est en Haute-Garonne
-      const inHauteGaronne = result.address_components.some(comp =>
-        comp.types.includes('administrative_area_level_2') &&
-        comp.long_name.toLowerCase() === 'haute-garonne'
-      );
-
-      if (!inHauteGaronne) {
-        console.warn(`⚠️ Adresse hors Haute-Garonne ignorée : "${address}"`);
-        return NextResponse.json({
-          status: 'IGNORED',
-          error_message: 'Adresse hors Haute-Garonne',
-          results: [],
-        });
-      }
-
-      const location = result.geometry.location;
-      console.log(`✅ Adresse géocodée : "${address}" → lat:${location.lat}, lng:${location.lng}`);
-      return NextResponse.json({
-        status: 'OK',
-        results: [{ lat: location.lat, lng: location.lng }],
-      });
-    } else {
+    if (data.status !== 'OK' || !data.results.length) {
       console.warn(`❌ Adresse introuvable : "${address}" (status: ${data.status})`);
       return NextResponse.json({
         status: data.status,
@@ -56,6 +39,30 @@ export async function GET(req: NextRequest) {
         results: [],
       });
     }
+
+    const location = data.results[0].geometry.location;
+    const components = data.results[0].address_components;
+
+    // Vérifie si l'adresse est en Haute-Garonne
+    const inHauteGaronne = components.some(
+      c => c.types.includes('administrative_area_level_2') && /Haute-Garonne/i.test(c.long_name)
+    );
+
+    if (!inHauteGaronne) {
+      console.warn(`⚠️ Adresse hors Haute-Garonne ignorée : "${address}"`);
+      return NextResponse.json({
+        status: 'IGNORED',
+        error_message: 'Adresse hors Haute-Garonne',
+        results: [],
+      });
+    }
+
+    console.log(`✅ Adresse géocodée : "${address}" → lat:${location.lat}, lng:${location.lng}`);
+
+    return NextResponse.json({
+      status: 'OK',
+      results: [{ lat: location.lat, lng: location.lng }],
+    });
   } catch (err: any) {
     console.error(`Erreur Geocoding API pour "${address}" :`, err);
     return NextResponse.json({
