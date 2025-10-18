@@ -1,9 +1,9 @@
 'use client';
-import { useCallback } from "react";
+
+import { useRef, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -12,18 +12,55 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// --- Déclaration globale pour Turnstile ---
+declare global {
+  interface Window {
+    turnstile: {
+      render: (el: HTMLElement, options: any) => string;
+      reset: (widgetIdOrContainer: string | HTMLElement) => void;
+    };
+  }
+}
+
 // --- Validation du formulaire ---
 const contactFormSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   subject: z.string().min(5),
   message: z.string().min(10),
+  'cf-turnstile-response': z.string().min(1, { message: 'Veuillez compléter la vérification anti-bot.' }),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
   const { toast } = useToast();
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const [siteKey, setSiteKey] = useState<string | null>(null);
+
+  // --- Récupérer la clé publique côté client ---
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+    if (!key) {
+      console.error("❌ NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY est manquant !");
+      return;
+    }
+    setSiteKey(key);
+  }, []);
+
+  // --- Initialiser le widget Turnstile ---
+  useEffect(() => {
+    if (siteKey && turnstileRef.current && window.turnstile && !widgetIdRef.current) {
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: siteKey,
+        theme: "auto",
+        callback: (token: string) => form.setValue('cf-turnstile-response', token, { shouldValidate: true }),
+        "error-callback": () => form.setValue('cf-turnstile-response', '', { shouldValidate: true }),
+        "expired-callback": () => form.setValue('cf-turnstile-response', '', { shouldValidate: true }),
+      });
+    }
+  }, [siteKey]);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -32,6 +69,7 @@ export default function ContactPage() {
       email: '',
       subject: '',
       message: '',
+      'cf-turnstile-response': '',
     },
   });
 
@@ -39,7 +77,6 @@ export default function ContactPage() {
     form.clearErrors();
 
     try {
-      // Envoi vers ton API Next.js
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,14 +88,22 @@ export default function ContactPage() {
       if (res.ok) {
         toast({ title: "Message envoyé avec succès !" });
         form.reset();
+        if (window.turnstile && turnstileRef.current) {
+          window.turnstile.reset(turnstileRef.current);
+        }
       } else {
         toast({ variant: "destructive", title: "Erreur", description: result.message || "Échec de l’envoi." });
+        if (window.turnstile && turnstileRef.current) {
+          window.turnstile.reset(turnstileRef.current);
+        }
       }
     } catch (err) {
       console.error(err);
       toast({ variant: "destructive", title: "Erreur réseau", description: "Impossible de contacter le serveur." });
     }
   }, [form, toast]);
+
+  const turnstileError = form.formState.errors['cf-turnstile-response']?.message;
 
   return (
     <div className="p-4 md:p-8">
@@ -110,6 +155,15 @@ export default function ContactPage() {
                   <FormMessage />
                 </FormItem>
               )}/>
+
+              {/* --- Champ caché pour Turnstile --- */}
+              <input type="hidden" {...form.register('cf-turnstile-response')} />
+
+              {/* --- Widget Turnstile --- */}
+              <div className="flex flex-col items-center pt-2">
+                <div ref={turnstileRef} className="cf-turnstile" />
+                {turnstileError && <p className="text-sm text-destructive mt-2">{turnstileError}</p>}
+              </div>
 
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />

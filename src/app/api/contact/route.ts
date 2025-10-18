@@ -1,51 +1,100 @@
 // src/app/api/contact/route.ts
-import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
-// Forcer le runtime Node.js pour Nodemailer
-export const runtime = 'nodejs';
+// ✅ Forcer l'utilisation du runtime Node.js (obligatoire pour Nodemailer)
+export const runtime = "nodejs";
 
 // --- Variables d'environnement ---
-const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
-const SMTP_USER = process.env.SMTP_USER;
-const SMTP_PASS = process.env.SMTP_PASS;
+const CONTACT_EMAIL = process.env.CONTACT_EMAIL;
+const TURNSTILE_SECRET_KEY = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
 
-// --- Vérification minimale des variables ---
-if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+// --- Vérification de la configuration SMTP ---
+if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.warn(
-    '⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.'
+    "⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel."
   );
 }
 
-// --- Configuration Nodemailer ---
+// --- Transporteur SMTP ---
 const transporter = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: SMTP_PORT === 465, // true pour 465, false sinon
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: process.env.SMTP_SECURE === "true",
   auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
 // --- Handler principal ---
 export async function POST(request: Request) {
   try {
+    // --- Vérification clé Turnstile ---
+    if (!TURNSTILE_SECRET_KEY) {
+      console.error("❌ CLOUDFLARE_TURNSTILE_SECRET_KEY est manquant.");
+      return NextResponse.json(
+        { message: "Erreur serveur : clé Turnstile manquante." },
+        { status: 500 }
+      );
+    }
+
+    // --- Lecture des données du formulaire ---
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name, email, subject, message, "cf-turnstile-response": turnstileToken } = body;
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
-        { message: 'Tous les champs sont requis.' },
+        { message: "Tous les champs du formulaire sont obligatoires." },
         { status: 400 }
       );
     }
 
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { message: "Vérification anti-bot manquante." },
+        { status: 400 }
+      );
+    }
+
+    // --- Vérification du token Turnstile ---
+    const verificationData = new URLSearchParams({
+      secret: TURNSTILE_SECRET_KEY,
+      response: turnstileToken,
+      remoteip: request.headers.get("cf-connecting-ip") || "",
+    });
+
+    const verificationResponse = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: verificationData,
+      }
+    );
+
+    const verificationResult = await verificationResponse.json();
+    console.log("Turnstile verification result:", verificationResult);
+
+    if (!verificationResult.success) {
+      console.warn("❌ Échec Turnstile:", verificationResult["error-codes"]);
+      return NextResponse.json(
+        { message: "Vérification anti-bot échouée. Veuillez réessayer." },
+        { status: 403 }
+      );
+    }
+
     // --- Envoi de l’e-mail ---
+    if (!CONTACT_EMAIL) {
+      console.error("❌ CONTACT_EMAIL est manquant !");
+      return NextResponse.json(
+        { message: "Erreur serveur : email de contact non configuré." },
+        { status: 500 }
+      );
+    }
+
     const mailOptions = {
-      from: SMTP_USER,
+      from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
       subject: `[CONTACT] ${subject} - De: ${name}`,
       html: `
@@ -53,28 +102,17 @@ export async function POST(request: Request) {
         <p><strong>Sujet:</strong> ${subject}</p>
         <hr>
         <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
+        <p>${message.replace(/\n/g, "<br>")}</p>
         <hr>
         <p><small>Envoyé via le formulaire de contact du site.</small></p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
 
-    console.log(`✅ Message envoyé par ${name} <${email}>`);
-
-    return NextResponse.json(
-      { message: 'Message envoyé avec succès !' },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: "Message envoyé avec succès !" }, { status: 200 });
   } catch (error: any) {
-    console.error('❌ Erreur serveur contact :', error);
+    console.error("❌ Erreur serveur contact :", error);
     return NextResponse.json(
-      {
-        message:
-          'Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.',
-      },
-      { status: 500 }
-    );
-  }
-}
+      { message: "Erre
