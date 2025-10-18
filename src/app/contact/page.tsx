@@ -203,6 +203,32 @@ export default function ContactPage() {
     </FormItem>
   )}
 />
+
+{/* Widget Turnstile visible */}
+<div className="flex flex-col items-center pt-2">
+  <div
+    ref={turnstileRef}
+    className="cf-turnstile"
+    data-sitekey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY!}
+    data-theme="auto"
+    data-callback={(token: string) =>
+      form.setValue('cf-turnstile-response', token, { shouldValidate: true })
+    }
+    data-error-callback={() =>
+      form.setValue('cf-turnstile-response', '', { shouldValidate: true })
+    }
+    data-expired-callback={() =>
+      form.setValue('cf-turnstile-response', '', { shouldValidate: true })
+    }
+  ></div>
+
+  {turnstileError && (
+    <p className="text-sm font-medium text-destructive mt-2">
+      {turnstileError}
+    </p>
+  )}
+</div>
+
               
               {/* 2. WIDGET CLOUDFLARE TURNSTILE */}
               <div className="flex flex-col items-center pt-2">
