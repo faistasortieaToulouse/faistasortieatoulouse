@@ -67,13 +67,14 @@ export default function ContactPage() {
   });
 
   // --- SITE KEY Turnstile
-  const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+  const siteKeyRaw = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+  const siteKey = typeof siteKeyRaw === 'string' ? siteKeyRaw : '';
 
   const turnstileError = form.formState.errors['cf-turnstile-response']?.message;
 
   // --- Charger le script Turnstile une seule fois
   useEffect(() => {
-    if (!siteKey || typeof siteKey !== 'string') {
+    if (!siteKey) {
       console.error('⚠️ Clé publique Turnstile manquante ou invalide.');
       return;
     }
@@ -155,7 +156,7 @@ export default function ContactPage() {
   );
 
   // --- Message si la clé publique est manquante
-  if (!siteKey || typeof siteKey !== 'string') {
+  if (!siteKey) {
     return (
       <div className="p-6 text-red-500">
         Erreur de configuration : clé publique Turnstile manquante.
