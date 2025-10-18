@@ -35,15 +35,23 @@ export default function MapClient({ initialEvents }: MapClientProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
+  // Sélection uniquement des événements avec adresse valide
   const addressEvents = useMemo(
     () => initialEvents.filter(e => e.entity_type === 3 && !!e.entity_metadata?.location?.trim()),
     [initialEvents]
   );
 
+  // Géocodage côté serveur
   const geocodeAll = useCallback(async () => {
+    if (addressEvents.length === 0) {
+      setLoading(false);
+      return;
+    }
+
     const temp: MappedEvent[] = [];
+
     for (const event of addressEvents) {
-      const location = event.entity_metadata?.location?.trim();
+      const location = event.entity_metadata!.location!.trim();
       if (!location) continue;
 
       try {
@@ -58,6 +66,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         console.error(`Erreur géocodage: "${location}"`, err);
       }
     }
+
     setMappedEvents(temp);
     setLoading(false);
   }, [addressEvents]);
@@ -100,7 +109,8 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     if (loading) {
       return (
         <div className="h-96 flex flex-col justify-center items-center">
-          <Loader2 className="animate-spin h-10 w-10 mb-4" /> Chargement de la carte et géocodage…
+          <Loader2 className="animate-spin h-10 w-10 mb-4" />
+          Chargement de la carte et géocodage…
         </div>
       );
     }
@@ -110,7 +120,9 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         <Alert className="h-96 flex flex-col justify-center items-center text-center p-6">
           <Info className="h-8 w-8 mb-3 text-blue-500" />
           <AlertTitle>Aucun événement localisable</AlertTitle>
-          <AlertDescription>Aucun événement avec adresse physique n’a été trouvé.</AlertDescription>
+          <AlertDescription>
+            Aucun événement avec adresse physique n’a été trouvé.
+          </AlertDescription>
           <Button onClick={handleRefresh} className="mt-2">Rafraîchir</Button>
         </Alert>
       );
@@ -119,20 +131,18 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     return <div ref={mapRef} style={{ width: '100%', height: '500px' }} />;
   };
 
+  // Affichage des détails d'un événement
   const getLocationDetails = (event: DiscordEvent) => {
-    if (event.entity_type === 3) {
-      const location = event.entity_metadata?.location?.trim();
+    const location = event.entity_metadata?.location?.trim();
+    if (event.entity_type === 3 && location) {
       return {
         icon: <MapPin className="h-4 w-4 text-green-600" />,
-        text: location || 'Lieu non spécifié',
-        link: location
-          ? location.startsWith('http')
-            ? location
-            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
-          : '#',
-        isMappable: !!location,
+        text: location,
+        link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`,
+        isMappable: true,
       };
     }
+
     const type = event.entity_type === 2 ? 'Salon Vocal' : 'Salon Stage';
     return {
       icon: <Mic className="h-4 w-4 text-indigo-500" />,
