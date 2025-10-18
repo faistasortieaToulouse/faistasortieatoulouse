@@ -29,12 +29,37 @@ interface MapClientProps {
 
 const TOULOUSE_CENTER = { lat: 43.6047, lng: 1.4442 };
 const GUILD_ID = '1422806103267344416';
+const GOOGLE_MAPS_CLIENT_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_CLIENT_KEY || '';
+
+// Hook pour charger Google Maps côté client
+function useLoadGoogleMaps(apiKey: string) {
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if ((window as any).google?.maps) {
+      setLoaded(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setLoaded(true);
+    script.onerror = () => console.error('Erreur de chargement de Google Maps API');
+    document.head.appendChild(script);
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [apiKey]);
+  return loaded;
+}
 
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+
+  const mapsLoaded = useLoadGoogleMaps(GOOGLE_MAPS_CLIENT_KEY);
 
   const addressEvents = useMemo(
     () => initialEvents.filter(e => e.entity_type === 3 && !!e.entity_metadata?.location?.trim()),
@@ -43,17 +68,13 @@ export default function MapClient({ initialEvents }: MapClientProps) {
 
   const geocodeAll = useCallback(async () => {
     const temp: MappedEvent[] = [];
-
     for (const event of addressEvents) {
       const location = event.entity_metadata?.location?.trim();
       if (!location) continue;
-
       try {
         const res = await fetch(`/api/geocode?address=${encodeURIComponent(location)}`);
         const data = await res.json();
-
         let status: 'OK' | 'IGNORED' | 'NOT_FOUND' = 'NOT_FOUND';
-
         if (data.status === 'OK' && data.results.length > 0) {
           status = 'OK';
           temp.push({ ...event, position: data.results[0], isGeocoded: true, geocodeStatus: status });
@@ -64,12 +85,10 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         } else {
           console.warn(`❌ Adresse introuvable : "${location}"`);
         }
-
       } catch (err) {
         console.error(`Erreur géocodage "${location}"`, err);
       }
     }
-
     setMappedEvents(temp);
     setLoading(false);
   }, [addressEvents]);
@@ -78,8 +97,9 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     geocodeAll();
   }, [geocodeAll]);
 
+  // Initialisation / mise à jour de la carte
   useEffect(() => {
-    if (loading || !mapRef.current || mappedEvents.length === 0) return;
+    if (!mapsLoaded || loading || !mapRef.current || mappedEvents.length === 0) return;
 
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = new google.maps.Map(mapRef.current, {
@@ -103,19 +123,25 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     });
 
     map.fitBounds(bounds);
-  }, [loading, mappedEvents]);
+  }, [mapsLoaded, loading, mappedEvents]);
 
   const handleRefresh = useCallback(() => window.location.reload(), []);
 
   const renderMapStatus = () => {
-    if (loading) {
+    if (!mapsLoaded) {
       return (
         <div className="h-96 flex flex-col justify-center items-center">
-          <Loader2 className="animate-spin h-10 w-10 mb-4" /> Chargement de la carte et géocodage…
+          <Loader2 className="animate-spin h-10 w-10 mb-4" /> Chargement de Google Maps…
         </div>
       );
     }
-
+    if (loading) {
+      return (
+        <div className="h-96 flex flex-col justify-center items-center">
+          <Loader2 className="animate-spin h-10 w-10 mb-4" /> Chargement des événements et géocodage…
+        </div>
+      );
+    }
     if (mappedEvents.length === 0) {
       return (
         <Alert className="h-96 flex flex-col justify-center items-center text-center p-6">
@@ -128,7 +154,6 @@ export default function MapClient({ initialEvents }: MapClientProps) {
         </Alert>
       );
     }
-
     return <div ref={mapRef} style={{ width: '100%', height: '500px' }} />;
   };
 
