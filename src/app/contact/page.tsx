@@ -49,6 +49,7 @@ const contactFormSchema = z.object({
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
+  console.log('Turnstile site key:', process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY);
   const { toast } = useToast();
   const turnstileRef = useRef<HTMLDivElement>(null);
 
@@ -190,11 +191,7 @@ export default function ContactPage() {
               />
 
               {/* --- Champ caché RHF pour le token Turnstile (hors FormField) --- */}
-              <input
-                type="hidden"
-                {...form.register('cf-turnstile-response')}
-                value={form.getValues('cf-turnstile-response') ?? ''}
-              />
+		<input type="hidden" {...form.register('cf-turnstile-response')} />
 
               {/* --- Widget Turnstile --- */}
               <div className="flex flex-col items-center pt-2">
