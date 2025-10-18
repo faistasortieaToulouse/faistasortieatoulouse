@@ -4,22 +4,9 @@ export const dynamic = 'force-dynamic';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
@@ -41,17 +28,17 @@ const contactFormSchema = z.object({
   email: z.string().email({ message: 'Veuillez entrer une adresse email valide.' }),
   subject: z.string().min(5, { message: 'Le sujet doit contenir au moins 5 caractères.' }),
   message: z.string().min(10, { message: 'Le message doit contenir au moins 10 caractères.' }),
-  'cf-turnstile-response': z
-    .string()
-    .min(1, { message: 'Veuillez compléter la vérification anti-bot.' }),
+  'cf-turnstile-response': z.string().min(1, { message: 'Veuillez compléter la vérification anti-bot.' }),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
-  console.log('Turnstile site key:', process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY);
   const { toast } = useToast();
   const turnstileRef = useRef<HTMLDivElement>(null);
+
+  // --- Clé Turnstile côté client ---
+  const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ?? '';
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -77,10 +64,7 @@ export default function ContactPage() {
         const result = await response.json();
 
         if (response.ok) {
-          toast({
-            title: 'Message envoyé avec succès !',
-            description: 'Nous vous répondrons dès que possible.',
-          });
+          toast({ title: 'Message envoyé avec succès !', description: 'Nous vous répondrons dès que possible.' });
           form.reset();
           if (window.turnstile && turnstileRef.current) {
             window.turnstile.reset(turnstileRef.current);
@@ -89,8 +73,7 @@ export default function ContactPage() {
           toast({
             variant: 'destructive',
             title: 'Échec de l’envoi',
-            description:
-              result.message || 'Une erreur est survenue lors de l’envoi du message.',
+            description: result.message || 'Une erreur est survenue lors de l’envoi du message.',
           });
           if (window.turnstile && turnstileRef.current) {
             window.turnstile.reset(turnstileRef.current);
@@ -129,49 +112,25 @@ export default function ContactPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* --- Champs standards --- */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Votre nom</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Jean Dupont" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Champs classiques */}
+              {['name', 'email', 'subject'].map((field) => (
+                <FormField
+                  key={field}
+                  control={form.control}
+                  name={field as keyof ContactFormValues}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{field === 'name' ? 'Votre nom' : field === 'email' ? 'Votre email' : 'Sujet'}</FormLabel>
+                      <FormControl>
+                        <Input placeholder={field === 'name' ? 'Jean Dupont' : field === 'email' ? 'jean.dupont@exemple.com' : 'Sujet du message'} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Votre email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="jean.dupont@exemple.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sujet</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Suggestion pour l'application" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+              {/* Message */}
               <FormField
                 control={form.control}
                 name="message"
@@ -179,59 +138,38 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Votre message</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Bonjour, je vous contacte car..."
-                        rows={5}
-                        {...field}
-                      />
+                      <Textarea placeholder="Bonjour, je vous contacte car..." rows={5} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* --- Champ caché RHF pour le token Turnstile (hors FormField) --- */}
-		<input type="hidden" {...form.register('cf-turnstile-response')} />
+              {/* Champ caché pour Turnstile */}
+              <input type="hidden" {...form.register('cf-turnstile-response')} />
 
-              {/* --- Widget Turnstile --- */}
+              {/* Widget Turnstile */}
               <div className="flex flex-col items-center pt-2">
                 <div
                   ref={turnstileRef}
                   className="cf-turnstile"
-                  data-sitekey={
-                    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY!
-                  }
+                  data-sitekey={siteKey}
                   data-theme="auto"
                   data-callback={(token: string) =>
-                    form.setValue('cf-turnstile-response', token, {
-                      shouldValidate: true,
-                    })
+                    form.setValue('cf-turnstile-response', token, { shouldValidate: true })
                   }
                   data-error-callback={() =>
-                    form.setValue('cf-turnstile-response', '', {
-                      shouldValidate: true,
-                    })
+                    form.setValue('cf-turnstile-response', '', { shouldValidate: true })
                   }
                   data-expired-callback={() =>
-                    form.setValue('cf-turnstile-response', '', {
-                      shouldValidate: true,
-                    })
+                    form.setValue('cf-turnstile-response', '', { shouldValidate: true })
                   }
-                ></div>
-
-                {turnstileError && (
-                  <p className="text-sm font-medium text-destructive mt-2">
-                    {turnstileError}
-                  </p>
-                )}
+                />
+                {turnstileError && <p className="text-sm font-medium text-destructive mt-2">{turnstileError}</p>}
               </div>
 
-              {/* --- Bouton d’envoi --- */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-              >
+              {/* Bouton */}
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
                 {form.formState.isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
               </Button>
