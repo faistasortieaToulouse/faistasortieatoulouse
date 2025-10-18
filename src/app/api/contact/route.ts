@@ -2,113 +2,87 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-// ✅ Forcer l'utilisation du runtime Node.js (obligatoire pour Nodemailer)
 export const runtime = 'nodejs';
 
 // --- Variables d'environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const TURNSTILE_SECRET_KEY = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
 
-// --- Vérification de la configuration SMTP ---
+// --- Vérification SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn(
-    '⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.'
-  );
+  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
 }
 
-// --- Configuration du transport SMTP ---
+// --- Transport Nodemailer ---
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST, // ex: smtp.gmail.com
+  host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true pour 465, false sinon
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-// --- Handler principal ---
 export async function POST(request: Request) {
   if (!TURNSTILE_SECRET_KEY) {
     console.error('❌ CLOUDFLARE_TURNSTILE_SECRET_KEY est manquant.');
     return NextResponse.json(
-      { message: 'Erreur de configuration serveur (clé Turnstile manquante).' },
+      { message: 'Erreur serveur : clé Turnstile manquante.' },
       { status: 500 }
     );
   }
 
   try {
     const body = await request.json();
-    console.log('Form data reçu :', body);
+    const { name, email, message, 'cf-turnstile-response': token } = body;
 
-    const { name, email, subject, message, 'cf-turnstile-response': turnstileToken } = body;
-
-    // --- Étape 1 : Validation Turnstile ---
-    if (!turnstileToken) {
+    if (!token) {
       return NextResponse.json(
         { message: 'Vérification anti-bot manquante.' },
         { status: 400 }
       );
     }
 
-    const verificationData = new URLSearchParams({
+    // --- Vérification côté serveur Turnstile ---
+    const params = new URLSearchParams({
       secret: TURNSTILE_SECRET_KEY,
-      response: turnstileToken,
+      response: token,
       remoteip: request.headers.get('cf-connecting-ip') || '',
     });
 
-    const verificationResponse = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: verificationData,
-      }
-    );
+    const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    });
 
-    const verificationResult = await verificationResponse.json();
-    console.log('Turnstile verification result:', verificationResult);
+    const result = await verification.json();
 
-    if (!verificationResult.success) {
-      console.warn(
-        '⚠️ Échec de la vérification Turnstile:',
-        verificationResult['error-codes']
-      );
+    if (!result.success) {
+      console.warn('⚠️ Échec Turnstile :', result['error-codes']);
       return NextResponse.json(
-        { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
+        { message: 'Vérification anti-bot échouée.' },
         { status: 403 }
       );
     }
 
-    // --- Étape 2 : Envoi de l’e-mail ---
-    const mailOptions = {
+    // --- Envoi de l’email ---
+    await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
-      subject: `[CONTACT] ${subject} - De: ${name}`,
-      html: `
-        <p><strong>De:</strong> ${name} &lt;${email}&gt;</p>
-        <p><strong>Sujet:</strong> ${subject}</p>
-        <hr>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        <hr>
-        <p><small>Envoyé via le formulaire de contact du site.</small></p>
-      `,
-    };
+      subject: `[CONTACT] Message de ${name} <${email}>`,
+      html: `<p><strong>Nom:</strong> ${name}</p>
+             <p><strong>Email:</strong> ${email}</p>
+             <p><strong>Message:</strong></p>
+             <p>${message.replace(/\n/g, '<br>')}</p>`,
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
-
+    return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
+  } catch (err: any) {
+    console.error('❌ Erreur serveur contact :', err);
     return NextResponse.json(
-      { message: 'Message envoyé avec succès !' },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    console.error('❌ Erreur serveur contact :', error);
-    return NextResponse.json(
-      {
-        message: `Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.`,
-      },
+      { message: 'Erreur interne du serveur, veuillez réessayer plus tard.' },
       { status: 500 }
     );
   }
