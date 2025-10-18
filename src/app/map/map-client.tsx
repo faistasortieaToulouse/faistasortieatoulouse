@@ -69,32 +69,40 @@ export default function MapClient({ initialEvents }: MapClientProps) {
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
   // --- Géocodage côté serveur via API ---
-  const geocodeAll = useCallback(async () => {
-    if (addressEvents.length === 0) {
-      setGeocodingStatus('complete');
-      return;
-    }
-    setGeocodingStatus('loading');
-    const temp: MappedEvent[] = [];
-    for (const event of addressEvents) {
-      const location = event.entity_metadata?.location?.trim();
-      if (!location) continue;
-      try {
-        const res = await fetch(`/api/geocoderoute?address=${encodeURIComponent(location)}`);
-        const data = await res.json();
-        if (data.status === 'OK' && data.results.length > 0) {
-          const { lat, lng } = data.results[0].geometry.location;
-          temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
-        } else {
-          console.warn(`Géocodage échoué pour "${event.name}" ("${location}"):`, data.status);
-        }
-      } catch (err) {
-        console.error(`Erreur géocodage pour "${event.name}" ("${location}")`, err);
-      }
-    }
-    setMappedEvents(temp);
+const geocodeAll = useCallback(async () => {
+  if (addressEvents.length === 0) {
     setGeocodingStatus('complete');
-  }, [addressEvents]);
+    return;
+  }
+  setGeocodingStatus('loading');
+
+  const temp: MappedEvent[] = [];
+
+  for (const event of addressEvents) {
+    const location = event.entity_metadata?.location?.trim();
+    if (!location) continue;
+
+    try {
+      const res = await fetch(`/api/geocoderoute?address=${encodeURIComponent(location)}`);
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { status: 'ERROR', results: [] }; }
+
+      if (data.status === 'OK' && data.results.length > 0) {
+        const { lat, lng } = data.results[0].geometry.location;
+        temp.push({ ...event, position: { lat, lng }, isGeocoded: true });
+      } else {
+        console.warn(`Adresse introuvable: "${location}"`);
+      }
+    } catch (err) {
+      console.error(`Erreur géocodage pour "${location}"`, err);
+    }
+  }
+
+  setMappedEvents(temp);
+  setGeocodingStatus('complete');
+}, [addressEvents]);
+
 
   useEffect(() => {
     if (geocodingStatus === 'pending') geocodeAll();
