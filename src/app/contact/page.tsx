@@ -192,21 +192,17 @@ export default function ContactPage() {
               
               {/* ---------------------------------------------------- */}
               {/* 1. CHAMP CACHÉ RHF POUR LE TOKEN TURNSTILE (Contournement total du bug React.Children.only) */}
-              <FormField
-                control={form.control}
-                name="cf-turnstile-response"
-                // Nous retournons un simple <div> masqué contenant l'input HTML natif
-                // Cela évite toute interaction avec la logique complexe de FormItem/FormControl.
-                render={({ field }) => (
-                    <div style={{ display: 'none' }}>
-                        <input
-                            type="hidden"
-                            {...field}
-                            value={field.value ?? ''}
-                        />
-                    </div>
-                )}
-              />
+<FormField
+  control={form.control}
+  name="cf-turnstile-response"
+  render={({ field }) => (
+    <FormItem className="hidden">
+      <FormControl>
+        <input type="hidden" {...field} value={field.value ?? ''} />
+      </FormControl>
+    </FormItem>
+  )}
+/>
               
               {/* 2. WIDGET CLOUDFLARE TURNSTILE */}
               <div className="flex flex-col items-center pt-2">
