@@ -213,7 +213,7 @@ export default function ContactPage() {
                 <div
                     ref={turnstileRef}
                     className="cf-turnstile"
-                    data-sitekey="0x4AAAAAAB67F6RPRZZDOgEg" // Votre Site Key Cloudflare
+                    data-sitekey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY!} // Votre Site Key Cloudflare
                     data-theme="auto"
                     // Ces callbacks sont essentiels pour que RHF sache quand le jeton est là
                     data-callback={(token: string) => form.setValue('cf-turnstile-response', token, { shouldValidate: true })}
