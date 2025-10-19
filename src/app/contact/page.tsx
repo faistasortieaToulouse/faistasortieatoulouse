@@ -97,7 +97,7 @@ useEffect(() => {
 useEffect(() => {
   if (!document.querySelector('script[data-altcha-loaded]')) {
     const script = document.createElement('script');
-    script.src = 'https://cdn.altcha.com/v5/altcha.js'; // ✅ URL CDN ALTCHA
+    script.src = 'https://github.com/altcha-org/altcha/blob/main/dist/altcha.js'; // ✅ URL CDN ALTCHA
     script.async = true;
     script.defer = true;
     script.type = 'module';
