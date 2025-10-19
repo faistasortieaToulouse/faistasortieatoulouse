@@ -81,39 +81,35 @@ export default function ContactPage() {
 
   // --- Charger le script ALTCHA une seule fois ---
   // Nous utilisons le CDN ici pour la simplicité de l'Open Source
-  useEffect(() => {
-    // Vérifie si le script est déjà là pour éviter de le recharger
-    if (!document.querySelector('script[data-altcha-loaded]')) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/gh/altcha-org/altcha@main/dist/altcha.min.js';
-      script.async = true;
-      script.defer = true;
-      script.type = 'module';
-      script.setAttribute('data-altcha-loaded', 'true'); // Marqueur pour ne pas recharger
+useEffect(() => {
+  if (!document.querySelector('script[data-altcha-loaded]')) {
+    const script = document.createElement('script');
+    script.src = '/js/altcha.js'; // depuis ton propre domaine
+    script.async = true;
+    script.defer = true;
+    script.type = 'module';
+    script.setAttribute('data-altcha-loaded', 'true');
 
-      // Une fois le script chargé, nous pouvons rendre le Web Component
-      script.onload = () => {
-        setScriptLoaded(true);
-        // On doit manuellement indiquer à React que le champ caché 'altcha' est prêt.
-        // C'est un contournement des formulaires contrôlés pour les Web Components.
-        const altchaWidget = document.querySelector('altcha-widget');
-        if(altchaWidget) {
-            altchaWidget.addEventListener('verified', (event: any) => {
-                // ALTCHA a résolu le PoW et a généré le payload.
-                // On met à jour le champ 'altcha' du formulaire React Hook Form
-                form.setValue('altcha', event.detail.payload, { shouldValidate: true });
-            });
-            altchaWidget.addEventListener('unverified', () => {
-                form.setValue('altcha', '', { shouldValidate: true });
-            });
-        }
-      };
-      
-      document.body.appendChild(script);
-    } else {
-        setScriptLoaded(true);
-    }
-  }, [form]); // Ajout de 'form' dans les dépendances (meilleure pratique)
+    script.onload = () => {
+      setScriptLoaded(true);
+
+      const altchaWidget = document.querySelector('altcha-widget');
+      if (altchaWidget) {
+        altchaWidget.addEventListener('verified', (event: any) => {
+          form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+        });
+        altchaWidget.addEventListener('unverified', () => {
+          form.setValue('altcha', '', { shouldValidate: true });
+        });
+      }
+    };
+
+    document.body.appendChild(script);
+  } else {
+    setScriptLoaded(true);
+  }
+}, [form]);
+ // Ajout de 'form' dans les dépendances (meilleure pratique)
 
   // --- Envoi du formulaire ---
   const onSubmit = useCallback(
