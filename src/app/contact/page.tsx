@@ -41,6 +41,7 @@ declare global {
         theme?: 'light' | 'dark' | 'auto';
         auto?: 'onsubmit'; // Utilisation pour déclencher la vérification au submit
         'challenge-url'?: string; // Optionnel pour Sentinel
+        verify?: 'true' | 'false'; // Ajout pour le contrôle du PoW
       }, HTMLElement>;
     }
   }
@@ -64,7 +65,7 @@ export default function ContactPage() {
   const { toast } = useToast();
   
   // État pour s'assurer que le script ALTCHA est chargé avant le rendu du widget
-  const [scriptLoaded, setScriptLoaded] = useState(false); 
+  const [scriptLoaded, setScriptLoaded] = useState(false);	
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -158,11 +159,11 @@ export default function ContactPage() {
   
   // Optionnel: Afficher un loader si le script n'est pas chargé
   if (!scriptLoaded) {
-     return (
+      return (
         <div className="p-6 text-blue-500">
             Chargement du module de vérification...
         </div>
-     );
+      );
   }
 
   return (
@@ -247,18 +248,19 @@ export default function ContactPage() {
               {/* ------------------------------------------- */}
               
               {/* Champ caché pour ALTCHA - Géré par RHF */}
-              <input type="hidden" {...form.register('altcha')} /> 
+              <input type="hidden" {...form.register('altcha')} />	
 
               <div className="flex flex-col items-center pt-2">
                 {/* Le Web Component ALTCHA.
                     - name="altcha" est essentiel pour la soumission.
                     - maxnumber augmente la difficulté (1 000 000 est une bonne base).
-                    - auto="onsubmit" permet de lancer la vérification lors du clic sur le bouton.
+                    - verify="false" indique au widget de ne pas utiliser d'URL de vérification distante.
                 */}
-                <altcha-widget 
-                    name="altcha" 
-                    maxnumber="1000000" 
+                <altcha-widget	
+                    name="altcha"	
+                    maxnumber="1000000"	
                     theme="auto"
+                    verify="false" {/* <-- CORRECTION APPLIQUÉE ICI */}
                 />
 
                 {altchaError && (
