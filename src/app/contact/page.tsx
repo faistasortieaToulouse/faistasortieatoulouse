@@ -41,7 +41,6 @@ declare global {
         theme?: 'light' | 'dark' | 'auto';
         auto?: 'onsubmit'; // Utilisation pour déclencher la vérification au submit
         'challenge-url'?: string; // Optionnel pour Sentinel
-        verify?: 'true' | 'false'; // Ajout pour le contrôle du PoW
       }, HTMLElement>;
     }
   }
@@ -255,13 +254,12 @@ export default function ContactPage() {
                 {/* Le Web Component ALTCHA.
                     - name="altcha" est essentiel pour la soumission.
                     - maxnumber augmente la difficulté (1 000 000 est une bonne base).
-                    - verify="false" indique au widget de ne pas utiliser d'URL de vérification distante.
+                    - 'challenge-url' est omis, forçant le mode PoW local.
                 */}
                 <altcha-widget	
                     name="altcha"	
                     maxnumber="1000000"	
                     theme="auto"
-                    verify="false"
                 />
 
                 {altchaError && (
