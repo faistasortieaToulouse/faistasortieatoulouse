@@ -15,10 +15,11 @@ interface DiscordEvent {
 }
 
 interface CalendarClientProps {
-  eventsData: DiscordEvent[]; // Tous les événements
+  eventsData: DiscordEvent[];
   upcomingEvents: DiscordEvent[];
 }
 
+// Formattage de la date et heure
 const formatEventTime = (isoString: string) => {
   const date = new Date(isoString);
   return new Intl.DateTimeFormat('fr-FR', {
@@ -41,7 +42,7 @@ const getEventLocation = (event: DiscordEvent) => {
   return 'Lieu non spécifié';
 };
 
-// Optionnel : lien Google Maps si adresse physique
+// Récupérer le lien Google Maps si adresse physique
 const getEventLocationLink = (event: DiscordEvent) => {
   const location = event.entity_metadata?.location;
   if (event.entity_type === 3 && location) {
@@ -54,6 +55,12 @@ const getEventLocationLink = (event: DiscordEvent) => {
 
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  // Préparer les événements pour le calendrier (points visibles)
+  const calendarEvents = eventsData.map(e => ({
+    title: e.name,
+    start: new Date(e.scheduled_start_time),
+  }));
 
   // Liste complète triée
   const allEvents = (eventsData || []).slice().sort(
@@ -73,6 +80,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={fr}
+          events={calendarEvents} // <-- points correctement affichés
           className="rounded-xl border shadow bg-card"
         />
       </div>
@@ -83,16 +91,24 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           Liste Complète des Événements
         </h2>
         <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[600px] overflow-y-auto">
+          {allEvents.length === 0 && (
+            <p className="text-muted-foreground text-center py-4">
+              Aucun événement Discord trouvé.
+            </p>
+          )}
           {allEvents.map(event => {
             const location = getEventLocation(event);
             const link = getEventLocationLink(event);
+
             return (
               <div
                 key={event.id}
                 className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
               >
                 <p className="font-bold text-lg text-primary">{event.name}</p>
-                <p className="text-sm text-muted-foreground">{formatEventTime(event.scheduled_start_time)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatEventTime(event.scheduled_start_time)}
+                </p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-4 w-4 text-green-600" />
                   {link ? (
@@ -111,11 +127,6 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
               </div>
             );
           })}
-          {allEvents.length === 0 && (
-            <p className="text-muted-foreground text-center py-4">
-              Aucun événement Discord trouvé.
-            </p>
-          )}
         </div>
       </div>
     </div>
