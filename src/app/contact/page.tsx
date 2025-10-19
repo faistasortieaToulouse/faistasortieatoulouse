@@ -1,5 +1,8 @@
 'use client';
 
+// Important: Installation de la bibliothèque nécessaire côté serveur !
+// N'oubliez pas de faire : npm install altcha-lib
+
 export const dynamic = 'force-dynamic';
 
 import { useRef, useEffect, useCallback, useState } from 'react';
@@ -27,12 +30,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+// Déclaration pour TypeScript/React du Web Component altcha-widget
+// Note: Ceci est nécessaire car 'altcha-widget' n'est pas une balise HTML standard
 declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement, options: any) => string;
-      reset: (id?: string | HTMLElement) => void;
-    };
+  namespace JSX {
+    interface IntrinsicElements {
+      'altcha-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        name?: string;
+        maxnumber?: string;
+        theme?: 'light' | 'dark' | 'auto';
+        auto?: 'onsubmit'; // Utilisation pour déclencher la vérification au submit
+        'challenge-url'?: string; // Optionnel pour Sentinel
+      }, HTMLElement>;
+    }
   }
 }
 
@@ -42,18 +52,19 @@ const contactFormSchema = z.object({
   email: z.string().email('Email invalide'),
   subject: z.string().min(5, 'Sujet trop court'),
   message: z.string().min(10, 'Message trop court'),
-  'cf-turnstile-response': z
+  // Le champ s'appelle 'altcha' par défaut
+  altcha: z
     .string()
-    .min(1, { message: 'Veuillez compléter la vérification anti-bot.' }),
+    .min(1, { message: 'Veuillez compléter la vérification ALTCHA.' }),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
   const { toast } = useToast();
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  
+  // État pour s'assurer que le script ALTCHA est chargé avant le rendu du widget
+  const [scriptLoaded, setScriptLoaded] = useState(false); 
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -62,63 +73,54 @@ export default function ContactPage() {
       email: '',
       subject: '',
       message: '',
-      'cf-turnstile-response': '',
+      altcha: '', // Champ pour le payload ALTCHA
     },
   });
 
-  // --- SITE KEY Turnstile
-  const siteKeyRaw = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
-  const siteKey = typeof siteKeyRaw === 'string' ? siteKeyRaw : '';
+  const altchaError = form.formState.errors['altcha']?.message;
 
-  const turnstileError = form.formState.errors['cf-turnstile-response']?.message;
-
-  // --- Charger le script Turnstile une seule fois
+  // --- Charger le script ALTCHA une seule fois ---
+  // Nous utilisons le CDN ici pour la simplicité de l'Open Source
   useEffect(() => {
-    if (!siteKey) {
-      console.error('⚠️ Clé publique Turnstile manquante ou invalide.');
-      return;
-    }
-
-    if (!window.turnstile) {
+    // Vérifie si le script est déjà là pour éviter de le recharger
+    if (!document.querySelector('script[data-altcha-loaded]')) {
       const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.src = 'https://cdn.jsdelivr.net/gh/altcha-org/altcha@main/dist/altcha.min.js';
       script.async = true;
       script.defer = true;
-      script.onload = () => setScriptLoaded(true);
+      script.type = 'module';
+      script.setAttribute('data-altcha-loaded', 'true'); // Marqueur pour ne pas recharger
+
+      // Une fois le script chargé, nous pouvons rendre le Web Component
+      script.onload = () => {
+        setScriptLoaded(true);
+        // On doit manuellement indiquer à React que le champ caché 'altcha' est prêt.
+        // C'est un contournement des formulaires contrôlés pour les Web Components.
+        const altchaWidget = document.querySelector('altcha-widget');
+        if(altchaWidget) {
+            altchaWidget.addEventListener('verified', (event: any) => {
+                // ALTCHA a résolu le PoW et a généré le payload.
+                // On met à jour le champ 'altcha' du formulaire React Hook Form
+                form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+            });
+            altchaWidget.addEventListener('unverified', () => {
+                form.setValue('altcha', '', { shouldValidate: true });
+            });
+        }
+      };
+      
       document.body.appendChild(script);
     } else {
-      setScriptLoaded(true);
+        setScriptLoaded(true);
     }
-  }, [siteKey]);
+  }, [form]);
 
-  // --- Rendre le widget une seule fois
-  useEffect(() => {
-    if (
-      scriptLoaded &&
-      window.turnstile &&
-      turnstileRef.current &&
-      !widgetIdRef.current
-    ) {
-      try {
-        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-          sitekey: siteKey,
-          theme: 'auto',
-          callback: (token: string) =>
-            form.setValue('cf-turnstile-response', token, { shouldValidate: true }),
-          'expired-callback': () =>
-            form.setValue('cf-turnstile-response', '', { shouldValidate: true }),
-          'error-callback': () =>
-            form.setValue('cf-turnstile-response', '', { shouldValidate: true }),
-        });
-      } catch (err) {
-        console.error('Erreur lors du rendu Turnstile:', err);
-      }
-    }
-  }, [scriptLoaded, form, siteKey]);
-
-  // --- Envoi du formulaire
+  // --- Envoi du formulaire ---
   const onSubmit = useCallback(
     async (data: ContactFormValues) => {
+      // 1. Déclenche le PoW si auto="onsubmit" (non nécessaire si le widget est en mode auto)
+      //    ALTCHA gère le PoW, nous vérifions simplement le résultat du PoW dans le champ 'altcha'
+      
       try {
         const res = await fetch('/api/contact', {
           method: 'POST',
@@ -139,10 +141,9 @@ export default function ContactPage() {
           });
         }
 
-        // --- Réinitialiser Turnstile après l’envoi
-        if (window.turnstile && widgetIdRef.current) {
-          window.turnstile.reset(widgetIdRef.current);
-        }
+        // Le widget ALTCHA se réinitialise généralement lui-même après l'envoi, 
+        // ou la prochaine interaction de l'utilisateur déclenchera un nouveau PoW si nécessaire.
+        
       } catch (err) {
         console.error(err);
         toast({
@@ -154,14 +155,14 @@ export default function ContactPage() {
     },
     [form, toast]
   );
-
-  // --- Message si la clé publique est manquante
-  if (!siteKey) {
-    return (
-      <div className="p-6 text-red-500">
-        Erreur de configuration : clé publique Turnstile manquante.
-      </div>
-    );
+  
+  // Optionnel: Afficher un loader si le script n'est pas chargé
+  if (!scriptLoaded) {
+     return (
+        <div className="p-6 text-blue-500">
+            Chargement du module de vérification...
+        </div>
+     );
   }
 
   return (
@@ -183,6 +184,8 @@ export default function ContactPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+              
+              {/* CHAMPS STANDARDS (inchangés) */}
               <FormField
                 control={form.control}
                 name="name"
@@ -238,15 +241,28 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
+              
+              {/* ------------------------------------------- */}
+              {/* INTÉGRATION ALTCHA (Remplace Turnstile) */}
+              {/* ------------------------------------------- */}
+              
+              {/* Champ caché pour ALTCHA - Géré par RHF */}
+              <input type="hidden" {...form.register('altcha')} /> 
 
-              {/* Champ caché pour Turnstile */}
-              <input type="hidden" {...form.register('cf-turnstile-response')} />
-
-              {/* Widget Turnstile */}
               <div className="flex flex-col items-center pt-2">
-                <div ref={turnstileRef} className="cf-turnstile" />
-                {turnstileError && (
-                  <p className="text-sm text-destructive mt-2">{turnstileError}</p>
+                {/* Le Web Component ALTCHA.
+                    - name="altcha" est essentiel pour la soumission.
+                    - maxnumber augmente la difficulté (1 000 000 est une bonne base).
+                    - auto="onsubmit" permet de lancer la vérification lors du clic sur le bouton.
+                */}
+                <altcha-widget 
+                    name="altcha" 
+                    maxnumber="1000000" 
+                    theme="auto"
+                />
+
+                {altchaError && (
+                  <p className="text-sm text-destructive mt-2">{altchaError}</p>
                 )}
               </div>
 

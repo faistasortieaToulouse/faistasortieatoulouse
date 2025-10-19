@@ -8,13 +8,10 @@ export default function Layout({ children }: { children: ReactNode }) {
     <>
       <MainLayout>{children}</MainLayout>
 
-      {/* --- Script Cloudflare Turnstile --- */}
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        strategy="afterInteractive"
-        async
-        defer
-      />
+      {/* --- Script Cloudflare Turnstile RETIRÉ ---
+        Le script ALTCHA est désormais chargé spécifiquement dans src/app/contact/page.jsx 
+        pour ne s'appliquer qu'à cette page.
+      */}
     </>
   );
 }

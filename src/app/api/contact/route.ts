@@ -1,13 +1,15 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { verifySolution } from 'altcha-lib'; // <-- NOUVEL IMPORT ALTCHA
 
 // ✅ Forcer l'utilisation du runtime Node.js (obligatoire pour Nodemailer)
 export const runtime = 'nodejs';
 
 // --- Variables d'environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
-const TURNSTILE_SECRET_KEY = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+// Remplacer CLOUDFLARE_TURNSTILE_SECRET_KEY par ALTCHA_HMAC_SECRET
+const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET; 
 
 // --- Vérification de la configuration SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -29,48 +31,33 @@ const transporter = nodemailer.createTransport({
 
 // --- Handler principal ---
 export async function POST(request: Request) {
-  if (!TURNSTILE_SECRET_KEY) {
-    console.error('❌ CLOUDFLARE_TURNSTILE_SECRET_KEY est manquant.');
+  if (!ALTCHA_HMAC_SECRET) {
+    console.error('❌ ALTCHA_HMAC_SECRET est manquant. Veuillez le définir dans vos variables d’environnement.');
     return NextResponse.json(
-      { message: 'Erreur de configuration serveur (clé Turnstile manquante).' },
+      { message: 'Erreur de configuration serveur (clé ALTCHA manquante).' },
       { status: 500 }
     );
   }
 
   try {
     const body = await request.json();
-    const { name, email, subject, message, 'cf-turnstile-response': turnstileToken } = body;
+    // Le nom du champ est maintenant 'altcha' au lieu de 'cf-turnstile-response'
+    const { name, email, subject, message, altcha } = body; 
 
-    // --- Étape 1 : Validation Turnstile ---
-    if (!turnstileToken) {
+    // --- Étape 1 : Validation ALTCHA ---
+    if (!altcha) {
       return NextResponse.json(
-        { message: 'Vérification anti-bot manquante.' },
+        { message: 'Vérification anti-bot manquante. Le widget ALTCHA n\'a pas soumis de jeton.' },
         { status: 400 }
       );
     }
 
-    const verificationData = new URLSearchParams({
-      secret: TURNSTILE_SECRET_KEY,
-      response: turnstileToken,
-      remoteip: request.headers.get('cf-connecting-ip') || '',
+    const verificationResult = await verifySolution(altcha, { 
+        hmacKey: ALTCHA_HMAC_SECRET 
     });
 
-    const verificationResponse = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: verificationData,
-      }
-    );
-
-    const verificationResult = await verificationResponse.json();
-
-    if (!verificationResult.success) {
-      console.warn(
-        '⚠️ Échec de la vérification Turnstile:',
-        verificationResult['error-codes']
-      );
+    if (!verificationResult.verified) {
+      console.warn('⚠️ Échec de la vérification ALTCHA. Raisons:', verificationResult.error);
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
