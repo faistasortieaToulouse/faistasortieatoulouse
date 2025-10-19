@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-// Déclaration du type personnalisé pour le widget ALTCHA
+// --- Déclaration du widget ALTCHA ---
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -31,7 +31,7 @@ declare global {
   }
 }
 
-// Validation Zod du formulaire
+// --- Validation du formulaire ---
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Nom trop court'),
   email: z.string().email('Email invalide'),
@@ -55,26 +55,45 @@ export default function ContactPage() {
   const altchaError = form.formState.errors['altcha']?.message;
 
   // --- Charger le script ALTCHA ---
-  useEffect(() => {
-    if (!document.querySelector('script[data-altcha-loaded]')) {
-      const script = document.createElement('script');
-      script.src = '/js/altcha.js';
-      script.async = true;
-      script.defer = true;
-      script.type = 'module';
-      script.setAttribute('data-altcha-loaded', 'true');
-      script.onload = () => {
-        console.log('✅ ALTCHA.js chargé');
-        setTimeout(() => setScriptLoaded(true), 200);
-      };
-      document.body.appendChild(script);
-    } else {
-      console.log('✅ ALTCHA.js déjà chargé');
-      setScriptLoaded(true);
-    }
-  }, []);
+useEffect(() => {
+  if (!scriptLoaded) return;
+  const widget = document.querySelector('altcha-widget');
+  if (!widget) return;
+  console.log('🔗 ALTCHA widget détecté');
+  setAltchaElement(widget as HTMLElement);
 
-  // --- Associer le widget ALTCHA ---
+  // Ancien listener 'change' (optionnel, peut rester pour compatibilité)
+  const onChange = (event?: any) => {
+    const value = (widget as any).value ?? event?.detail?.value ?? '';
+    form.setValue('altcha', value, { shouldValidate: true });
+  };
+  widget.addEventListener('change', onChange);
+
+  // ✅ Nouveau listener ALTCHA v5+
+  const onVerified = (e: any) => {
+    const value = e.detail?.payload;
+    if (value) {
+      console.log('✅ ALTCHA vérifié, payload reçu :', value);
+      form.setValue('altcha', value, { shouldValidate: true });
+    }
+  };
+  const onReset = () => {
+    console.log('🔄 ALTCHA réinitialisé');
+    form.setValue('altcha', '', { shouldValidate: true });
+  };
+
+  widget.addEventListener('verified', onVerified);
+  widget.addEventListener('reset', onReset);
+
+  return () => {
+    widget.removeEventListener('change', onChange);
+    widget.removeEventListener('verified', onVerified);
+    widget.removeEventListener('reset', onReset);
+  };
+}, [scriptLoaded, form]);
+
+
+  // --- Lier le widget ALTCHA ---
   useEffect(() => {
     if (!scriptLoaded) return;
     const el = document.querySelector('altcha-widget');
@@ -82,8 +101,8 @@ export default function ContactPage() {
     console.log('🔗 ALTCHA widget détecté');
     setAltchaElement(el as HTMLElement);
 
-    const onChange = () => {
-      const value = (el as any).value;
+    const onChange = (event?: any) => {
+      const value = (el as any).value ?? event?.detail?.value ?? '';
       if (value) {
         console.log('✅ ALTCHA validé, payload reçu :', value);
         form.setValue('altcha', value, { shouldValidate: true });
@@ -99,7 +118,7 @@ export default function ContactPage() {
     };
   }, [scriptLoaded, form]);
 
-  // --- Réinitialisation ALTCHA ---
+  // --- Réinitialiser le widget ---
   const resetAltcha = () => {
     console.log('🔄 Réinitialisation du widget ALTCHA');
     form.setValue('altcha', '', { shouldValidate: true });
@@ -114,7 +133,7 @@ export default function ContactPage() {
       console.log('🟢 Formulaire soumis avec données :', data);
 
       if (!data.altcha) {
-        console.warn('⚠️ Submission bloquée : ALTCHA non complété');
+        console.warn('⚠️ Soumission bloquée : ALTCHA non complété');
         toast({
           variant: 'destructive',
           title: 'Erreur',
@@ -248,6 +267,7 @@ export default function ContactPage() {
                 )}
               />
 
+              {/* Champ caché pour la valeur ALTCHA */}
               <input type="hidden" {...form.register('altcha')} />
 
               <div className="flex flex-col items-center pt-2">
