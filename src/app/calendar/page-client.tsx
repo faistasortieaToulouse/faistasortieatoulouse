@@ -52,12 +52,6 @@ const getEventLocationLink = (event: DiscordEvent) => {
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Préparer les points pour le calendrier
-  const calendarEvents = useMemo(
-    () => eventsData.map(e => ({ title: e.name, start: new Date(e.scheduled_start_time) })),
-    [eventsData]
-  );
-
   // Liste complète triée pour le panneau de droite
   const allEvents = useMemo(
     () =>
@@ -69,23 +63,24 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Calendrier avec points */}
+      {/* Calendrier */}
       <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border flex flex-col items-center">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
           <CalendarIcon className="h-6 w-6 text-primary" />
           Vue Mensuelle des Événements
         </h2>
+        {/* ✅ Passer eventsData ici pour conserver les points */}
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={fr}
-          events={calendarEvents} // points visibles sur les jours avec événements
+          events={eventsData} 
           className="rounded-xl border shadow bg-card"
         />
       </div>
 
-      {/* Liste complète avec titre, date/heure et lieu */}
+      {/* Liste complète des événements avec lieux */}
       <div className="lg:col-span-1 flex flex-col gap-4">
         <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
           Liste Complète des Événements
