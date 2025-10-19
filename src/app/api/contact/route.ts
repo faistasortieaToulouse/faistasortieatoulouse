@@ -1,7 +1,7 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verifyPayload } from 'altcha-lib';
+import { verify } from 'altcha-lib'; // ✅ nouveau nom correct pour ALTCHA v5+
 
 export const runtime = 'nodejs';
 
@@ -12,7 +12,7 @@ if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) 
   console.warn('⚠️ [Contact API] Configuration SMTP incomplète. Vérifie tes variables d’environnement.');
 }
 
-// Configuration du transport SMTP
+// Transport SMTP
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -42,24 +42,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Veuillez compléter la vérification ALTCHA.' }, { status: 400 });
     }
 
-    // --- Vérification ALTCHA v5 ---
+    // ✅ Vérification ALTCHA v5+
     let isValid = false;
     try {
-      isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET, version: 'v5' });
-    } catch (verifyError) {
-      console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', verifyError);
+      isValid = await verify({ payload: altcha, hmacKey: ALTCHA_HMAC_SECRET });
+      console.log('🔍 [Contact API] Vérification ALTCHA :', isValid);
+    } catch (err) {
+      console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', err);
+      return NextResponse.json({ message: 'Erreur de vérification ALTCHA.' }, { status: 500 });
     }
-
-    console.log('🔍 [Contact API] Résultat vérification ALTCHA :', isValid);
 
     if (!isValid) {
-      return NextResponse.json(
-        { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
-        { status: 403 }
-      );
+      console.warn('⚠️ [Contact API] Échec de la vérification ALTCHA');
+      return NextResponse.json({ message: 'Vérification anti-bot échouée. Veuillez réessayer.' }, { status: 403 });
     }
 
-    // --- Vérifier connexion SMTP ---
+    // Vérifier SMTP
     try {
       await transporter.verify();
       console.log('✅ [Contact API] Connexion SMTP OK');
@@ -71,7 +69,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Préparer et envoyer l’e-mail ---
+    // Préparer et envoyer l’e-mail
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
@@ -87,19 +85,10 @@ export async function POST(request: Request) {
       `,
     };
 
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log(`✅ [Contact API] Message envoyé avec succès par ${name} <${email}>`);
-    } catch (sendError) {
-      console.error('❌ [Contact API] Erreur lors de l’envoi de l’e-mail :', sendError);
-      return NextResponse.json(
-        { message: 'Erreur serveur : impossible d’envoyer l’e-mail.' },
-        { status: 500 }
-      );
-    }
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ [Contact API] Message envoyé avec succès par ${name} <${email}>`);
 
     return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
-
   } catch (error: any) {
     console.error('❌ [Contact API] Erreur serveur contact :', error);
     return NextResponse.json(
