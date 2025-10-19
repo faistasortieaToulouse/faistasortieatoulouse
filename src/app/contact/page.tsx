@@ -28,6 +28,7 @@ declare global {
   }
 }
 
+// --- Schéma de validation ---
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Nom trop court'),
   email: z.string().email('Email invalide'),
@@ -59,10 +60,14 @@ export default function ContactPage() {
       script.defer = true;
       script.type = 'module';
       script.setAttribute('data-altcha-loaded', 'true');
-      script.onload = () => setScriptLoaded(true);
+      script.onload = () => {
+        console.log('✅ ALTCHA.js chargé');
+        setScriptLoaded(true);
+      };
       document.body.appendChild(script);
     } else {
       setScriptLoaded(true);
+      console.log('✅ ALTCHA.js déjà chargé');
     }
   }, []);
 
@@ -71,8 +76,16 @@ export default function ContactPage() {
     if (!scriptLoaded || !altchaRef.current) return;
 
     const widget = altchaRef.current;
-    const onVerified = (event: any) => form.setValue('altcha', event.detail.payload, { shouldValidate: true });
-    const onUnverified = () => form.setValue('altcha', '', { shouldValidate: true });
+
+    const onVerified = (event: any) => {
+      console.log('🔹 ALTCHA vérifié, payload :', event.detail.payload);
+      form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+    };
+
+    const onUnverified = () => {
+      console.log('🔹 ALTCHA réinitialisé');
+      form.setValue('altcha', '', { shouldValidate: true });
+    };
 
     widget.addEventListener('verified', onVerified);
     widget.addEventListener('unverified', onUnverified);
@@ -83,12 +96,17 @@ export default function ContactPage() {
     };
   }, [scriptLoaded, form]);
 
+  // --- Réinitialisation ALTCHA ---
   const resetAltcha = () => {
+    console.log('🔄 Réinitialisation du widget ALTCHA côté client');
     form.setValue('altcha', '', { shouldValidate: true });
     if (altchaRef.current && (altchaRef.current as any).reset) (altchaRef.current as any).reset();
   };
 
+  // --- Soumission du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
+    console.log('🟢 Formulaire soumis avec données :', data);
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -96,7 +114,10 @@ export default function ContactPage() {
         body: JSON.stringify(data),
       });
 
+      console.log('📨 Requête envoyée à /api/contact');
+
       const result = await res.json();
+      console.log('📬 Réponse serveur :', result);
 
       if (res.ok) {
         toast({ title: 'Message envoyé avec succès 🎉' });
@@ -107,7 +128,7 @@ export default function ContactPage() {
         resetAltcha();
       }
     } catch (err) {
-      console.error(err);
+      console.error('❌ Erreur réseau lors de l’envoi :', err);
       toast({ variant: 'destructive', title: 'Erreur réseau', description: 'Impossible de contacter le serveur.' });
       resetAltcha();
     }
@@ -170,7 +191,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challengeurl="/api/altcha" // ✅ lien correct vers GET
+                  challengeurl="/api/altcha"
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>

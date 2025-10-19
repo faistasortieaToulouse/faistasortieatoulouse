@@ -24,6 +24,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function POST(request: Request) {
+  console.log('🟢 /api/contact POST reçu');
+
   if (!ALTCHA_HMAC_SECRET) {
     console.error('❌ ALTCHA_HMAC_SECRET manquant.');
     return NextResponse.json(
@@ -51,16 +53,17 @@ export async function POST(request: Request) {
     console.log('🔍 Résultat de la vérification ALTCHA :', isValid);
 
     if (!isValid) {
+      console.warn('⚠️ Échec de la vérification ALTCHA');
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
       );
     }
 
-    // Vérifier la connexion SMTP avant d’envoyer
+    // Vérifier connexion SMTP
     try {
       await transporter.verify();
-      console.log('✅ SMTP connecté avec succès');
+      console.log('✅ Connexion SMTP OK');
     } catch (smtpCheckError) {
       console.error('❌ Impossible de se connecter au serveur SMTP :', smtpCheckError);
       return NextResponse.json(
