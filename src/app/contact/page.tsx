@@ -64,6 +64,7 @@ export default function ContactPage() {
       script.onload = () => {
         setScriptLoaded(true);
 
+        // Événements du widget ALTCHA
         const altchaWidget = document.querySelector('altcha-widget');
         if (altchaWidget) {
           altchaWidget.addEventListener('verified', (event: any) => {
@@ -162,7 +163,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challenge-url="/api/altcha" // ✅ indispensable
+                  challenge-url="/api/altcha" // ✅ essentiel
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>
