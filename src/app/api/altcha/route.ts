@@ -1,7 +1,7 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verifyPayload } from 'altcha-lib'; // ✅ bon import
+import { verifySolution } from 'altcha-lib'; // ✅ bon import
 
 export const runtime = 'nodejs';
 
@@ -43,10 +43,10 @@ export async function POST(request: Request) {
     }
 
     // ✅ Vérification ALTCHA
-    const isValid = await verifyPayload({
-      payload: altcha,
-      secret: ALTCHA_HMAC_SECRET,
-    });
+const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
+if (!verificationResult.verified) {
+  return NextResponse.json({ message: 'Vérification anti-bot échouée.' }, { status: 403 });
+}
 
     if (!isValid) {
       console.warn('⚠️ Échec de la vérification ALTCHA.');
