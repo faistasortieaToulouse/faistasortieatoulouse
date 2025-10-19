@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
-      subject: `[CONTACT] ${sanitizedSubject} - De: ${sanitizedName}`,
+      subject: `[CONTACT FTS Fais ta Sortie] ${sanitizedSubject} - De: ${sanitizedName}`,
       html: `
         <p><strong>De:</strong> ${sanitizedName} &lt;${sanitizedEmail}&gt;</p>
         <p><strong>Sujet:</strong> ${sanitizedSubject}</p>
