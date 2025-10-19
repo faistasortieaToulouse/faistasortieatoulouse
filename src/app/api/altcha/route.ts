@@ -5,15 +5,18 @@ import { verifySolution } from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
+// --- Variables d'environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
+// --- Vérification de la configuration SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.warn(
     '⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.'
   );
 }
 
+// --- Configuration du transport SMTP ---
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -24,6 +27,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// --- Handler POST principal ---
 export async function POST(request: Request) {
   if (!ALTCHA_HMAC_SECRET) {
     console.error('❌ ALTCHA_HMAC_SECRET est manquant.');
@@ -37,6 +41,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, email, subject, message, altcha } = body;
 
+    // --- Vérification ALTCHA ---
     if (!altcha) {
       return NextResponse.json(
         {
@@ -47,8 +52,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // ✅ Vérification ALTCHA
-    const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
+    const verificationResult = await verifySolution(altcha, {
+      hmacKey: ALTCHA_HMAC_SECRET,
+    });
+
     if (!verificationResult.verified) {
       console.warn('⚠️ Échec de la vérification ALTCHA.', verificationResult.error);
       return NextResponse.json(
@@ -57,7 +64,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // ✅ Envoi de l’e-mail
+    // --- Envoi de l’e-mail ---
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
