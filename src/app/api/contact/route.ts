@@ -1,9 +1,15 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import * as altcha from 'altcha-lib'; // ✅ ALTCHA v5.x compatible
+import altchaImport from 'altcha-lib'; // ✅ Import compatible avec toutes les versions d'altcha-lib
 
 export const runtime = 'nodejs';
+
+// --- Compatibilité ALTCHA (gestion export par défaut ou nommé) ---
+const altcha: any =
+  typeof altchaImport.verify === 'function'
+    ? altchaImport
+    : altchaImport.default || altchaImport;
 
 // --- Variables d’environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
