@@ -28,7 +28,6 @@ declare global {
   }
 }
 
-// --- Validation formulaire ---
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Nom trop court'),
   email: z.string().email('Email invalide'),
@@ -72,7 +71,6 @@ export default function ContactPage() {
     if (!scriptLoaded || !altchaRef.current) return;
 
     const widget = altchaRef.current;
-
     const onVerified = (event: any) => form.setValue('altcha', event.detail.payload, { shouldValidate: true });
     const onUnverified = () => form.setValue('altcha', '', { shouldValidate: true });
 
@@ -85,15 +83,11 @@ export default function ContactPage() {
     };
   }, [scriptLoaded, form]);
 
-  // --- Réinitialisation ALTCHA ---
   const resetAltcha = () => {
     form.setValue('altcha', '', { shouldValidate: true });
-    if (altchaRef.current && (altchaRef.current as any).reset) {
-      (altchaRef.current as any).reset();
-    }
+    if (altchaRef.current && (altchaRef.current as any).reset) (altchaRef.current as any).reset();
   };
 
-  // --- Envoi du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     try {
       const res = await fetch('/api/contact', {
@@ -176,7 +170,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challengeurl="/api/altcha"
+                  challengeurl="/api/altcha" // ✅ lien correct vers GET
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>

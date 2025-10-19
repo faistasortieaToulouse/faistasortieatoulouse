@@ -1,7 +1,6 @@
-// src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verifyPayload } from 'altcha-lib'; // ✅ bon import
+import { verifyPayload } from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
@@ -9,7 +8,7 @@ const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
+  console.warn('⚠️ Configuration SMTP incomplète.');
 }
 
 const transporter = nodemailer.createTransport({
@@ -24,9 +23,8 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
   if (!ALTCHA_HMAC_SECRET) {
-    console.error('❌ ALTCHA_HMAC_SECRET est manquant.');
     return NextResponse.json(
-      { message: 'Erreur de configuration serveur (clé ALTCHA manquante).' },
+      { message: 'Erreur serveur : clé ALTCHA manquante.' },
       { status: 500 }
     );
   }
@@ -37,26 +35,21 @@ export async function POST(request: Request) {
 
     if (!altcha) {
       return NextResponse.json(
-        { message: 'Vérification anti-bot manquante. Le widget ALTCHA n’a pas soumis de jeton.' },
+        { message: 'Veuillez compléter la vérification ALTCHA.' },
         { status: 400 }
       );
     }
 
     // ✅ Vérification ALTCHA
-    const isValid = await verifyPayload({
-      payload: altcha,
-      secret: ALTCHA_HMAC_SECRET,
-    });
-
+    const isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET });
     if (!isValid) {
-      console.warn('⚠️ Échec de la vérification ALTCHA.');
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
       );
     }
 
-    // ✅ Envoi de l’e-mail
+    // ✅ Envoi de l’email
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
@@ -76,10 +69,11 @@ export async function POST(request: Request) {
     console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
 
     return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
+
   } catch (error: any) {
     console.error('❌ Erreur serveur contact :', error);
     return NextResponse.json(
-      { message: 'Erreur interne du serveur lors du traitement du message.' },
+      { message: 'Erreur interne du serveur. Veuillez réessayer plus tard.' },
       { status: 500 }
     );
   }
