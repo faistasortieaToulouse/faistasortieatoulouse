@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription
 } from '@/components/ui/card';
@@ -43,6 +43,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 export default function ContactPage() {
   const { toast } = useToast();
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const altchaRef = useRef<HTMLElement>(null);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -55,32 +56,41 @@ export default function ContactPage() {
   useEffect(() => {
     if (!document.querySelector('script[data-altcha-loaded]')) {
       const script = document.createElement('script');
-      script.src = '/js/altcha.js'; // doit être accessible dans public/js
+      script.src = '/js/altcha.js';
       script.async = true;
       script.defer = true;
       script.type = 'module';
       script.setAttribute('data-altcha-loaded', 'true');
 
-      script.onload = () => {
-        setScriptLoaded(true);
-
-        const altchaWidget = document.querySelector('altcha-widget');
-        if (altchaWidget) {
-          // Événements pour mettre à jour le champ caché RHF
-          altchaWidget.addEventListener('verified', (event: any) => {
-            form.setValue('altcha', event.detail.payload, { shouldValidate: true });
-          });
-          altchaWidget.addEventListener('unverified', () => {
-            form.setValue('altcha', '', { shouldValidate: true });
-          });
-        }
-      };
-
+      script.onload = () => setScriptLoaded(true);
       document.body.appendChild(script);
     } else {
       setScriptLoaded(true);
     }
-  }, [form]);
+  }, []);
+
+  // --- Attacher les événements verified/unverified ---
+  useEffect(() => {
+    if (!scriptLoaded || !altchaRef.current) return;
+
+    const widget = altchaRef.current;
+
+    const onVerified = (event: any) => {
+      form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+    };
+
+    const onUnverified = () => {
+      form.setValue('altcha', '', { shouldValidate: true });
+    };
+
+    widget.addEventListener('verified', onVerified);
+    widget.addEventListener('unverified', onUnverified);
+
+    return () => {
+      widget.removeEventListener('verified', onVerified);
+      widget.removeEventListener('unverified', onUnverified);
+    };
+  }, [scriptLoaded, form]);
 
   // --- Envoi du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
@@ -97,9 +107,10 @@ export default function ContactPage() {
         toast({ title: 'Message envoyé avec succès 🎉' });
         form.reset();
 
-        // Réinitialiser le widget ALTCHA si nécessaire
-        const widget = document.querySelector('altcha-widget');
-        if (widget && (widget as any).reset) (widget as any).reset();
+        // Réinitialiser le widget ALTCHA si possible
+        if (altchaRef.current && (altchaRef.current as any).reset) {
+          (altchaRef.current as any).reset();
+        }
       } else {
         toast({ variant: 'destructive', title: 'Erreur', description: result.message || 'Échec de l’envoi.' });
       }
@@ -163,11 +174,12 @@ export default function ContactPage() {
               {/* Widget ALTCHA */}
               <div className="flex flex-col items-center pt-2">
                 <altcha-widget
+                  ref={altchaRef}
                   name="altcha"
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challengeurl="/api/altcha" // ✅ essentiel pour faire apparaître le captcha
+                  challengeurl="/api/altcha"
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>
