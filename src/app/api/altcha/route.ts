@@ -5,6 +5,7 @@ import { createChallenge } from 'altcha-lib';
 export const runtime = 'nodejs';
 
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
+
 if (!ALTCHA_HMAC_SECRET) {
   console.error('❌ ALTCHA_HMAC_SECRET manquant !');
   throw new Error('ALTCHA_HMAC_SECRET manquant !');
@@ -12,14 +13,21 @@ if (!ALTCHA_HMAC_SECRET) {
 
 export async function GET() {
   try {
-    console.log('🔹 Demande de challenge ALTCHA reçue');
-    
+    console.log('🔹 [ALTCHA API] Demande de challenge reçue');
+
+    // Génération du challenge
     const challenge = await createChallenge({ hmacKey: ALTCHA_HMAC_SECRET });
 
-    console.log('✅ Challenge ALTCHA généré avec succès', challenge);
-    return NextResponse.json(challenge);
+    // Log détaillé
+    console.log('✅ [ALTCHA API] Challenge généré avec succès :', JSON.stringify(challenge));
+
+    return NextResponse.json(challenge, {
+      status: 200,
+      headers: { 'Cache-Control': 'no-store' }, // Toujours générer un challenge frais
+    });
   } catch (err) {
-    console.error('❌ Erreur lors de la génération du challenge ALTCHA :', err);
+    console.error('❌ [ALTCHA API] Erreur lors de la génération du challenge :', err);
+
     return NextResponse.json(
       { message: 'Erreur serveur ALTCHA.' },
       { status: 500 }

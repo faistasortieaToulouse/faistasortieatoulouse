@@ -66,8 +66,8 @@ export default function ContactPage() {
       };
       document.body.appendChild(script);
     } else {
-      setScriptLoaded(true);
       console.log('✅ ALTCHA.js déjà chargé');
+      setScriptLoaded(true);
     }
   }, []);
 
@@ -78,12 +78,21 @@ export default function ContactPage() {
     const widget = altchaRef.current;
 
     const onVerified = (event: any) => {
-      console.log('🔹 ALTCHA vérifié, payload :', event.detail.payload);
-      form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+      console.log('🔹 ALTCHA verified event reçu :', event);
+
+      // v5 : récupérer le payload depuis event.detail ou fallback global
+      const payload = event?.detail?.payload || (window as any).ALTCHA_PAYLOAD;
+      if (payload) {
+        console.log('🔹 Payload ALTCHA détecté :', payload);
+        form.setValue('altcha', payload, { shouldValidate: true });
+      } else {
+        console.warn('⚠️ Aucun payload ALTCHA reçu !');
+        form.setValue('altcha', '', { shouldValidate: true });
+      }
     };
 
     const onUnverified = () => {
-      console.log('🔹 ALTCHA réinitialisé');
+      console.log('⚠️ ALTCHA réinitialisé');
       form.setValue('altcha', '', { shouldValidate: true });
     };
 
@@ -106,6 +115,12 @@ export default function ContactPage() {
   // --- Soumission du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     console.log('🟢 Formulaire soumis avec données :', data);
+
+    if (!data.altcha) {
+      console.warn('⚠️ Submission impossible : ALTCHA non complété');
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez compléter la vérification ALTCHA.' });
+      return;
+    }
 
     try {
       const res = await fetch('/api/contact', {

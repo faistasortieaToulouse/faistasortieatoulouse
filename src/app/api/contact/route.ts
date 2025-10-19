@@ -9,7 +9,7 @@ const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement.');
+  console.warn('⚠️ [Contact API] Configuration SMTP incomplète. Vérifie tes variables d’environnement.');
 }
 
 // Configuration du transport SMTP
@@ -24,48 +24,39 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function POST(request: Request) {
-  console.log('🟢 /api/contact POST reçu');
+  console.log('🔹 [Contact API] Requête POST reçue');
 
   if (!ALTCHA_HMAC_SECRET) {
-    console.error('❌ ALTCHA_HMAC_SECRET manquant.');
-    return NextResponse.json(
-      { message: 'Erreur serveur : clé ALTCHA manquante.' },
-      { status: 500 }
-    );
+    console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant');
+    return NextResponse.json({ message: 'Erreur serveur : clé ALTCHA manquante.' }, { status: 500 });
   }
 
   try {
     const body = await request.json();
-    console.log('📩 Données reçues du formulaire :', body);
+    console.log('📩 [Contact API] Données reçues :', body);
 
     const { name, email, subject, message, altcha } = body;
 
     if (!altcha) {
-      console.warn('⚠️ Jeton ALTCHA manquant.');
-      return NextResponse.json(
-        { message: 'Veuillez compléter la vérification ALTCHA.' },
-        { status: 400 }
-      );
+      console.warn('⚠️ [Contact API] Jeton ALTCHA manquant');
+      return NextResponse.json({ message: 'Veuillez compléter la vérification ALTCHA.' }, { status: 400 });
     }
 
     // Vérification ALTCHA
     const isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET });
-    console.log('🔍 Résultat de la vérification ALTCHA :', isValid);
+    console.log('🔍 [Contact API] Résultat vérification ALTCHA :', isValid);
 
     if (!isValid) {
-      console.warn('⚠️ Échec de la vérification ALTCHA');
-      return NextResponse.json(
-        { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
-        { status: 403 }
-      );
+      console.warn('⚠️ [Contact API] Échec de la vérification ALTCHA');
+      return NextResponse.json({ message: 'Vérification anti-bot échouée. Veuillez réessayer.' }, { status: 403 });
     }
 
     // Vérifier connexion SMTP
     try {
       await transporter.verify();
-      console.log('✅ Connexion SMTP OK');
+      console.log('✅ [Contact API] Connexion SMTP OK');
     } catch (smtpCheckError) {
-      console.error('❌ Impossible de se connecter au serveur SMTP :', smtpCheckError);
+      console.error('❌ [Contact API] Impossible de se connecter au serveur SMTP :', smtpCheckError);
       return NextResponse.json(
         { message: 'Erreur serveur : impossible de se connecter au serveur SMTP.' },
         { status: 500 }
@@ -90,9 +81,9 @@ export async function POST(request: Request) {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
+      console.log(`✅ [Contact API] Message envoyé avec succès par ${name} <${email}>`);
     } catch (sendError) {
-      console.error('❌ Erreur lors de l’envoi de l’e-mail :', sendError);
+      console.error('❌ [Contact API] Erreur lors de l’envoi de l’e-mail :', sendError);
       return NextResponse.json(
         { message: 'Erreur serveur : impossible d’envoyer l’e-mail.' },
         { status: 500 }
@@ -102,7 +93,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
 
   } catch (error: any) {
-    console.error('❌ Erreur serveur contact :', error);
+    console.error('❌ [Contact API] Erreur serveur contact :', error);
     return NextResponse.json(
       { message: 'Erreur interne du serveur. Veuillez réessayer plus tard.' },
       { status: 500 }
