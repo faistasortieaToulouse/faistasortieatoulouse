@@ -10,7 +10,7 @@ const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
 if (!ALTCHA_HMAC_SECRET) {
-  console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant !');
+  console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant ! Vérifie ta configuration sur Vercel.');
 }
 
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -50,36 +50,30 @@ export async function POST(request: Request) {
 
     // --- Vérification des champs ---
     if (!name || !email || !subject || !message) {
-      console.warn('⚠️ [Contact API] Champs manquants dans la requête');
-      return NextResponse.json(
-        { success: false, message: 'Tous les champs sont requis.' },
-        { status: 400 }
-      );
+      console.warn('⚠️ [Contact API] Champs manquants');
+      return NextResponse.json({ success: false, message: 'Tous les champs sont requis.' }, { status: 400 });
     }
 
     if (!altcha) {
       console.warn('⚠️ [Contact API] Jeton ALTCHA manquant');
-      return NextResponse.json(
-        { success: false, message: 'Veuillez compléter la vérification ALTCHA.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: 'Veuillez compléter la vérification ALTCHA.' }, { status: 400 });
     }
 
     if (!ALTCHA_HMAC_SECRET) {
       console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant');
-      return NextResponse.json(
-        { success: false, message: 'Erreur serveur : clé ALTCHA absente.' },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, message: 'Erreur serveur : clé ALTCHA absente.' }, { status: 500 });
     }
 
-    // --- Vérification ALTCHA v5 ---
+    // --- Vérification ALTCHA ---
+    console.log('🔍 [Contact API] Tentative de vérification ALTCHA...');
     let isValid = false;
+
     try {
+      console.log('📦 [Contact API] Payload ALTCHA reçu :', altcha.slice(0, 100) + '...');
       isValid = await verify({ payload: altcha, hmacKey: ALTCHA_HMAC_SECRET });
-      console.log('🔍 [Contact API] Vérification ALTCHA :', isValid);
+      console.log('✅ [Contact API] ALTCHA vérifié avec succès :', isValid);
     } catch (err: any) {
-      console.error('❌ [Contact API] Erreur ALTCHA :', err);
+      console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', JSON.stringify(err, null, 2));
       return NextResponse.json(
         { success: false, message: 'Erreur lors de la vérification ALTCHA.' },
         { status: 500 }
@@ -87,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     if (!isValid) {
-      console.warn('⚠️ [Contact API] Échec de la vérification ALTCHA');
+      console.warn('⚠️ [Contact API] Vérification ALTCHA invalide (échec de la signature)');
       return NextResponse.json(
         { success: false, message: 'Vérification anti-bot échouée. Réessayez.' },
         { status: 403 }
@@ -106,7 +100,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Préparer l’e-mail ---
+    // --- Préparer et envoyer l’e-mail ---
     const sanitizedMessage = escapeHTML(message).replace(/\n/g, '<br>');
     const sanitizedName = escapeHTML(name);
     const sanitizedSubject = escapeHTML(subject);
@@ -128,11 +122,11 @@ export async function POST(request: Request) {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`✅ [Contact API] Message envoyé avec succès par ${sanitizedName} <${sanitizedEmail}>`);
+    console.log(`📨 [Contact API] Message envoyé par ${sanitizedName} <${sanitizedEmail}>`);
 
     return NextResponse.json({ success: true, message: 'Message envoyé avec succès !' }, { status: 200 });
   } catch (error: any) {
-    console.error('❌ [Contact API] Erreur interne :', error);
+    console.error('❌ [Contact API] Erreur interne :', JSON.stringify(error, null, 2));
     return NextResponse.json(
       { success: false, message: 'Erreur interne du serveur. Réessayez plus tard.' },
       { status: 500 }
