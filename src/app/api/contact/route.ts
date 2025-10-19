@@ -40,10 +40,8 @@ const transporter = nodemailer.createTransport({
 function getDecodedKey(): Buffer | string {
   if (!ALTCHA_HMAC_SECRET) return '';
   try {
-    // Si c’est du Base64 valide, on retourne le Buffer
     return Buffer.from(ALTCHA_HMAC_SECRET, 'base64');
   } catch {
-    // Sinon, on retourne la chaîne brute
     return ALTCHA_HMAC_SECRET;
   }
 }
@@ -100,14 +98,22 @@ export async function POST(request: Request) {
     let isValid = false;
     try {
       const decodedKey = getDecodedKey();
-
       console.log('📦 [Contact API] Payload ALTCHA reçu :', altchaPayload.slice(0, 100) + '...');
-      if (typeof altcha.verify !== 'function') {
-        throw new Error('La fonction altcha.verify() est introuvable dans altcha-lib !');
+
+      // ✅ Compatibilité altcha.verify ou altcha.default.verify
+      const verifyFn =
+        typeof altcha.verify === 'function'
+          ? altcha.verify
+          : altcha.default && typeof altcha.default.verify === 'function'
+            ? altcha.default.verify
+            : null;
+
+      if (!verifyFn) {
+        throw new Error('❌ altcha.verify() introuvable (ni altcha.verify ni altcha.default.verify)');
       }
 
-      // ✅ Vérification via altcha-lib
-      isValid = await altcha.verify({
+      // 🧠 Vérification ALTCHA
+      isValid = await verifyFn({
         payload: altchaPayload,
         hmacKey: decodedKey,
       });
@@ -129,7 +135,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Vérification de la connexion SMTP ---
+    // --- Vérification connexion SMTP ---
     try {
       await transporter.verify();
       console.log('✅ [Contact API] Connexion SMTP OK');
