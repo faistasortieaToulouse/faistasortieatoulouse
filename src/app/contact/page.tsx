@@ -94,29 +94,28 @@ useEffect(() => {
 
 
   // --- Lier le widget ALTCHA ---
-  useEffect(() => {
-    if (!scriptLoaded) return;
-    const el = document.querySelector('altcha-widget');
-    if (!el) return;
-    console.log('🔗 ALTCHA widget détecté');
-    setAltchaElement(el as HTMLElement);
-
-    const onChange = (event?: any) => {
-      const value = (el as any).value ?? event?.detail?.value ?? '';
-      if (value) {
-        console.log('✅ ALTCHA validé, payload reçu :', value);
-        form.setValue('altcha', value, { shouldValidate: true });
-      } else {
-        console.log('⚠️ ALTCHA réinitialisé ou invalide');
-        form.setValue('altcha', '', { shouldValidate: true });
-      }
+useEffect(() => {
+  if (!document.querySelector('script[data-altcha-loaded]')) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.altcha.com/v5/altcha.js'; // ✅ URL CDN ALTCHA
+    script.async = true;
+    script.defer = true;
+    script.type = 'module';
+    script.setAttribute('data-altcha-loaded', 'true');
+    script.onload = () => {
+      console.log('✅ ALTCHA.js chargé');
+      setTimeout(() => setScriptLoaded(true), 100);
     };
-
-    el.addEventListener('change', onChange);
-    return () => {
-      el.removeEventListener('change', onChange);
+    script.onerror = (e) => {
+      console.error('❌ Impossible de charger ALTCHA.js', e);
     };
-  }, [scriptLoaded, form]);
+    document.body.appendChild(script);
+  } else {
+    console.log('✅ ALTCHA.js déjà chargé');
+    setScriptLoaded(true);
+  }
+}, []);
+
 
   // --- Réinitialiser le widget ---
   const resetAltcha = () => {
