@@ -1,3 +1,4 @@
+// src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { verifyPayload } from 'altcha-lib';
@@ -8,9 +9,10 @@ const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Configuration SMTP incomplète.');
+  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement.');
 }
 
+// Configuration du transport SMTP
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -23,6 +25,7 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
   if (!ALTCHA_HMAC_SECRET) {
+    console.error('❌ ALTCHA_HMAC_SECRET manquant.');
     return NextResponse.json(
       { message: 'Erreur serveur : clé ALTCHA manquante.' },
       { status: 500 }
@@ -31,17 +34,22 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+    console.log('📩 Données reçues du formulaire :', body);
+
     const { name, email, subject, message, altcha } = body;
 
     if (!altcha) {
+      console.warn('⚠️ Jeton ALTCHA manquant.');
       return NextResponse.json(
         { message: 'Veuillez compléter la vérification ALTCHA.' },
         { status: 400 }
       );
     }
 
-    // ✅ Vérification ALTCHA
+    // Vérification ALTCHA
     const isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET });
+    console.log('🔍 Résultat de la vérification ALTCHA :', isValid);
+
     if (!isValid) {
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
@@ -49,7 +57,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // ✅ Envoi de l’email
+    // Vérifier la connexion SMTP avant d’envoyer
+    try {
+      await transporter.verify();
+      console.log('✅ SMTP connecté avec succès');
+    } catch (smtpCheckError) {
+      console.error('❌ Impossible de se connecter au serveur SMTP :', smtpCheckError);
+      return NextResponse.json(
+        { message: 'Erreur serveur : impossible de se connecter au serveur SMTP.' },
+        { status: 500 }
+      );
+    }
+
+    // Préparer l’e-mail
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
@@ -65,8 +85,16 @@ export async function POST(request: Request) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
+    } catch (sendError) {
+      console.error('❌ Erreur lors de l’envoi de l’e-mail :', sendError);
+      return NextResponse.json(
+        { message: 'Erreur serveur : impossible d’envoyer l’e-mail.' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
 
