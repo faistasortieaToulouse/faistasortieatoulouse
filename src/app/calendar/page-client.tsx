@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, MapPin } from 'lucide-react';
@@ -56,15 +56,21 @@ const getEventLocationLink = (event: DiscordEvent) => {
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Préparer les événements pour le calendrier (points visibles)
-  const calendarEvents = eventsData.map(e => ({
-    title: e.name,
-    start: new Date(e.scheduled_start_time),
-  }));
+  // Préparer les événements pour le calendrier
+  const calendarEvents = useMemo(
+    () => eventsData.map(e => ({
+      title: e.name,
+      date: new Date(e.scheduled_start_time), // <-- "date" utilisé pour compatibilité calendrier
+    })),
+    [eventsData]
+  );
 
   // Liste complète triée
-  const allEvents = (eventsData || []).slice().sort(
-    (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+  const allEvents = useMemo(
+    () => (eventsData || []).slice().sort(
+      (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+    ),
+    [eventsData]
   );
 
   return (
@@ -80,7 +86,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={fr}
-          events={calendarEvents} // <-- points correctement affichés
+          events={calendarEvents} // <-- points visibles
           className="rounded-xl border shadow bg-card"
         />
       </div>
