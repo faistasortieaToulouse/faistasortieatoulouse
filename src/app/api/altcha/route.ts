@@ -1,7 +1,7 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verifySolution } from 'altcha-lib'; // ✅ bon import
+import { verifySolution } from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
@@ -9,7 +9,9 @@ const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
+  console.warn(
+    '⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.'
+  );
 }
 
 const transporter = nodemailer.createTransport({
@@ -37,19 +39,18 @@ export async function POST(request: Request) {
 
     if (!altcha) {
       return NextResponse.json(
-        { message: 'Vérification anti-bot manquante. Le widget ALTCHA n’a pas soumis de jeton.' },
+        {
+          message:
+            'Vérification anti-bot manquante. Le widget ALTCHA n’a pas soumis de jeton.',
+        },
         { status: 400 }
       );
     }
 
     // ✅ Vérification ALTCHA
-const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
-if (!verificationResult.verified) {
-  return NextResponse.json({ message: 'Vérification anti-bot échouée.' }, { status: 403 });
-}
-
-    if (!isValid) {
-      console.warn('⚠️ Échec de la vérification ALTCHA.');
+    const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
+    if (!verificationResult.verified) {
+      console.warn('⚠️ Échec de la vérification ALTCHA.', verificationResult.error);
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
@@ -79,7 +80,10 @@ if (!verificationResult.verified) {
   } catch (error: any) {
     console.error('❌ Erreur serveur contact :', error);
     return NextResponse.json(
-      { message: 'Erreur interne du serveur lors du traitement du message.' },
+      {
+        message:
+          'Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.',
+      },
       { status: 500 }
     );
   }
