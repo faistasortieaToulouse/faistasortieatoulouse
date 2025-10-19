@@ -114,7 +114,7 @@ export default function ContactPage() {
     } else {
         setScriptLoaded(true);
     }
-  }, [form]);
+  }, [form]); // Ajout de 'form' dans les dépendances (meilleure pratique)
 
   // --- Envoi du formulaire ---
   const onSubmit = useCallback(
@@ -166,6 +166,7 @@ export default function ContactPage() {
       );
   }
 
+  // RETURN PRINCIPAL
   return (
     <div className="p-4 md:p-8">
       <header className="mb-8">
@@ -260,7 +261,7 @@ export default function ContactPage() {
                     name="altcha"	
                     maxnumber="1000000"	
                     theme="auto"
-                    verify="false" {/* <-- CORRECTION APPLIQUÉE ICI */}
+                    verify="false"
                 />
 
                 {altchaError && (
