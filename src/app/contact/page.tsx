@@ -198,7 +198,7 @@ useEffect(() => {
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Formulaire de contact</CardTitle>
-          <CardDescription>Remplissez les champs ci-dessous.</CardDescription>
+          <CardDescription>Veuillez remplir les champs ci-dessous.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
