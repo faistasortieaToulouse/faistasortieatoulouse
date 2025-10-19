@@ -1,38 +1,30 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verifySolution } from 'altcha-lib'; // <-- NOUVEL IMPORT ALTCHA
+import { verifyPayload } from 'altcha-lib'; // ✅ bon import
 
-// ✅ Forcer l'utilisation du runtime Node.js (obligatoire pour Nodemailer)
 export const runtime = 'nodejs';
 
-// --- Variables d'environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
-// Remplacer CLOUDFLARE_TURNSTILE_SECRET_KEY par ALTCHA_HMAC_SECRET
-const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET; 
+const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
-// --- Vérification de la configuration SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn(
-    '⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.'
-  );
+  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
 }
 
-// --- Configuration du transport SMTP ---
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST, // ex: smtp.gmail.com
+  host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true pour 465, false sinon
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-// --- Handler principal ---
 export async function POST(request: Request) {
   if (!ALTCHA_HMAC_SECRET) {
-    console.error('❌ ALTCHA_HMAC_SECRET est manquant. Veuillez le définir dans vos variables d’environnement.');
+    console.error('❌ ALTCHA_HMAC_SECRET est manquant.');
     return NextResponse.json(
       { message: 'Erreur de configuration serveur (clé ALTCHA manquante).' },
       { status: 500 }
@@ -41,30 +33,30 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    // Le nom du champ est maintenant 'altcha' au lieu de 'cf-turnstile-response'
-    const { name, email, subject, message, altcha } = body; 
+    const { name, email, subject, message, altcha } = body;
 
-    // --- Étape 1 : Validation ALTCHA ---
     if (!altcha) {
       return NextResponse.json(
-        { message: 'Vérification anti-bot manquante. Le widget ALTCHA n\'a pas soumis de jeton.' },
+        { message: 'Vérification anti-bot manquante. Le widget ALTCHA n’a pas soumis de jeton.' },
         { status: 400 }
       );
     }
 
-    const verificationResult = await verifySolution(altcha, { 
-        hmacKey: ALTCHA_HMAC_SECRET 
+    // ✅ Vérification ALTCHA
+    const isValid = await verifyPayload({
+      payload: altcha,
+      secret: ALTCHA_HMAC_SECRET,
     });
 
-    if (!verificationResult.verified) {
-      console.warn('⚠️ Échec de la vérification ALTCHA. Raisons:', verificationResult.error);
+    if (!isValid) {
+      console.warn('⚠️ Échec de la vérification ALTCHA.');
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
       );
     }
 
-    // --- Étape 2 : Envoi de l’e-mail ---
+    // ✅ Envoi de l’e-mail
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
@@ -81,20 +73,13 @@ export async function POST(request: Request) {
     };
 
     await transporter.sendMail(mailOptions);
-
     console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
 
-    return NextResponse.json(
-      { message: 'Message envoyé avec succès !' },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
   } catch (error: any) {
     console.error('❌ Erreur serveur contact :', error);
     return NextResponse.json(
-      {
-        message:
-          'Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.',
-      },
+      { message: 'Erreur interne du serveur lors du traitement du message.' },
       { status: 500 }
     );
   }
