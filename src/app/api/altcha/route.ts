@@ -5,20 +5,13 @@ import { verifySolution } from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
-// --- Variables d'environnement ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
-if (!ALTCHA_HMAC_SECRET) {
-  console.error('❌ ALTCHA_HMAC_SECRET est manquant !');
-}
-
-// --- Vérification de la configuration SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
+  console.warn('⚠️ Configuration SMTP incomplète.');
 }
 
-// --- Configuration du transport SMTP ---
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -41,11 +34,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, email, subject, message, altcha } = body;
 
-    console.log('📩 Nouveau message reçu :', { name, email, subject });
-
-    // --- Vérification ALTCHA ---
     if (!altcha) {
-      console.warn('⚠️ Jeton ALTCHA manquant dans la requête.');
       return NextResponse.json(
         { message: 'Veuillez compléter la vérification ALTCHA.' },
         { status: 400 }
@@ -53,18 +42,13 @@ export async function POST(request: Request) {
     }
 
     const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
-
     if (!verificationResult.verified) {
-      console.warn('⚠️ Échec de la vérification ALTCHA :', verificationResult.error);
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
       );
     }
 
-    console.log('✅ ALTCHA vérifié avec succès pour', email);
-
-    // --- Préparer l’e-mail ---
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,
@@ -80,23 +64,13 @@ export async function POST(request: Request) {
       `,
     };
 
-    try {
-      console.log('📧 Envoi de l’e-mail à', CONTACT_EMAIL);
-      await transporter.sendMail(mailOptions);
-      console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
-      return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
-    } catch (smtpError: any) {
-      console.error('❌ Erreur SMTP :', smtpError);
-      return NextResponse.json(
-        { message: 'Erreur serveur : impossible d’envoyer l’e-mail.' },
-        { status: 500 }
-      );
-    }
+    await transporter.sendMail(mailOptions);
 
+    return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
   } catch (error: any) {
     console.error('❌ Erreur serveur contact :', error);
     return NextResponse.json(
-      { message: 'Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.' },
+      { message: 'Erreur interne du serveur. Veuillez réessayer plus tard.' },
       { status: 500 }
     );
   }

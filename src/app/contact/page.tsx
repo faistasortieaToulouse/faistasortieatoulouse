@@ -1,4 +1,3 @@
-// src/app/contact/page.tsx (ou équivalent)
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -29,6 +28,7 @@ declare global {
   }
 }
 
+// --- Validation formulaire ---
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Nom trop court'),
   email: z.string().email('Email invalide'),
@@ -51,7 +51,7 @@ export default function ContactPage() {
 
   const altchaError = form.formState.errors['altcha']?.message;
 
-  // Charger le script ALTCHA
+  // --- Charger ALTCHA.js ---
   useEffect(() => {
     if (!document.querySelector('script[data-altcha-loaded]')) {
       const script = document.createElement('script');
@@ -67,18 +67,14 @@ export default function ContactPage() {
     }
   }, []);
 
-  // Attacher événements verified / unverified
+  // --- Événements verified / unverified ---
   useEffect(() => {
     if (!scriptLoaded || !altchaRef.current) return;
 
     const widget = altchaRef.current;
 
-    const onVerified = (event: any) => {
-      form.setValue('altcha', event.detail.payload, { shouldValidate: true });
-    };
-    const onUnverified = () => {
-      form.setValue('altcha', '', { shouldValidate: true });
-    };
+    const onVerified = (event: any) => form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+    const onUnverified = () => form.setValue('altcha', '', { shouldValidate: true });
 
     widget.addEventListener('verified', onVerified);
     widget.addEventListener('unverified', onUnverified);
@@ -89,7 +85,7 @@ export default function ContactPage() {
     };
   }, [scriptLoaded, form]);
 
-  // Fonction de réinitialisation complète du widget ALTCHA et du champ RHF
+  // --- Réinitialisation ALTCHA ---
   const resetAltcha = () => {
     form.setValue('altcha', '', { shouldValidate: true });
     if (altchaRef.current && (altchaRef.current as any).reset) {
@@ -97,6 +93,7 @@ export default function ContactPage() {
     }
   };
 
+  // --- Envoi du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     try {
       const res = await fetch('/api/contact', {
@@ -110,21 +107,19 @@ export default function ContactPage() {
       if (res.ok) {
         toast({ title: 'Message envoyé avec succès 🎉' });
         form.reset();
-        resetAltcha(); // 🔹 réinitialisation du widget
+        resetAltcha();
       } else {
         toast({ variant: 'destructive', title: 'Erreur', description: result.message || 'Échec de l’envoi.' });
-        resetAltcha(); // 🔹 réinitialisation si erreur serveur
+        resetAltcha();
       }
     } catch (err) {
       console.error(err);
       toast({ variant: 'destructive', title: 'Erreur réseau', description: 'Impossible de contacter le serveur.' });
-      resetAltcha(); // 🔹 réinitialisation en cas d'erreur réseau
+      resetAltcha();
     }
   }, [form, toast]);
 
-  if (!scriptLoaded) {
-    return <div className="p-6 text-blue-500">Chargement du module de vérification...</div>;
-  }
+  if (!scriptLoaded) return <div className="p-6 text-blue-500">Chargement du module de vérification...</div>;
 
   return (
     <div className="p-4 md:p-8">
