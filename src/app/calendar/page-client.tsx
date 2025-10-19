@@ -15,11 +15,11 @@ interface DiscordEvent {
 }
 
 interface CalendarClientProps {
-  eventsData: DiscordEvent[]; // Tous les événements
+  eventsData: DiscordEvent[];
   upcomingEvents: DiscordEvent[];
 }
 
-// Formattage de la date et heure
+// Formattage date/heure
 const formatEventTime = (isoString: string) => {
   const date = new Date(isoString);
   return new Intl.DateTimeFormat('fr-FR', {
@@ -52,13 +52,13 @@ const getEventLocationLink = (event: DiscordEvent) => {
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Préparer les événements pour le calendrier (points visibles)
+  // Préparer les points pour le calendrier
   const calendarEvents = useMemo(
-    () => eventsData.map(e => ({ title: e.name, date: new Date(e.scheduled_start_time) })),
+    () => eventsData.map(e => ({ title: e.name, start: new Date(e.scheduled_start_time) })),
     [eventsData]
   );
 
-  // Liste complète triée
+  // Liste complète triée pour le panneau de droite
   const allEvents = useMemo(
     () =>
       (eventsData || []).slice().sort(
@@ -69,7 +69,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Calendrier */}
+      {/* Calendrier avec points */}
       <div className="lg:col-span-2 bg-card p-6 rounded-xl shadow-lg border flex flex-col items-center">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-card-foreground">
           <CalendarIcon className="h-6 w-6 text-primary" />
@@ -80,12 +80,12 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={fr}
-          events={calendarEvents} // <-- points sur le calendrier
+          events={calendarEvents} // points visibles sur les jours avec événements
           className="rounded-xl border shadow bg-card"
         />
       </div>
 
-      {/* Liste complète des événements */}
+      {/* Liste complète avec titre, date/heure et lieu */}
       <div className="lg:col-span-1 flex flex-col gap-4">
         <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
           Liste Complète des Événements
