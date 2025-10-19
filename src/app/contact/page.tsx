@@ -3,13 +3,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+  Card, CardContent, CardHeader, CardTitle, CardDescription
 } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -18,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-// Déclaration Web Component ALTCHA
+// Déclaration Web Component ALTCHA pour TypeScript
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -46,21 +42,46 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
   const { toast } = useToast();
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-      altcha: '',
-    },
+    defaultValues: { name: '', email: '', subject: '', message: '', altcha: '' },
   });
 
   const altchaError = form.formState.errors['altcha']?.message;
 
-  // Gestion du PoW ALTCHA
+  // --- Charger ALTCHA.js depuis public/js ---
+  useEffect(() => {
+    if (!document.querySelector('script[data-altcha-loaded]')) {
+      const script = document.createElement('script');
+      script.src = '/js/altcha.js'; // ✅ doit être présent dans public/js
+      script.async = true;
+      script.defer = true;
+      script.type = 'module';
+      script.setAttribute('data-altcha-loaded', 'true');
+
+      script.onload = () => {
+        setScriptLoaded(true);
+
+        const altchaWidget = document.querySelector('altcha-widget');
+        if (altchaWidget) {
+          altchaWidget.addEventListener('verified', (event: any) => {
+            form.setValue('altcha', event.detail.payload, { shouldValidate: true });
+          });
+          altchaWidget.addEventListener('unverified', () => {
+            form.setValue('altcha', '', { shouldValidate: true });
+          });
+        }
+      };
+
+      document.body.appendChild(script);
+    } else {
+      setScriptLoaded(true);
+    }
+  }, [form]);
+
+  // --- Envoi du formulaire ---
   const onSubmit = useCallback(async (data: ContactFormValues) => {
     try {
       const res = await fetch('/api/contact', {
@@ -83,13 +104,15 @@ export default function ContactPage() {
     }
   }, [form, toast]);
 
+  if (!scriptLoaded) {
+    return <div className="p-6 text-blue-500">Chargement du module de vérification...</div>;
+  }
+
   return (
     <div className="p-4 md:p-8">
       <header className="mb-8">
         <h1 className="font-headline text-4xl font-bold text-primary">Nous contacter</h1>
-        <p className="mt-2 text-muted-foreground">
-          Une question, une suggestion ? N&apos;hésitez pas à nous envoyer un message.
-        </p>
+        <p className="mt-2 text-muted-foreground">Une question, une suggestion ? N&apos;hésitez pas à nous envoyer un message.</p>
       </header>
 
       <Card className="max-w-2xl mx-auto">
@@ -97,11 +120,9 @@ export default function ContactPage() {
           <CardTitle>Formulaire de contact</CardTitle>
           <CardDescription>Remplissez les champs ci-dessous.</CardDescription>
         </CardHeader>
-
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
-
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nom</FormLabel>
@@ -109,7 +130,6 @@ export default function ContactPage() {
                   <FormMessage />
                 </FormItem>
               )}/>
-
               <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -117,7 +137,6 @@ export default function ContactPage() {
                   <FormMessage />
                 </FormItem>
               )}/>
-
               <FormField control={form.control} name="subject" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sujet</FormLabel>
@@ -125,7 +144,6 @@ export default function ContactPage() {
                   <FormMessage />
                 </FormItem>
               )}/>
-
               <FormField control={form.control} name="message" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Message</FormLabel>
@@ -144,7 +162,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challenge-url="/api/altcha" // ✅ essentiel pour fonctionner
+                  challenge-url="/api/altcha" // ✅ indispensable
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>
@@ -153,7 +171,6 @@ export default function ContactPage() {
                 <Send className="mr-2 h-4 w-4" />
                 {form.formState.isSubmitting ? "Envoi..." : "Envoyer"}
               </Button>
-
             </form>
           </Form>
         </CardContent>
