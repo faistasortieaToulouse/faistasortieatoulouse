@@ -260,6 +260,7 @@ export default function ContactPage() {
                     name="altcha"	
                     maxnumber="1000000"	
                     theme="auto"
+		    challenge-url="/api/altcha"  // ✅ ajout essentiel
                 />
 
                 {altchaError && (
