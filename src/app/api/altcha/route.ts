@@ -9,6 +9,10 @@ export const runtime = 'nodejs';
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
+if (!ALTCHA_HMAC_SECRET) {
+  console.error('❌ ALTCHA_HMAC_SECRET est manquant !');
+}
+
 // --- Vérification de la configuration SMTP ---
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.warn('⚠️ Configuration SMTP incomplète. Vérifie tes variables d’environnement sur Vercel.');
@@ -27,9 +31,8 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
   if (!ALTCHA_HMAC_SECRET) {
-    console.error('❌ ALTCHA_HMAC_SECRET est manquant.');
     return NextResponse.json(
-      { message: 'Erreur de configuration serveur (clé ALTCHA manquante).' },
+      { message: 'Erreur serveur : clé ALTCHA manquante.' },
       { status: 500 }
     );
   }
@@ -50,8 +53,9 @@ export async function POST(request: Request) {
     }
 
     const verificationResult = await verifySolution(altcha, { hmacKey: ALTCHA_HMAC_SECRET });
+
     if (!verificationResult.verified) {
-      console.warn('⚠️ Échec de la vérification ALTCHA.', verificationResult.error);
+      console.warn('⚠️ Échec de la vérification ALTCHA :', verificationResult.error);
       return NextResponse.json(
         { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
         { status: 403 }
@@ -76,14 +80,21 @@ export async function POST(request: Request) {
       `,
     };
 
-    console.log('📧 Envoi de l’e-mail à', CONTACT_EMAIL);
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
+    try {
+      console.log('📧 Envoi de l’e-mail à', CONTACT_EMAIL);
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Message envoyé avec succès par ${name} <${email}>`);
+      return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
+    } catch (smtpError: any) {
+      console.error('❌ Erreur SMTP :', smtpError);
+      return NextResponse.json(
+        { message: 'Erreur serveur : impossible d’envoyer l’e-mail.' },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ message: 'Message envoyé avec succès !' }, { status: 200 });
   } catch (error: any) {
     console.error('❌ Erreur serveur contact :', error);
-    console.error('Détails de l’erreur :', error?.stack || error);
     return NextResponse.json(
       { message: 'Erreur interne du serveur lors du traitement du message. Veuillez réessayer plus tard.' },
       { status: 500 }
