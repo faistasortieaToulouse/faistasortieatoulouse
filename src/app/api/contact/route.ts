@@ -42,16 +42,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Veuillez compléter la vérification ALTCHA.' }, { status: 400 });
     }
 
-    // Vérification ALTCHA
-    const isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET });
+    // --- Vérification ALTCHA v5 ---
+    let isValid = false;
+    try {
+      isValid = await verifyPayload({ payload: altcha, secret: ALTCHA_HMAC_SECRET, version: 'v5' });
+    } catch (verifyError) {
+      console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', verifyError);
+    }
+
     console.log('🔍 [Contact API] Résultat vérification ALTCHA :', isValid);
 
     if (!isValid) {
-      console.warn('⚠️ [Contact API] Échec de la vérification ALTCHA');
-      return NextResponse.json({ message: 'Vérification anti-bot échouée. Veuillez réessayer.' }, { status: 403 });
+      return NextResponse.json(
+        { message: 'Vérification anti-bot échouée. Veuillez réessayer.' },
+        { status: 403 }
+      );
     }
 
-    // Vérifier connexion SMTP
+    // --- Vérifier connexion SMTP ---
     try {
       await transporter.verify();
       console.log('✅ [Contact API] Connexion SMTP OK');
@@ -63,7 +71,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Préparer l’e-mail
+    // --- Préparer et envoyer l’e-mail ---
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: CONTACT_EMAIL,

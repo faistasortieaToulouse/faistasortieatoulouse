@@ -28,7 +28,6 @@ declare global {
   }
 }
 
-// --- Schéma de validation ---
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Nom trop court'),
   email: z.string().email('Email invalide'),
@@ -62,7 +61,8 @@ export default function ContactPage() {
       script.setAttribute('data-altcha-loaded', 'true');
       script.onload = () => {
         console.log('✅ ALTCHA.js chargé');
-        setScriptLoaded(true);
+        // Petit délai pour garantir l'init du widget
+        setTimeout(() => setScriptLoaded(true), 100);
       };
       document.body.appendChild(script);
     } else {
@@ -78,12 +78,13 @@ export default function ContactPage() {
     const widget = altchaRef.current;
 
     const onVerified = (event: any) => {
-      console.log('🔹 ALTCHA verified event reçu :', event);
-
-      // v5 : récupérer le payload depuis event.detail ou fallback global
+      if (!event) {
+        console.warn('⚠️ événement verified reçu est undefined');
+        return;
+      }
       const payload = event?.detail?.payload || (window as any).ALTCHA_PAYLOAD;
       if (payload) {
-        console.log('🔹 Payload ALTCHA détecté :', payload);
+        console.log('🔹 ALTCHA vérifié, payload :', payload);
         form.setValue('altcha', payload, { shouldValidate: true });
       } else {
         console.warn('⚠️ Aucun payload ALTCHA reçu !');
@@ -109,7 +110,9 @@ export default function ContactPage() {
   const resetAltcha = () => {
     console.log('🔄 Réinitialisation du widget ALTCHA côté client');
     form.setValue('altcha', '', { shouldValidate: true });
-    if (altchaRef.current && (altchaRef.current as any).reset) (altchaRef.current as any).reset();
+    if (altchaRef.current && (altchaRef.current as any).reset) {
+      (altchaRef.current as any).reset();
+    }
   };
 
   // --- Soumission du formulaire ---
