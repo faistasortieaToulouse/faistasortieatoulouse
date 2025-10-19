@@ -17,9 +17,13 @@ export async function GET() {
       hmacKey: ALTCHA_HMAC_SECRET,
     });
 
+    // ⚡ Renvoie du challenge JSON
     return NextResponse.json(challenge);
   } catch (err) {
     console.error('❌ Erreur lors de la génération du challenge ALTCHA :', err);
-    return NextResponse.json({ message: 'Erreur serveur ALTCHA.' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Erreur serveur ALTCHA.' },
+      { status: 500 }
+    );
   }
 }

@@ -55,7 +55,7 @@ export default function ContactPage() {
   useEffect(() => {
     if (!document.querySelector('script[data-altcha-loaded]')) {
       const script = document.createElement('script');
-      script.src = '/js/altcha.js'; // ✅ doit être présent dans public/js
+      script.src = '/js/altcha.js'; // doit être accessible dans public/js
       script.async = true;
       script.defer = true;
       script.type = 'module';
@@ -64,9 +64,9 @@ export default function ContactPage() {
       script.onload = () => {
         setScriptLoaded(true);
 
-        // Événements du widget ALTCHA
         const altchaWidget = document.querySelector('altcha-widget');
         if (altchaWidget) {
+          // Événements pour mettre à jour le champ caché RHF
           altchaWidget.addEventListener('verified', (event: any) => {
             form.setValue('altcha', event.detail.payload, { shouldValidate: true });
           });
@@ -96,6 +96,10 @@ export default function ContactPage() {
       if (res.ok) {
         toast({ title: 'Message envoyé avec succès 🎉' });
         form.reset();
+
+        // Réinitialiser le widget ALTCHA si nécessaire
+        const widget = document.querySelector('altcha-widget');
+        if (widget && (widget as any).reset) (widget as any).reset();
       } else {
         toast({ variant: 'destructive', title: 'Erreur', description: result.message || 'Échec de l’envoi.' });
       }
@@ -163,7 +167,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challenge-url="/api/altcha" // ✅ essentiel
+                  challenge-url="/api/altcha" // ✅ essentiel pour faire apparaître le captcha
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>
