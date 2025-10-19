@@ -4,28 +4,33 @@ import { createChallenge } from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
-// Vérifie que la clé secrète existe
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
+// --- Vérifie que la clé secrète existe ---
 if (!ALTCHA_HMAC_SECRET) {
-  console.error('❌ [ALTCHA API] ALTCHA_HMAC_SECRET manquant !');
-  throw new Error('ALTCHA_HMAC_SECRET manquant !');
+  console.warn('⚠️ [ALTCHA API] ALTCHA_HMAC_SECRET manquant. ALTCHA ne fonctionnera pas sans clé !');
 }
 
 export async function GET() {
-  try {
-    console.log('🔹 [ALTCHA API] Requête GET reçue pour challenge');
+  console.log('🔹 [ALTCHA API] Requête GET reçue pour challenge');
 
-    // ✅ Génération du challenge ALTCHA v5.2
+  if (!ALTCHA_HMAC_SECRET) {
+    return NextResponse.json(
+      { success: false, message: 'ALTCHA non configuré sur le serveur.' },
+      { status: 500 }
+    );
+  }
+
+  try {
+    // ✅ Génération du challenge ALTCHA v5+
     const challenge = await createChallenge({
       hmacKey: ALTCHA_HMAC_SECRET,
-      algorithm: 'SHA-256', // plus explicite
-      version: 'v5', // assure compatibilité future
+      algorithm: 'SHA-256',
+      version: 'v5',
     });
 
-    // Log non verbeux en prod
     if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ [ALTCHA API] Challenge généré :', JSON.stringify(challenge, null, 2));
+      console.log('✅ [ALTCHA API] Challenge généré :', challenge);
     }
 
     return NextResponse.json(challenge, {
@@ -35,12 +40,18 @@ export async function GET() {
         Pragma: 'no-cache',
         Expires: '0',
         'Content-Type': 'application/json',
+        'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none';",
+        'Referrer-Policy': 'no-referrer',
       },
     });
   } catch (err) {
     console.error('❌ [ALTCHA API] Erreur lors de la génération du challenge :', err);
+
     return NextResponse.json(
-      { message: 'Erreur serveur ALTCHA.' },
+      {
+        success: false,
+        message: 'Erreur interne lors de la génération du challenge ALTCHA.',
+      },
       { status: 500 }
     );
   }

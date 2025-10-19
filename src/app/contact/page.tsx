@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription
 } from '@/components/ui/card';
@@ -45,7 +45,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 export default function ContactPage() {
   const { toast } = useToast();
   const [scriptLoaded, setScriptLoaded] = useState(false);
-  const altchaRef = useRef<HTMLElement>(null);
+  const [altchaElement, setAltchaElement] = useState<HTMLElement | null>(null);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -65,7 +65,7 @@ export default function ContactPage() {
       script.setAttribute('data-altcha-loaded', 'true');
       script.onload = () => {
         console.log('✅ ALTCHA.js chargé');
-        setTimeout(() => setScriptLoaded(true), 100);
+        setTimeout(() => setScriptLoaded(true), 200);
       };
       document.body.appendChild(script);
     } else {
@@ -74,14 +74,16 @@ export default function ContactPage() {
     }
   }, []);
 
-  // --- Gestion du widget ALTCHA (v5.2+) ---
+  // --- Associer le widget ALTCHA ---
   useEffect(() => {
-    if (!scriptLoaded || !altchaRef.current) return;
-
-    const widget = altchaRef.current as any;
+    if (!scriptLoaded) return;
+    const el = document.querySelector('altcha-widget');
+    if (!el) return;
+    console.log('🔗 ALTCHA widget détecté');
+    setAltchaElement(el as HTMLElement);
 
     const onChange = () => {
-      const value = widget?.value;
+      const value = (el as any).value;
       if (value) {
         console.log('✅ ALTCHA validé, payload reçu :', value);
         form.setValue('altcha', value, { shouldValidate: true });
@@ -91,20 +93,18 @@ export default function ContactPage() {
       }
     };
 
-    widget.addEventListener('change', onChange);
+    el.addEventListener('change', onChange);
     return () => {
-      widget.removeEventListener('change', onChange);
+      el.removeEventListener('change', onChange);
     };
   }, [scriptLoaded, form]);
 
   // --- Réinitialisation ALTCHA ---
   const resetAltcha = () => {
-    console.log('🔄 Réinitialisation du widget ALTCHA côté client');
+    console.log('🔄 Réinitialisation du widget ALTCHA');
     form.setValue('altcha', '', { shouldValidate: true });
-    if (altchaRef.current && 'reset' in altchaRef.current) {
-      (altchaRef.current as any).reset();
-    } else {
-      console.warn('⚠️ ALTCHA widget ne supporte pas reset()');
+    if (altchaElement && 'reset' in altchaElement) {
+      (altchaElement as any).reset();
     }
   };
 
@@ -114,7 +114,7 @@ export default function ContactPage() {
       console.log('🟢 Formulaire soumis avec données :', data);
 
       if (!data.altcha) {
-        console.warn('⚠️ Submission impossible : ALTCHA non complété');
+        console.warn('⚠️ Submission bloquée : ALTCHA non complété');
         toast({
           variant: 'destructive',
           title: 'Erreur',
@@ -147,7 +147,7 @@ export default function ContactPage() {
           resetAltcha();
         }
       } catch (err) {
-        console.error('❌ Erreur réseau lors de l’envoi :', err);
+        console.error('❌ Erreur réseau :', err);
         toast({
           variant: 'destructive',
           title: 'Erreur réseau',
@@ -156,7 +156,7 @@ export default function ContactPage() {
         resetAltcha();
       }
     },
-    [form, toast]
+    [form, toast, altchaElement]
   );
 
   if (!scriptLoaded)
@@ -173,8 +173,7 @@ export default function ContactPage() {
           Nous contacter
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Une question, une suggestion ? N&apos;hésitez pas à nous envoyer un
-          message.
+          Une question, une suggestion ? N&apos;hésitez pas à nous envoyer un message.
         </p>
       </header>
 
@@ -186,7 +185,10 @@ export default function ContactPage() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(e) => {
+                console.log('🧭 Tentative de soumission du formulaire...');
+                form.handleSubmit(onSubmit)(e);
+              }}
               className="space-y-6"
               noValidate
             >
@@ -246,13 +248,10 @@ export default function ContactPage() {
                 )}
               />
 
-              {/* Champ caché ALTCHA */}
               <input type="hidden" {...form.register('altcha')} />
 
-              {/* Widget ALTCHA */}
               <div className="flex flex-col items-center pt-2">
                 <altcha-widget
-                  ref={altchaRef}
                   name="altcha"
                   theme="auto"
                   auto="onsubmit"
