@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Plus, BellRing } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { CalendarIcon, MapPin } from 'lucide-react';
 
 interface DiscordEvent {
   id: string;
   name: string;
   scheduled_start_time: string;
   description?: string;
+  entity_type?: 1 | 2 | 3; // 3 = événement avec adresse
+  entity_metadata?: { location?: string } | null;
 }
 
 interface CalendarClientProps {
@@ -19,6 +19,7 @@ interface CalendarClientProps {
   upcomingEvents: DiscordEvent[];
 }
 
+// Formattage de la date et heure
 const formatEventTime = (isoString: string) => {
   const date = new Date(isoString);
   return new Intl.DateTimeFormat('fr-FR', {
@@ -29,17 +30,42 @@ const formatEventTime = (isoString: string) => {
   }).format(date);
 };
 
+// Récupérer le lieu
+const getEventLocation = (event: DiscordEvent) => {
+  if (event.entity_type === 3 && event.entity_metadata?.location) return event.entity_metadata.location;
+  if (event.entity_type === 2) return 'Salon Vocal';
+  if (event.entity_type === 1) return 'Salon Stage';
+  return 'Lieu non spécifié';
+};
+
+// Lien Google Maps si adresse physique
+const getEventLocationLink = (event: DiscordEvent) => {
+  const location = event.entity_metadata?.location;
+  if (event.entity_type === 3 && location) {
+    return location.startsWith('http')
+      ? location
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+  }
+  return null;
+};
+
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Liste complète triée
-  const allEvents = (eventsData || []).slice().sort(
-    (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+  // Préparer les événements pour le calendrier (points visibles)
+  const calendarEvents = useMemo(
+    () => eventsData.map(e => ({ title: e.name, date: new Date(e.scheduled_start_time) })),
+    [eventsData]
   );
 
-  // Tous les jours avec événements pour le calendrier
-  const eventDays = (eventsData || []).map(e => new Date(e.scheduled_start_time));
-
+  // Liste complète triée
+  const allEvents = useMemo(
+    () =>
+      (eventsData || []).slice().sort(
+        (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+      ),
+    [eventsData]
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -49,15 +75,14 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           <CalendarIcon className="h-6 w-6 text-primary" />
           Vue Mensuelle des Événements
         </h2>
-<Calendar
-  mode="single"
-  selected={selectedDate}
-  onSelect={setSelectedDate}
-  locale={fr}
-  events={eventsData}   // <-- C'est cette prop qui est incorrecte
-  className="rounded-xl border shadow bg-card"
-/>
-
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          locale={fr}
+          events={calendarEvents} // <-- points sur le calendrier
+          className="rounded-xl border shadow bg-card"
+        />
       </div>
 
       {/* Liste complète des événements */}
@@ -66,22 +91,35 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           Liste Complète des Événements
         </h2>
         <div className="bg-card rounded-xl shadow-lg p-4 border max-h-[600px] overflow-y-auto">
-          {allEvents.map(event => (
-            <div
-              key={event.id}
-              className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
-            >
-              <p className="font-bold text-lg text-primary">{event.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatEventTime(event.scheduled_start_time)}
-              </p>
-            </div>
-          ))}
           {allEvents.length === 0 && (
             <p className="text-muted-foreground text-center py-4">
               Aucun événement Discord trouvé.
             </p>
           )}
+          {allEvents.map(event => {
+            const location = getEventLocation(event);
+            const link = getEventLocationLink(event);
+
+            return (
+              <div
+                key={event.id}
+                className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
+              >
+                <p className="font-bold text-lg text-primary">{event.name}</p>
+                <p className="text-sm text-muted-foreground">{formatEventTime(event.scheduled_start_time)}</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  {link ? (
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      {location}
+                    </a>
+                  ) : (
+                    location
+                  )}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
