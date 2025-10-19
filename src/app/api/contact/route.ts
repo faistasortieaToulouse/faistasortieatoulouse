@@ -1,7 +1,7 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { verify } from 'altcha-lib'; // ✅ ALTCHA v5.x compatible
+import * as altcha from 'altcha-lib'; // ✅ ALTCHA v5.x compatible
 
 export const runtime = 'nodejs';
 
@@ -59,15 +59,18 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('📩 [Contact API] Données reçues :', body);
 
-    const { name, email, subject, message, altcha } = body;
+    const { name, email, subject, message, altcha: altchaPayload } = body;
 
     // --- Vérifications basiques ---
     if (!name || !email || !subject || !message) {
       console.warn('⚠️ [Contact API] Champs manquants');
-      return NextResponse.json({ success: false, message: 'Tous les champs sont requis.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: 'Tous les champs sont requis.' },
+        { status: 400 }
+      );
     }
 
-    if (!altcha) {
+    if (!altchaPayload) {
       console.warn('⚠️ [Contact API] Jeton ALTCHA manquant');
       return NextResponse.json(
         { success: false, message: 'Veuillez compléter la vérification ALTCHA.' },
@@ -83,15 +86,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Vérification ALTCHA v5 ---
+    // --- Vérification ALTCHA ---
     console.log('🧩 [Contact API] ALTCHA_HMAC_SECRET présent ? ', !!ALTCHA_HMAC_SECRET);
     console.log('🔍 [Contact API] Tentative de vérification ALTCHA...');
+    console.log('🔧 [Contact API] altcha-lib exports →', Object.keys(altcha));
 
     let isValid = false;
     try {
       const decodedKey = getDecodedKey();
-      console.log('📦 [Contact API] Payload ALTCHA reçu :', altcha.slice(0, 120) + '...');
-      isValid = await verify({ payload: altcha, hmacKey: decodedKey });
+
+      console.log('📦 [Contact API] Payload ALTCHA reçu :', altchaPayload.slice(0, 100) + '...');
+      if (typeof altcha.verify !== 'function') {
+        throw new Error('La fonction altcha.verify() est introuvable dans altcha-lib !');
+      }
+
+      // ✅ Vérification via altcha-lib
+      isValid = await altcha.verify({
+        payload: altchaPayload,
+        hmacKey: decodedKey,
+      });
+
       console.log('✅ [Contact API] ALTCHA vérifié →', isValid);
     } catch (err: any) {
       console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', err);
@@ -145,7 +159,10 @@ export async function POST(request: Request) {
     await transporter.sendMail(mailOptions);
     console.log(`📨 [Contact API] Message envoyé par ${sanitizedName} <${sanitizedEmail}>`);
 
-    return NextResponse.json({ success: true, message: 'Message envoyé avec succès !' }, { status: 200 });
+    return NextResponse.json(
+      { success: true, message: 'Message envoyé avec succès !' },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error('❌ [Contact API] Erreur interne :', JSON.stringify(error, null, 2));
     return NextResponse.json(
