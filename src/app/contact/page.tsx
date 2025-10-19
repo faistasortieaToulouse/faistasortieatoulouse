@@ -23,7 +23,7 @@ declare global {
         maxnumber?: string;
         theme?: 'light' | 'dark' | 'auto';
         auto?: 'onsubmit';
-        'challenge-url'?: string;
+        'challengeurl'?: string;
       }, HTMLElement>;
     }
   }
@@ -167,7 +167,7 @@ export default function ContactPage() {
                   maxnumber="1000000"
                   theme="auto"
                   auto="onsubmit"
-                  challenge-url="/api/altcha" // ✅ essentiel pour faire apparaître le captcha
+                  challengeurl="/api/altcha" // ✅ essentiel pour faire apparaître le captcha
                 />
                 {altchaError && <p className="text-sm text-destructive mt-2">{altchaError}</p>}
               </div>
