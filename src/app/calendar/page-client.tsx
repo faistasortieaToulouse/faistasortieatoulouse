@@ -10,7 +10,7 @@ interface DiscordEvent {
   name: string;
   scheduled_start_time: string;
   description?: string;
-  entity_type?: 1 | 2 | 3; // 3 = événement avec adresse
+  entity_type?: 1 | 2 | 3;
   entity_metadata?: { location?: string } | null;
 }
 
@@ -30,19 +30,15 @@ const formatEventTime = (isoString: string) => {
   }).format(date);
 };
 
-// Récupérer le lieu de l'événement
+// Récupérer le lieu
 const getEventLocation = (event: DiscordEvent) => {
-  if (event.entity_type === 3 && event.entity_metadata?.location) {
-    return event.entity_metadata.location;
-  } else if (event.entity_type === 2) {
-    return 'Salon Vocal';
-  } else if (event.entity_type === 1) {
-    return 'Salon Stage';
-  }
+  if (event.entity_type === 3 && event.entity_metadata?.location) return event.entity_metadata.location;
+  if (event.entity_type === 2) return 'Salon Vocal';
+  if (event.entity_type === 1) return 'Salon Stage';
   return 'Lieu non spécifié';
 };
 
-// Récupérer le lien Google Maps si adresse physique
+// Lien Google Maps si adresse physique
 const getEventLocationLink = (event: DiscordEvent) => {
   const location = event.entity_metadata?.location;
   if (event.entity_type === 3 && location) {
@@ -56,20 +52,22 @@ const getEventLocationLink = (event: DiscordEvent) => {
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Préparer les événements pour le calendrier
+  // Préparer les événements pour le calendrier (points visibles)
   const calendarEvents = useMemo(
-    () => eventsData.map(e => ({
-      title: e.name,
-      date: new Date(e.scheduled_start_time), // <-- "date" utilisé pour compatibilité calendrier
-    })),
+    () =>
+      eventsData.map(e => ({
+        title: e.name,
+        date: new Date(e.scheduled_start_time),
+      })),
     [eventsData]
   );
 
   // Liste complète triée
   const allEvents = useMemo(
-    () => (eventsData || []).slice().sort(
-      (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
-    ),
+    () =>
+      (eventsData || []).slice().sort(
+        (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+      ),
     [eventsData]
   );
 
@@ -86,7 +84,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           selected={selectedDate}
           onSelect={setSelectedDate}
           locale={fr}
-          events={calendarEvents} // <-- points visibles
+          events={calendarEvents} // <-- points réapparaissent ici
           className="rounded-xl border shadow bg-card"
         />
       </div>
@@ -112,18 +110,11 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                 className="mb-3 p-3 border-b last:border-b-0 hover:bg-secondary/50 rounded-md transition-colors"
               >
                 <p className="font-bold text-lg text-primary">{event.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatEventTime(event.scheduled_start_time)}
-                </p>
+                <p className="text-sm text-muted-foreground">{formatEventTime(event.scheduled_start_time)}</p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-4 w-4 text-green-600" />
                   {link ? (
-                    <a
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                       {location}
                     </a>
                   ) : (
