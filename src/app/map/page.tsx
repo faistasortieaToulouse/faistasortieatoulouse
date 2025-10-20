@@ -21,19 +21,44 @@ async function fetchEventsData(): Promise<DiscordEvent[]> {
       // Revalidation pour rafraîchir les événements toutes les 5 minutes
       next: { revalidate: 300 }, 
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`Failed to fetch events: ${res.status} ${res.statusText}`);
+      return [];
+    }
     return res.json();
-  } catch {
+  } catch (e) {
+    console.error("Error during Discord API fetch:", e);
     return [];
   }
 }
 
+/**
+ * Nettoie les données brutes de Discord pour assurer une sérialisation propre
+ * et ne conserver que les champs nécessaires.
+ */
+function mapEvents(events: any[]): DiscordEvent[] {
+    return events.map(event => ({
+        id: event.id,
+        name: event.name,
+        scheduled_start_time: event.scheduled_start_time,
+        channel_id: event.channel_id,
+        entity_type: event.entity_type,
+        entity_metadata: event.entity_metadata ? {
+            location: event.entity_metadata.location
+        } : null,
+        // Ignorer le reste des champs Discord qui pourraient causer des problèmes de sérialisation
+    }));
+}
+
 export default async function MapPage() {
-  const eventsData = await fetchEventsData();
+  const rawEventsData = await fetchEventsData();
   
+  // 0. Nettoyage des données pour la sérialisation
+  const cleanedEventsData = mapEvents(rawEventsData);
+
   // 1. Tri des événements par date de début (du plus proche au plus éloigné)
-  // CORRECTION : Créer une copie du tableau avec [...eventsData] avant de trier.
-  const sortedEvents = [...eventsData].sort((a, b) => 
+  // Créer une copie du tableau avant de trier.
+  const sortedEvents = [...cleanedEventsData].sort((a, b) => 
     new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
 
@@ -42,20 +67,3 @@ export default async function MapPage() {
 
   return <MapClient initialEvents={limitedEvents} />;
 }
-```
-eof
-
-### Explication de la Correction
-
-L'erreur de pré-rendu (`Error occurred prerendering page`) est souvent liée à des mutations d'objets ou de tableaux qui devraient rester immuables dans le contexte des Server Components et de la sérialisation.
-
-En changeant :
-
-```typescript
-const sortedEvents = eventsData.sort((a, b) => ...);
-```
-
-par :
-
-```typescript
-const sortedEvents = [...eventsData].sort((a, b) => ...);
