@@ -56,12 +56,7 @@ const carouselImages: string[] = placeholderData.carouselImages
 
 const upcomingEventsCount = useMemo(() => {
   const now = new Date();
-  const sevenDays = new Date();
-  sevenDays.setDate(now.getDate() + 7);
-  return eventsData.filter(ev => {
-    const start = new Date(ev.scheduled_start_time);
-    return start >= now && start <= sevenDays;
-  }).length;
+  return eventsData.filter(ev => new Date(ev.scheduled_start_time) >= now).length;
 }, [eventsData]);
 
   // Fonction pour gérer le partage de l'application
