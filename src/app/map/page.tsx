@@ -50,6 +50,7 @@ function mapEvents(events: any[]): DiscordEvent[] {
     }));
 }
 
+// Utilisation d'une fonction fléchée pour l'export par défaut (style Server Component standard)
 export default async function MapPage() {
   const rawEventsData = await fetchEventsData();
   
@@ -57,7 +58,7 @@ export default async function MapPage() {
   const cleanedEventsData = mapEvents(rawEventsData);
 
   // 1. Tri des événements par date de début (du plus proche au plus éloigné)
-  // Créer une copie du tableau avant de trier.
+  // Créer une copie du tableau avant de trier pour éviter la mutation.
   const sortedEvents = [...cleanedEventsData].sort((a, b) => 
     new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
