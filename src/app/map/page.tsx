@@ -32,7 +32,8 @@ export default async function MapPage() {
   const eventsData = await fetchEventsData();
   
   // 1. Tri des événements par date de début (du plus proche au plus éloigné)
-  const sortedEvents = eventsData.sort((a, b) => 
+  // CORRECTION : Créer une copie du tableau avec [...eventsData] avant de trier.
+  const sortedEvents = [...eventsData].sort((a, b) => 
     new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
 
@@ -41,3 +42,20 @@ export default async function MapPage() {
 
   return <MapClient initialEvents={limitedEvents} />;
 }
+```
+eof
+
+### Explication de la Correction
+
+L'erreur de pré-rendu (`Error occurred prerendering page`) est souvent liée à des mutations d'objets ou de tableaux qui devraient rester immuables dans le contexte des Server Components et de la sérialisation.
+
+En changeant :
+
+```typescript
+const sortedEvents = eventsData.sort((a, b) => ...);
+```
+
+par :
+
+```typescript
+const sortedEvents = [...eventsData].sort((a, b) => ...);
