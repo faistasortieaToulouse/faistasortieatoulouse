@@ -21,45 +21,18 @@ async function fetchEventsData(): Promise<DiscordEvent[]> {
       // Revalidation pour rafraîchir les événements toutes les 5 minutes
       next: { revalidate: 300 }, 
     });
-    if (!res.ok) {
-      console.error(`Failed to fetch events: ${res.status} ${res.statusText}`);
-      return [];
-    }
+    if (!res.ok) return [];
     return res.json();
-  } catch (e) {
-    console.error("Error during Discord API fetch:", e);
+  } catch {
     return [];
   }
 }
 
-/**
- * Nettoie les données brutes de Discord pour assurer une sérialisation propre
- * et ne conserver que les champs nécessaires.
- */
-function mapEvents(events: any[]): DiscordEvent[] {
-    return events.map(event => ({
-        id: event.id,
-        name: event.name,
-        scheduled_start_time: event.scheduled_start_time,
-        channel_id: event.channel_id,
-        entity_type: event.entity_type,
-        entity_metadata: event.entity_metadata ? {
-            location: event.entity_metadata.location
-        } : null,
-        // Ignorer le reste des champs Discord qui pourraient causer des problèmes de sérialisation
-    }));
-}
-
-// Utilisation d'une fonction fléchée pour l'export par défaut (style Server Component standard)
 export default async function MapPage() {
-  const rawEventsData = await fetchEventsData();
+  const eventsData = await fetchEventsData();
   
-  // 0. Nettoyage des données pour la sérialisation
-  const cleanedEventsData = mapEvents(rawEventsData);
-
   // 1. Tri des événements par date de début (du plus proche au plus éloigné)
-  // Créer une copie du tableau avant de trier pour éviter la mutation.
-  const sortedEvents = [...cleanedEventsData].sort((a, b) => 
+  const sortedEvents = eventsData.sort((a, b) => 
     new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
 
