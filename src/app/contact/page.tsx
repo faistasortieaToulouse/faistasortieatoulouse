@@ -57,7 +57,7 @@ useEffect(() => {
                   theme="auto"
                   auto="onsubmit"
                   // ✅ MODIFICATION : Utilisation de l'état challengeUrl
-                  challengeurl={challengeUrl} 
+                  challengeurl="/api/altcha" // ✅ OK
                   style={{ width: '100%', maxWidth: 320 }}
                 />
                 {/* ... (Affichage altchaError inchangé) ... */}
