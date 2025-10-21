@@ -212,59 +212,55 @@ const upcomingEventsWeekCount = useMemo(() => {
 
             {/* NOUVEAU CONTENEUR pour les boutons. Utilisez 'flex-wrap' ici si vous voulez qu'ils restent sur une seule ligne sur grand écran, sinon utilisez 'flex-col' */}
 
-                <div className="flex flex-wrap justify-center gap-4 w-full"> 
+<div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
+  {/* 1. Lien Google Play (TWA Android) */}
+  <Link 
+    href="https://play.google.com/store/apps/details?id=com.votre.appli.android" 
+    target="_blank" 
+    className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+  >
+    <Store className="h-5 w-5" />
+    <Image
+      src="/images/google-play-badge.png"
+      alt="Disponible sur Google Play"
+      width={180}
+      height={53}
+    />
+  </Link>
 
-        {/* 1. Lien Google Play (TWA Android) */}
-        <Link 
-          href="https://play.google.com/store/apps/details?id=com.votre.appli.android" 
-          target="_blank" 
-          className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition duration-300"
-        >
-          <Store className="h-5 w-5" />
-          {/* Utilisation du badge officiel Google Play */}
-          <Image
-            src="/images/google-play-badge.png" // ⬅️ Le chemin de votre badge
-            alt="Disponible sur Google Play"
-            width={180} // Ajustez la taille selon vos besoins
-            height={53} // Ajustez la taille selon vos besoins
-          />
-        </Link>
+  {/* 2. Téléchargement APK */}
+  <Link 
+    href="/votre-application.apk"
+    download
+    className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+  >
+    <Store className="h-5 w-5" />
+    <span className="leading-tight text-center">
+      Télécharger le fichier APK (TWA)
+      <br />
+      <span className="text-sm font-normal opacity-90">pour Android</span>
+    </span>
+  </Link>
 
-        {/* 🚀 NOUVEAU BOUTON : Téléchargement direct APK/TWA */}
-        <Link 
-          href="/votre-application.apk" // ⬅️ REMPLACER PAR LE CHEMIN VERS VOTRE APK
-          download // Important : force le téléchargement du fichier
-          className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-        >
-          <Store className="h-5 w-5" />
+  {/* 3. PWA iOS */}
+  <Link 
+    href="/install-pwa-ios" 
+    className="flex items-center space-x-2 p-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+  >
+    <Apple className="h-5 w-5" />
+    <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
+  </Link>
 
-   <span className="leading-tight">
-    Télécharger le fichier APK (TWA)
-    <br />
-    <span className="text-sm font-normal opacity-90">pour Android</span>
-  </span>
+  {/* 4. Partage */}
+  <Button 
+    onClick={handleShare} 
+    className="flex items-center space-x-2 p-3 bg-primary text-primary-foreground rounded-lg shadow-md hover:bg-primary/90 transition duration-300"
+  >
+    <Share2 className="h-5 w-5" />
+    <span className="font-semibold">Partager l'application</span>
+  </Button>
+</div>
 
-        </Link>
-
-        {/* 2. Lien/Instructions pour PWA (Apple/iOS) */}
-        <Link 
-          href="/install-pwa-ios" 
-          className="flex items-center space-x-2 p-3 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition duration-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-        >
-          <Apple className="h-5 w-5" />
-          <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
-        </Link>
-
-        {/* 3. Bouton de Partage */}
-        <Button 
-          onClick={handleShare} 
-          className="flex items-center space-x-2 p-3 bg-primary text-primary-foreground rounded-lg shadow-md hover:bg-primary/90 transition duration-300"
-        >
-          <Share2 className="h-5 w-5" />
-          <span className="font-semibold">Partager l'application</span>
-        </Button>
-
-           </div>
 
       </section>
 
