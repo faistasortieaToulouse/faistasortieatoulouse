@@ -3,11 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { ChevronLeft, Zap, ExternalLink, Mountain, Footprints } from 'lucide-react';
-import { Facebook, Calendar, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
-import { Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
-import { SidebarTrigger } from "@/components/ui/sidebar"; 
-import GoogleTranslate from '@/components/GoogleTranslate';
+import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
+import { Map, LifeBuoy } from "lucide-react"; 
+import { SidebarTrigger } from "@/components/ui/sidebar"; // SidebarTrigger client-side
+
+// Charger GoogleTranslate uniquement côté client pour éviter le SSR
+const GoogleTranslate = dynamic(() => import('@/components/GoogleTranslate'), { ssr: false });
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -30,7 +33,7 @@ export function AppSidebar() {
 
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
-      {/* Header */}
+      {/* Logo + Trigger + GoogleTranslate */}
       <div className="flex items-center justify-between mb-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
@@ -50,7 +53,7 @@ export function AppSidebar() {
 
         <div className="flex items-center gap-2">
           <SidebarTrigger iconSize={36} className="cursor-pointer z-20 relative" />
-          <GoogleTranslate />  {/* Ajuste la taille dans le composant si besoin */}
+          <GoogleTranslate /> {/* Chargé dynamiquement côté client */}
         </div>
       </div>
 
@@ -61,6 +64,7 @@ export function AppSidebar() {
           const linkProps = item.external
             ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
             : { href: item.href };
+
           return (
             <Link
               key={item.label}
@@ -73,7 +77,6 @@ export function AppSidebar() {
           );
         })}
 
-        {/* Discord Button */}
         <a
           href="https://discord.gg/yourinvite"
           target="_blank"
