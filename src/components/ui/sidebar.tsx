@@ -257,13 +257,34 @@ const Sidebar = React.forwardRef<
     )
   }
 )
-Sidebar.displayName = "Sidebar"
+Sidebar.displayName = "Sidebar" // ← on garde
 
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
-  React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
+  React.ComponentProps<typeof Button> & {
+    iconSize?: number
+  }
+>(({ className, onClick, iconSize = 32, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
+
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      onClick={(e) => {
+        toggleSidebar()
+        onClick?.(e)
+      }}
+      className={cn("lg:hidden", className)}
+      {...props}
+    >
+      <Menu size={iconSize} />
+    </Button>
+  )
+})
+SidebarTrigger.displayName = "SidebarTrigger"
+
 
   return (
     <Button
