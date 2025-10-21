@@ -38,7 +38,7 @@ const navItems = [
   { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
 
-export default function AppSidebar() {
+export function AppSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const ftsLogo = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
 
