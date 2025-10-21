@@ -24,7 +24,6 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-    }
 
   try {
     // ✅ Génération du challenge ALTCHA v5+
@@ -61,4 +60,5 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+    }
 }
