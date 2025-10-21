@@ -54,79 +54,78 @@ export default function ContactPage() {
 
   const altchaError = form.formState.errors['altcha']?.message;
 
-  // --- Charger le script ALTCHA ---
-useEffect(() => {
-  if (!scriptLoaded) return;
-  const widget = document.querySelector('altcha-widget');
-  if (!widget) return;
-  console.log('🔗 ALTCHA widget détecté');
-  setAltchaElement(widget as HTMLElement);
+  // --- Charger le script ALTCHA (Reste inchangé) ---
+  useEffect(() => {
+    if (!scriptLoaded) return;
+    const widget = document.querySelector('altcha-widget');
+    if (!widget) return;
+    console.log('🔗 ALTCHA widget détecté');
+    setAltchaElement(widget as HTMLElement);
 
-  // Ancien listener 'change' (optionnel, peut rester pour compatibilité)
-  const onChange = (event?: any) => {
-    const value = (widget as any).value ?? event?.detail?.value ?? '';
-    form.setValue('altcha', value, { shouldValidate: true });
-  };
-  widget.addEventListener('change', onChange);
-
-  // ✅ Nouveau listener ALTCHA v5+
-  const onVerified = (e: any) => {
-    const value = e.detail?.payload;
-    if (value) {
-      console.log('✅ ALTCHA vérifié, payload reçu :', value);
+    const onChange = (event?: any) => {
+      const value = (widget as any).value ?? event?.detail?.value ?? '';
       form.setValue('altcha', value, { shouldValidate: true });
+    };
+    widget.addEventListener('change', onChange);
+
+    const onVerified = (e: any) => {
+      const value = e.detail?.payload;
+      if (value) {
+        console.log('✅ ALTCHA vérifié, payload reçu :', value);
+        form.setValue('altcha', value, { shouldValidate: true });
+      }
+    };
+    const onReset = () => {
+      console.log('🔄 ALTCHA réinitialisé');
+      form.setValue('altcha', '', { shouldValidate: true });
+    };
+
+    widget.addEventListener('verified', onVerified);
+    widget.addEventListener('reset', onReset);
+
+    return () => {
+      widget.removeEventListener('change', onChange);
+      widget.removeEventListener('verified', onVerified);
+      widget.removeEventListener('reset', onReset);
+    };
+  }, [scriptLoaded, form]);
+
+
+  // --- Lier le widget ALTCHA (Reste inchangé) ---
+  useEffect(() => {
+    if (!document.querySelector('script[data-altcha-loaded]')) {
+      const script = document.createElement('script');
+      script.src = '/js/altcha.js'; // ✅ URL CDN ALTCHA
+      script.async = true;
+      script.defer = true;
+      script.type = 'module';
+      script.setAttribute('data-altcha-loaded', 'true');
+      script.onload = () => {
+        console.log('✅ ALTCHA.js chargé');
+        setTimeout(() => setScriptLoaded(true), 100);
+      };
+      script.onerror = (e) => {
+        console.error('❌ Impossible de charger ALTCHA.js', e);
+      };
+      document.body.appendChild(script);
+    } else {
+      console.log('✅ ALTCHA.js déjà chargé');
+      setScriptLoaded(true);
     }
-  };
-  const onReset = () => {
-    console.log('🔄 ALTCHA réinitialisé');
-    form.setValue('altcha', '', { shouldValidate: true });
-  };
-
-  widget.addEventListener('verified', onVerified);
-  widget.addEventListener('reset', onReset);
-
-  return () => {
-    widget.removeEventListener('change', onChange);
-    widget.removeEventListener('verified', onVerified);
-    widget.removeEventListener('reset', onReset);
-  };
-}, [scriptLoaded, form]);
+  }, []);
 
 
-  // --- Lier le widget ALTCHA ---
-useEffect(() => {
-  if (!document.querySelector('script[data-altcha-loaded]')) {
-    const script = document.createElement('script');
-    script.src = '/js/altcha.js'; // ✅ URL CDN ALTCHA
-    script.async = true;
-    script.defer = true;
-    script.type = 'module';
-    script.setAttribute('data-altcha-loaded', 'true');
-    script.onload = () => {
-      console.log('✅ ALTCHA.js chargé');
-      setTimeout(() => setScriptLoaded(true), 100);
-    };
-    script.onerror = (e) => {
-      console.error('❌ Impossible de charger ALTCHA.js', e);
-    };
-    document.body.appendChild(script);
-  } else {
-    console.log('✅ ALTCHA.js déjà chargé');
-    setScriptLoaded(true);
-  }
-}, []);
-
-
-  // --- Réinitialiser le widget ---
-  const resetAltcha = () => {
+  // --- Réinitialiser le widget (Reste inchangé) ---
+  const resetAltcha = useCallback(() => {
     console.log('🔄 Réinitialisation du widget ALTCHA');
     form.setValue('altcha', '', { shouldValidate: true });
     if (altchaElement && 'reset' in altchaElement) {
       (altchaElement as any).reset();
     }
-  };
+  }, [form, altchaElement]); // Ajout de altchaElement et form aux dépendances
 
-  // --- Soumission du formulaire ---
+
+  // --- Soumission du formulaire (LOGIQUE CORRIGÉE) ---
   const onSubmit = useCallback(
     async (data: ContactFormValues) => {
       console.log('🟢 Formulaire soumis avec données :', data);
@@ -155,7 +154,60 @@ useEffect(() => {
         if (res.ok) {
           toast({ title: 'Message envoyé avec succès 🎉' });
           form.reset();
+          // *** APPEL À LA RÉINITIALISATION DU WIDGET ***
+          resetAltcha(); 
+          return;
+        }
 
+        // Gestion des erreurs spécifiques (par exemple, échec de vérification ALTCHA)
+        if (res.status === 400 && result.error?.includes('ALTCHA')) {
+          toast({ variant: 'destructive', title: 'Erreur de vérification', description: result.error });
+          resetAltcha();
+        } else {
+          toast({ variant: 'destructive', title: 'Échec de l\'envoi', description: result.error || 'Une erreur inattendue est survenue.' });
+        }
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Erreur réseau',
+          description: 'Impossible de contacter le serveur.',
+        });
+      }
+    },
+    [form, toast, resetAltcha] // Dépendances incluant la fonction de réinitialisation
+  );
+
+
+  // --- Rendu du composant (JSX CORRIGÉ) ---
+  return (
+    <div className="flex justify-center items-center py-12 px-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>Contact</CardTitle>
+          <CardDescription>Envoyez-nous un message</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+              {/* FormField NOM */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Jean Dupont" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* FormField EMAIL */}
               <FormField
                 control={form.control}
                 name="email"
@@ -170,6 +222,7 @@ useEffect(() => {
                 )}
               />
 
+              {/* FormField SUJET */}
               <FormField
                 control={form.control}
                 name="subject"
@@ -184,6 +237,7 @@ useEffect(() => {
                 )}
               />
 
+              {/* FormField MESSAGE */}
               <FormField
                 control={form.control}
                 name="message"
