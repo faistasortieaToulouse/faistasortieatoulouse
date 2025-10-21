@@ -73,8 +73,7 @@ const SidebarProvider = React.forwardRef<
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
-)
-SidebarProvider.displayName = "SidebarProvider"
+)SidebarProvider.displayName = "SidebarProvider"
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
