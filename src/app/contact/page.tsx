@@ -1,11 +1,12 @@
-// ... après les autres imports et types
+// src/app/contact/page.tsx
+// AUCUN 'use client' ici.
+// AUCUN hook React (useState, useEffect, useForm, useToast) n'est importé ou utilisé ici.
 
-import ContactForm from '@/components/ContactForm';
-import MainLayout from "@/app/(main)/layout"; // Si vous utilisez le layout
+import ContactFormClient from '@/components/ContactFormClient';
+import MainLayout from "@/app/(main)/layout"; 
 
 export default function ContactPage() {
     return (
-        // Vous pouvez laisser le MainLayout ici ou dans votre layout.tsx
         <MainLayout> 
             <div className="flex flex-col items-center pt-8 pb-12 w-full max-w-lg mx-auto">
                 {/* 👈 L'appel au Client Component encapsule toute la logique */}
