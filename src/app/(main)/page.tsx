@@ -58,7 +58,7 @@ const totalMembersCount = membersData.length;
     try {
       const res = await fetch(
         `https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`,
-        { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 300 } }
+        { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 60 } }
       );
       eventsData = res.ok ? await res.json() : [];
     } catch {}
