@@ -11,8 +11,12 @@ if (!ALTCHA_HMAC_SECRET) {
   console.warn('⚠️ [ALTCHA API] ALTCHA_HMAC_SECRET manquant. ALTCHA ne fonctionnera pas sans clé !');
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   console.log('🔹 [ALTCHA API] Requête GET reçue pour challenge');
+    try {
+    // Option mobile : lecture d'un paramètre query `?mobile=true`
+    const url = new URL(request.url);
+    const isMobile = url.searchParams.get('mobile') === 'true';
 
   if (!ALTCHA_HMAC_SECRET) {
     return NextResponse.json(
@@ -27,6 +31,7 @@ export async function GET() {
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
       version: 'v5',
+      difficulty: isMobile ? 'easy' : 'normal', // ✅ version plus légère pour mobile
     });
 
     if (process.env.NODE_ENV !== 'production') {
