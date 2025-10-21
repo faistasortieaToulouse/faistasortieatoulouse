@@ -142,54 +142,50 @@ const upcomingEventsWeekCount = useMemo(() => {
       {/* Main Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-{/* Colonne gauche */}
-<div className="flex flex-col gap-8">
-  <DiscordWidget />
-  <DiscordChannelList channels={discordData?.channels} />
-
-  {/* 🧩 Sondages Actifs sur Discord — déplacé ici */}
-  <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-    <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
-    <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-      <div className="min-h-[100px]">
-        <DiscordPolls polls={discordPolls} />
+    {/* Nouvelle colonne droite → contenu anciennement à gauche */}
+  <div className="flex flex-col gap-8">
+    <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+      <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+      <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <DiscordEvents events={discordData?.events} />
       </div>
+    </div>
+
+    <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+      <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+      </p>
+      <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
     </div>
   </div>
 
-  {/* Total des membres du serveur */}
-  <Card className="relative p-4 flex flex-col justify-between h-28">
-    <div className="flex justify-between items-start">
-      <div>
-        <div className="text-sm text-gray-700">Membres sur le serveur</div>
-        <div className="text-2xl font-bold">{totalMembers}</div> 
-        <div className="text-xs text-gray-500">Inscrits sur le Discord</div>
-      </div>
-      <Users className="h-5 w-5 text-primary self-start" />
-    </div>
-  </Card>
-</div>
+  {/* Nouvelle colonne gauche → contenu anciennement à droite */}
+  <div className="flex flex-col gap-8">
+    <DiscordWidget />
+    <DiscordChannelList channels={discordData?.channels} />
 
-        {/* Colonne droite */}
-        <div className="flex flex-col gap-8">
-          {/* IA Recommendations */}
-          <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-            <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-            </p>
-            <AiRecommendations eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'} />
-          </div>
-
-          {/* Événements à venir */}
-          <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-            <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-            <div className="max-h-[400px] min-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-              <DiscordEvents events={discordData?.events} />
-            </div>
-          </div>
-
+    <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
+      <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
+      <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <div className="min-h-[100px]">
+          <DiscordPolls polls={discordPolls} />
         </div>
+      </div>
+    </div>
+
+    <Card className="relative p-4 flex flex-col justify-between h-28">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-sm text-gray-700">Membres sur le serveur</div>
+          <div className="text-2xl font-bold">{totalMembers}</div>
+          <div className="text-xs text-gray-500">Inscrits sur le Discord</div>
+        </div>
+        <Users className="h-5 w-5 text-primary self-start" />
+      </div>
+    </Card>
+  </div>
+
       </section>
 
       {/* Notifications */}
