@@ -161,10 +161,10 @@ const upcomingEventsWeekCount = useMemo(() => {
   </div>
 
   {/* Nouvelle colonne gauche → contenu anciennement à droite */}
-    <DiscordChannelList channels={discordData?.channels} />
   <div className="flex flex-col gap-8">
     <DiscordWidget />
-
+    <DiscordChannelList channels={discordData?.channels} />
+    
     <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
       <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
       <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
