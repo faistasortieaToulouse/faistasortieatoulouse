@@ -49,8 +49,16 @@ return (
   </div>
 </Link>
 
-        <SidebarTrigger className="lg:hidden cursor-pointer w-10 h-10" />
-      </div>
+<div className="flex items-center justify-between mb-6">
+  <Link href="/" className="flex items-center gap-3">
+    ...
+  </Link>
+
+  <div className="flex items-center gap-2">
+<SidebarTrigger iconSize={36} className="cursor-pointer z-20 relative" />
+    <GoogleTranslate />  {/* tu peux ajuster la taille ici */}
+  </div>
+</div>
 
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {navItems.map((item) => {
