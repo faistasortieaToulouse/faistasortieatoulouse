@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { LayoutDashboard, MessageSquare, Footprints, Mountain, Zap, Calendar, Car, Users, Facebook, ExternalLink, Map, LifeBuoy } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar"; // Client-side
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const GoogleTranslate = dynamic(() => import('@/components/GoogleTranslate'), { ssr: false });
 
@@ -30,7 +30,6 @@ export function AppSidebar() {
 
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
-      {/* Logo + SidebarTrigger + GoogleTranslate */}
       <div className="flex items-center justify-between mb-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
@@ -44,11 +43,10 @@ export function AppSidebar() {
 
         <div className="flex items-center gap-2">
           <SidebarTrigger iconSize={36} className="cursor-pointer z-20 relative" />
-          <GoogleTranslate /> 
+          <GoogleTranslate />
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
