@@ -49,7 +49,7 @@ return (
   </div>
 </Link>
 
-        <SidebarTrigger iconSize={36} className="cursor-pointer" />
+        <SidebarTrigger className="lg:hidden cursor-pointer w-10 h-10" />
       </div>
 
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
