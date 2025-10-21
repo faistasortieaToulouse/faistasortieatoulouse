@@ -1,16 +1,19 @@
 // ... après les autres imports et types
 
-export default function ContactPage() {
-  const { toast } = useToast();
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [altchaElement, setAltchaElement] = useState<HTMLElement | null>(null);
+import ContactForm from '@/components/ContactForm';
+import MainLayout from "@/app/(main)/layout"; // Si vous utilisez le layout
 
-  // ✅ AJOUT : État pour l'URL du challenge
-  const [challengeUrl, setChallengeUrl] = useState('/api/altcha'); 
-  
-  const form = useForm<ContactFormValues>({
-    // ...
-  });
+export default function ContactPage() {
+    return (
+        // Vous pouvez laisser le MainLayout ici ou dans votre layout.tsx
+        <MainLayout> 
+            <div className="flex flex-col items-center pt-8 pb-12 w-full max-w-lg mx-auto">
+                {/* 👈 L'appel au Client Component encapsule toute la logique */}
+                <ContactFormClient /> 
+            </div>
+        </MainLayout>
+    );
+}
 
 // ... (reste du code)
 
