@@ -24,6 +24,7 @@ declare global {
           theme?: 'light' | 'dark' | 'auto';
           auto?: 'onsubmit';
           challengeurl?: string;
+          challenge?: string;
         },
         HTMLElement
       >;
@@ -46,6 +47,7 @@ export default function ContactPage() {
   const { toast } = useToast();
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [altchaElement, setAltchaElement] = useState<HTMLElement | null>(null);
+  const [challenge, setChallenge] = useState<string | null>(null); // ✅ préchargement
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -54,32 +56,65 @@ export default function ContactPage() {
 
   const altchaError = form.formState.errors['altcha']?.message;
 
-  // --- Charger le script ALTCHA (Reste inchangé) ---
+  // --- Charger le script ALTCHA ---
+  useEffect(() => {
+    if (document.querySelector('script[data-altcha-loaded]')) {
+      setScriptLoaded(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = '/js/altcha.js';
+    script.async = true;
+    script.defer = true;
+    script.type = 'module';
+    script.setAttribute('data-altcha-loaded', 'true');
+    script.onload = () => {
+      console.log('✅ ALTCHA.js chargé');
+      setScriptLoaded(true);
+    };
+    script.onerror = (e) => console.error('❌ Erreur de chargement ALTCHA.js', e);
+    document.body.appendChild(script);
+  }, []);
+
+  // --- Précharger un challenge dès le montage ---
+  useEffect(() => {
+    const loadChallenge = async () => {
+      try {
+        const res = await fetch('/api/altcha', { cache: 'no-store' });
+        const data = await res.json();
+        if (data && data.challenge) {
+          console.log('✅ Challenge ALTCHA préchargé');
+          setChallenge(JSON.stringify(data)); // stocker challenge complet
+        } else {
+          console.warn('⚠️ Challenge non reçu');
+        }
+      } catch (e) {
+        console.error('❌ Erreur lors du préchargement du challenge', e);
+      }
+    };
+    loadChallenge();
+  }, []);
+
+  // --- Attacher les événements du widget ---
   useEffect(() => {
     if (!scriptLoaded) return;
     const widget = document.querySelector('altcha-widget');
     if (!widget) return;
-    console.log('🔗 ALTCHA widget détecté');
     setAltchaElement(widget as HTMLElement);
 
-    const onChange = (event?: any) => {
-      const value = (widget as any).value ?? event?.detail?.value ?? '';
+    const onChange = (e: any) => {
+      const value = (widget as any).value ?? e?.detail?.value ?? '';
       form.setValue('altcha', value, { shouldValidate: true });
     };
-    widget.addEventListener('change', onChange);
-
     const onVerified = (e: any) => {
       const value = e.detail?.payload;
-      if (value) {
-        console.log('✅ ALTCHA vérifié, payload reçu :', value);
-        form.setValue('altcha', value, { shouldValidate: true });
-      }
+      if (value) form.setValue('altcha', value, { shouldValidate: true });
     };
     const onReset = () => {
-      console.log('🔄 ALTCHA réinitialisé');
       form.setValue('altcha', '', { shouldValidate: true });
     };
 
+    widget.addEventListener('change', onChange);
     widget.addEventListener('verified', onVerified);
     widget.addEventListener('reset', onReset);
 
@@ -90,48 +125,17 @@ export default function ContactPage() {
     };
   }, [scriptLoaded, form]);
 
-
-  // --- Lier le widget ALTCHA (Reste inchangé) ---
-  useEffect(() => {
-    if (!document.querySelector('script[data-altcha-loaded]')) {
-      const script = document.createElement('script');
-      script.src = '/js/altcha.js'; // ✅ URL CDN ALTCHA
-      script.async = true;
-      script.defer = true;
-      script.type = 'module';
-      script.setAttribute('data-altcha-loaded', 'true');
-      script.onload = () => {
-        console.log('✅ ALTCHA.js chargé');
-        setTimeout(() => setScriptLoaded(true), 100);
-      };
-      script.onerror = (e) => {
-        console.error('❌ Impossible de charger ALTCHA.js', e);
-      };
-      document.body.appendChild(script);
-    } else {
-      console.log('✅ ALTCHA.js déjà chargé');
-      setScriptLoaded(true);
-    }
-  }, []);
-
-
-  // --- Réinitialiser le widget (Reste inchangé) ---
   const resetAltcha = useCallback(() => {
-    console.log('🔄 Réinitialisation du widget ALTCHA');
     form.setValue('altcha', '', { shouldValidate: true });
     if (altchaElement && 'reset' in altchaElement) {
       (altchaElement as any).reset();
     }
-  }, [form, altchaElement]); // Ajout de altchaElement et form aux dépendances
+  }, [form, altchaElement]);
 
-
-  // --- Soumission du formulaire (LOGIQUE CORRIGÉE) ---
+  // --- Soumission du formulaire ---
   const onSubmit = useCallback(
     async (data: ContactFormValues) => {
-      console.log('🟢 Formulaire soumis avec données :', data);
-
       if (!data.altcha) {
-        console.warn('⚠️ Soumission bloquée : ALTCHA non complété');
         toast({
           variant: 'destructive',
           title: 'Erreur',
@@ -146,53 +150,42 @@ export default function ContactPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
-
-        console.log('📨 Requête envoyée à /api/contact');
         const result = await res.json();
-        console.log('📬 Réponse serveur :', result);
 
         if (res.ok) {
           toast({ title: 'Message envoyé avec succès 🎉' });
           form.reset();
-          // *** APPEL À LA RÉINITIALISATION DU WIDGET ***
-          resetAltcha(); 
-          return;
-        }
-
-        // Gestion des erreurs spécifiques (par exemple, échec de vérification ALTCHA)
-        if (res.status === 400 && result.error?.includes('ALTCHA')) {
-          toast({ variant: 'destructive', title: 'Erreur de vérification', description: result.error });
           resetAltcha();
         } else {
-          toast({ variant: 'destructive', title: 'Échec de l\'envoi', description: result.error || 'Une erreur inattendue est survenue.' });
+          toast({
+            variant: 'destructive',
+            title: 'Erreur',
+            description: result.message || 'Une erreur est survenue.',
+          });
+          resetAltcha();
         }
-        
       } catch (error) {
-        console.error('Erreur lors de l\'envoi:', error);
+        console.error('❌ Erreur contact:', error);
         toast({
           variant: 'destructive',
           title: 'Erreur réseau',
-          description: 'Impossible de contacter le serveur.',
+          description: 'Impossible d’envoyer le message.',
         });
       }
     },
-    [form, toast, resetAltcha] // Dépendances incluant la fonction de réinitialisation
+    [form, toast, resetAltcha]
   );
 
-
-  // --- Rendu du composant (JSX CORRIGÉ) ---
   return (
-    <div className="flex justify-center items-center py-12 px-4">
+    <div className="flex justify-center items-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Contact</CardTitle>
-          <CardDescription>Envoyez-nous un message</CardDescription>
+          <CardDescription>Envoyez-nous un message, nous vous répondrons rapidement.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-              {/* FormField NOM */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -207,7 +200,6 @@ export default function ContactPage() {
                 )}
               />
 
-              {/* FormField EMAIL */}
               <FormField
                 control={form.control}
                 name="email"
@@ -222,7 +214,6 @@ export default function ContactPage() {
                 )}
               />
 
-              {/* FormField SUJET */}
               <FormField
                 control={form.control}
                 name="subject"
@@ -237,7 +228,6 @@ export default function ContactPage() {
                 )}
               />
 
-              {/* FormField MESSAGE */}
               <FormField
                 control={form.control}
                 name="message"
@@ -245,7 +235,7 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Message</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={5} />
+                      <Textarea {...field} rows={5} placeholder="Votre message..." />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -260,7 +250,8 @@ export default function ContactPage() {
                   name="altcha"
                   theme="auto"
                   auto="onsubmit"
-                  challengeurl="/api/altcha"
+                  challenge={challenge ?? undefined}
+                  challengeurl={!challenge ? '/api/altcha' : undefined}
                   style={{ width: '100%', maxWidth: 320 }}
                 />
                 {altchaError && (
