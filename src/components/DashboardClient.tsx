@@ -36,6 +36,7 @@ interface DashboardClientProps {
   discordPolls: any[];
   eventsData: DiscordEvent[];
   totalMembers: number; // <-- ajout
+  ftsLogoUrl?: string; // <-- ajoute cette ligne
 }
 
 //  carouselImages: string[]; // <-- ajouter
@@ -47,6 +48,7 @@ export default function DashboardClient({
   discordPolls,
   eventsData,
   totalMembers,
+  ftsLogoUrl, // <- récupérée ici
 }: DashboardClientProps) {
   const { toast } = useToast(); // Cette ligne doit être présente !
 const carouselImages: string[] = placeholderData.carouselImages
@@ -135,9 +137,10 @@ const upcomingEventsWeekCount = useMemo(() => {
       </div>
 
       {/* DashboardMenu sous le carrousel */}
-      <div className="w-full mt-4">
-        <DashboardMenu />
-      </div>
+<div className="w-full mt-4">
+  <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
+</div>
+
 
       {/* Main Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-hidden">
