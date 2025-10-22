@@ -7,6 +7,9 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from './ui/button';
 
+// Récupère l'ID du serveur côté client
+const GUILD_ID = process.env.NEXT_PUBLIC_DISCORD_GUILD_ID;
+
 interface DiscordEvent {
   id: string;
   name: string;
@@ -25,6 +28,7 @@ export function DiscordEvents() {
         const json = await res.json();
 
         if (json.error) {
+          console.error('Erreur API Discord:', json.error);
           setError(true);
           setEvents([]);
           return;
@@ -59,6 +63,7 @@ export function DiscordEvents() {
         {sortedEvents.map((event) => (
           <div key={event.id} className="rounded-lg border bg-card p-4 shadow-sm mb-4">
             <h3 className="mb-2 font-semibold text-primary">{event.name}</h3>
+
             <div className="space-y-1 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -85,7 +90,7 @@ export function DiscordEvents() {
 
             <Button asChild size="sm" variant="outline" className="mt-4">
               <a
-                href={`https://discord.com/events/${process.env.DISCORD_GUILD_ID}/${event.id}`}
+                href={`https://discord.com/events/${GUILD_ID}/${event.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
