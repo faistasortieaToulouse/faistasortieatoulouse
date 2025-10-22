@@ -1,13 +1,17 @@
 import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
+import runtimeCaching from 'next-pwa/cache'; // cache standard recommandé
 
-const nextConfig: NextConfig = withPWA({
+const nextConfig: NextConfig = {
+  // Ignore les erreurs TypeScript pendant le build
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Ignore les erreurs ESLint pendant le build
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Configuration des images distantes autorisées
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
@@ -18,12 +22,16 @@ const nextConfig: NextConfig = withPWA({
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/**' },
     ],
   },
+  // Configuration PWA
   pwa: {
-    dest: 'public', // dossier où le service worker et manifest seront générés
-    register: true, // enregistre automatiquement le SW
-    skipWaiting: true, // passe au SW suivant dès qu’il est installé
-    disable: process.env.NODE_ENV === 'development', // désactive PWA en dev
+    dest: 'public',               // le dossier où générer le service worker et le manifest
+    register: true,               // auto enregistrement du SW
+    skipWaiting: true,            // activate SW immédiatement
+    disable: process.env.NODE_ENV === 'development', // désactiver en dev
+    runtimeCaching,               // utilise le cache par défaut de next-pwa
   },
-});
+  // Autres options Next.js si nécessaire
+  reactStrictMode: true,
+};
 
-export default nextConfig;
+export default withPWA(nextConfig);
