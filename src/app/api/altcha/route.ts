@@ -26,18 +26,23 @@ export async function GET(req: Request) {
 
     // Ajuster la complexité selon l'appareil
     const maxNumber = isMobile ? 50000 : 100000;
-    const durationSeconds = 180; // durée de validité
+    const durationSeconds = 180; // durée de validité du challenge en secondes
 
     const challenge = await createChallenge({
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
       maxNumber,
-      expires: new Date(Date.now() + durationSeconds * 1000),
-      metadata: { device: isMobile ? 'mobile' : 'desktop' },
+      expires: new Date(Date.now() + durationSeconds * 1000), // expiration
+      // ❌ metadata supprimé car non supporté
     });
 
+    // Debug : log avec info sur l'appareil
     if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ [ALTCHA API] Challenge généré :', challenge);
+      console.log('✅ [ALTCHA API] Challenge généré :', challenge, {
+        device: isMobile ? 'mobile' : 'desktop',
+        maxNumber,
+        expiresInSeconds: durationSeconds,
+      });
     }
 
     return NextResponse.json(challenge, {
