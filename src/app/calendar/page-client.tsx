@@ -1,49 +1,84 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, MapPin, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// ... (interfaces et fonctions utilitaires identiques)
+interface DiscordEvent {
+  id: string;
+  name: string;
+  scheduled_start_time: string;
+  description?: string;
+  entity_type?: 1 | 2 | 3; // 3 = événement avec adresse
+  entity_metadata?: { location?: string } | null;
+}
+
+interface CalendarClientProps {
+  eventsData: DiscordEvent[];
+  upcomingEvents: DiscordEvent[];
+}
+
+// --- Fonctions utilitaires ---
+
+const formatEventTime = (isoString: string) => {
+  const date = new Date(isoString);
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
+const getEventLocation = (event: DiscordEvent) => {
+  if (event.entity_type === 3 && event.entity_metadata?.location) return event.entity_metadata.location;
+  if (event.entity_type === 2) return 'Salon Vocal';
+  if (event.entity_type === 1) return 'Salon Stage';
+  return 'Lieu non spécifié';
+};
+
+const getEventLocationLink = (event: DiscordEvent) => {
+  const location = event.entity_metadata?.location;
+  if (event.entity_type === 3 && location) {
+    return location.startsWith('http')
+      ? location
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+  }
+  return null;
+};
+
+// --- Composant principal ---
 
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [hasReloaded, setHasReloaded] = useState(false);
+  const [events, setEvents] = useState<DiscordEvent[]>(eventsData || []);
+  const [autoRefreshCount, setAutoRefreshCount] = useState(0);
 
   // Liste complète triée
   const allEvents = useMemo(
     () =>
-      (eventsData || []).slice().sort(
+      events.slice().sort(
         (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
       ),
-    [eventsData]
+    [events]
   );
 
-  // ✅ Rafraîchissement automatique si aucun événement détecté après 5 secondes
+  // --- Rafraîchissement automatique si aucun événement n'est chargé
   useEffect(() => {
-    if ((!eventsData || eventsData.length === 0) && !hasReloaded) {
-      const timeout = setTimeout(() => {
-        console.log("🔄 Aucun événement détecté — tentative automatique de rechargement...");
-        sessionStorage.setItem('calendar-auto-reload', 'true');
-        setHasReloaded(true);
+    if (events.length === 0 && autoRefreshCount < 3) {
+      const timer = setTimeout(() => {
+        // On relance le fetch des événements via la page (reload)
         window.location.reload();
-      }, 5000);
-      return () => clearTimeout(timeout);
+        setAutoRefreshCount(autoRefreshCount + 1);
+      }, 3000); // tous les 3s
+      return () => clearTimeout(timer);
     }
-  }, [eventsData, hasReloaded]);
+  }, [events, autoRefreshCount]);
 
-  // ✅ Supprimer le flag si les données se chargent bien
-  useEffect(() => {
-    if (eventsData && eventsData.length > 0) {
-      sessionStorage.removeItem('calendar-auto-reload');
-    }
-  }, [eventsData]);
-
-  // ✅ Bouton manuel "Rafraîchir"
+  // --- Fonction pour bouton manuel
   const handleManualRefresh = () => {
-    sessionStorage.removeItem('calendar-auto-reload');
     window.location.reload();
   };
 
@@ -55,22 +90,22 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           <CalendarIcon className="h-6 w-6 text-primary" />
           Vue Mensuelle des Événements
         </h2>
-
-        {(!eventsData || eventsData.length === 0) ? (
-          <div className="flex flex-col items-center justify-center text-center py-12 space-y-4">
-            <p className="text-muted-foreground">Aucun événement détecté pour le moment...</p>
-            <Button onClick={handleManualRefresh} variant="outline" className="flex items-center gap-2">
+        {events.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-10">
+            <p className="text-muted-foreground mb-4">Aucun événement Discord trouvé pour le moment…</p>
+            <Button onClick={handleManualRefresh} size="sm" variant="outline" className="flex items-center gap-2">
               <RefreshCw className="h-4 w-4" /> Rafraîchir
             </Button>
           </div>
-        ) : (
+        )}
+        {events.length > 0 && (
           <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={setSelectedDate}
             locale={fr}
-            events={eventsData}
-            className="rounded-xl border shadow bg-card"
+            events={events} 
+            className="rounded-xl border shadow bg-card w-full"
           />
         )}
       </div>
