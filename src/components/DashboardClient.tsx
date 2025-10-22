@@ -140,7 +140,7 @@ const upcomingEventsWeekCount = useMemo(() => {
       </div>
 
       {/* Main Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-hidden">
 
     {/* Nouvelle colonne droite → contenu anciennement à gauche */}
   <div className="flex flex-col gap-8">
