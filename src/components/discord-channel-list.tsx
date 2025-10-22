@@ -121,34 +121,35 @@ export function DiscordChannelList({ channels }: { channels?: Channel[] }) {
                                     {category.name.replace(/-/g, ' ')}
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="flex flex-col gap-2 pl-4 pt-2">
-                                        {subChannels.length > 0 ? (
-                                            subChannels
-                                                .map(channel => (
-                                                    <Link
-                                                        key={channel.id}
-                                                        href={`https://discord.com/channels/${GUILD_ID}/${channel.id}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center gap-2 rounded-md p-1 hover:bg-muted transition-colors"
-                                                    >
-                                                        {channel.type === 2 ? (
-                                                            <Volume2 className="h-4 w-4 text-primary" />
-                                                        ) : (
-                                                            <Hash className="h-4 w-4 text-muted-foreground" />
-                                                        )}
-                                                        <span className="text-sm font-medium hover:text-primary">
-                                                            {channel.name.replace(/-/g, ' ')}
-                                                        </span>
-                                                    </Link>
-                                                ))
-                                        ) : (
-                                            // Message corrigé pour ne plus parler du widget
-                                            <p className="text-xs text-muted-foreground">
-                                                Aucun salon visible dans cette catégorie.
-                                            </p>
-                                        )}
-                                    </div>
+<div className="flex flex-col gap-2 pl-4 pt-2">
+    {subChannels.length > 0 ? (
+        subChannels
+            .map(channel => (
+                <Link
+                    key={channel.id}
+                    href={`https://discord.com/channels/${GUILD_ID}/${channel.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    // min-w-0 est ajouté pour assurer la bonne gestion du flexbox sur mobile
+                    className="flex items-center gap-2 rounded-md p-1 hover:bg-muted transition-colors min-w-0"
+                >
+                    {channel.type === 2 ? (
+                        <Volume2 className="h-4 w-4 text-primary shrink-0" /> // shrink-0 empêche l'icône de rétrécir
+                    ) : (
+                        <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    {/* truncate est ajouté pour couper les noms trop longs avec '...' */}
+                    <span className="text-sm font-medium hover:text-primary truncate"> 
+                        {channel.name.replace(/-/g, ' ')}
+                    </span>
+                </Link>
+            ))
+    ) : (
+        <p className="text-xs text-muted-foreground">
+            Aucun salon visible dans cette catégorie.
+        </p>
+    )}
+</div>
                                 </AccordionContent>
                             </AccordionItem>
                           )
