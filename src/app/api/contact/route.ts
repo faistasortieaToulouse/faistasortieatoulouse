@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import altchaImport from 'altcha-lib';
+import { verifySolution } from 'altcha-lib'; // ✅ Utiliser directement la fonction exportée
 
 export const runtime = 'nodejs';
-
-// --- ALTCHA (compatibilité ESM / CJS)
-import { verifySolution } from 'altcha-lib';
-// ou directement utiliser verifySolution / createChallenge selon le besoin
 
 // --- ENV ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
@@ -36,15 +32,6 @@ const transporter = nodemailer.createTransport({
 });
 
 // --- Utilitaires ---
-function getDecodedKey(): Buffer | string {
-  if (!ALTCHA_HMAC_SECRET) return '';
-  try {
-    return Buffer.from(ALTCHA_HMAC_SECRET, 'base64');
-  } catch {
-    return ALTCHA_HMAC_SECRET;
-  }
-}
-
 function escapeHTML(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -56,8 +43,8 @@ function escapeHTML(str: string): string {
 async function verifyAltcha(payload: string): Promise<boolean> {
   if (!ALTCHA_HMAC_SECRET) return false;
   try {
-    const decodedKey = getDecodedKey();
-    const valid = altcha.verifySolution(payload, decodedKey);
+    // ✅ Appel direct à verifySolution avec la clé HMAC
+    const valid = await verifySolution(payload, ALTCHA_HMAC_SECRET);
     if (!isProd) console.log('🔐 [ALTCHA] Vérification réussie →', valid);
     return !!valid;
   } catch (err) {
@@ -66,18 +53,18 @@ async function verifyAltcha(payload: string): Promise<boolean> {
   }
 }
 
-// --- 🧠 Mémoire interne pour limiter les messages ---
+// --- Mémoire interne pour limiter les messages ---
 const rateLimitMap = new Map<string, { count: number; firstRequest: number }>();
 const LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
 const MAX_REQUESTS = 3;
 
-// Nettoyage périodique pour éviter une mémoire infinie
+// Nettoyage périodique
 setInterval(() => {
   const now = Date.now();
   for (const [ip, data] of rateLimitMap.entries()) {
     if (now - data.firstRequest > LIMIT_WINDOW) rateLimitMap.delete(ip);
   }
-}, 60_000); // toutes les 60s
+}, 60_000);
 
 // --- Vérification du quota ---
 function checkRateLimit(ip: string): boolean {
@@ -90,21 +77,18 @@ function checkRateLimit(ip: string): boolean {
   }
 
   if (now - record.firstRequest > LIMIT_WINDOW) {
-    // fenêtre expirée → reset
     rateLimitMap.set(ip, { count: 1, firstRequest: now });
     return true;
   }
 
-  if (record.count >= MAX_REQUESTS) {
-    return false;
-  }
+  if (record.count >= MAX_REQUESTS) return false;
 
   record.count++;
   rateLimitMap.set(ip, record);
   return true;
 }
 
-// --- Helper pour extraire l’IP du client (Next.js + Vercel compatible) ---
+// --- Helper pour extraire l’IP ---
 function getClientIp(request: Request): string {
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) return forwardedFor.split(',')[0].trim();
@@ -119,7 +103,6 @@ export async function POST(request: Request) {
 
   const ip = getClientIp(request);
   if (!checkRateLimit(ip)) {
-    console.warn(`🚫 [RateLimit] Trop de requêtes depuis ${ip}`);
     return NextResponse.json(
       { success: false, message: 'Trop de messages envoyés. Réessayez dans quelques minutes.' },
       { status: 429 }
@@ -130,7 +113,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, email, subject, message, altcha: altchaPayload } = body;
 
-    // --- Validation basique ---
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { success: false, message: 'Tous les champs sont requis.' },
@@ -145,7 +127,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Vérification ALTCHA ---
+    // ✅ Vérification ALTCHA
     const validAltcha = await verifyAltcha(altchaPayload);
     if (!validAltcha) {
       return NextResponse.json(
@@ -154,7 +136,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- Préparer le contenu du mail ---
     const sanitizedMessage = escapeHTML(message).replace(/\n/g, '<br>');
     const sanitizedName = escapeHTML(name);
     const sanitizedSubject = escapeHTML(subject);
@@ -174,7 +155,6 @@ export async function POST(request: Request) {
       `,
     };
 
-    // --- Envoi ---
     await transporter.sendMail(mailOptions);
     const duration = Date.now() - start;
     console.log(`✅ [Contact API] Email envoyé (${duration}ms) de ${sanitizedEmail} [IP: ${ip}]`);
