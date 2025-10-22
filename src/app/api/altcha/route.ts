@@ -24,14 +24,15 @@ export async function GET(req: Request) {
     const ua = req.headers.get('user-agent') || '';
     const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
 
-    // Définir maxNumber en fonction de l'appareil
+    // Ajuster la complexité selon l'appareil
     const maxNumber = isMobile ? 50000 : 100000;
+    const durationSeconds = 180; // durée de validité
 
     const challenge = await createChallenge({
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
-      maxNumber, // Ajuster la complexité en fonction de l'appareil
-      expires: 180,
+      maxNumber,
+      expires: new Date(Date.now() + durationSeconds * 1000),
       metadata: { device: isMobile ? 'mobile' : 'desktop' },
     });
 
