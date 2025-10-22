@@ -1,27 +1,26 @@
-// src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import altchaImport from 'altcha-lib'; // ✅ Compatible altcha-lib 1.3
+import altchaImport from 'altcha-lib';
 
 export const runtime = 'nodejs';
 
-// --- Compatibilité ALTCHA ---
+// --- ALTCHA (compatibilité ESM / CJS)
 const altcha: any = altchaImport.default || altchaImport;
 
-// --- Variables d’environnement ---
+// --- ENV ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
+const isProd = process.env.NODE_ENV === 'production';
 
-// --- Vérifications de configuration ---
+// --- Vérifications initiales ---
 if (!ALTCHA_HMAC_SECRET) {
-  console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant ! Vérifie ta configuration sur Vercel.');
+  console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant.');
 }
-
 if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ [Contact API] Configuration SMTP incomplète. Vérifie tes variables .env');
+  console.warn('⚠️ [Contact API] Configuration SMTP incomplète.');
 }
 
-// --- Transport SMTP ---
+// --- Transport SMTP (pool réutilisable entre requêtes) ---
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587', 10),
@@ -30,10 +29,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  connectionTimeout: 10_000, // 10s
+  pool: true,
+  maxConnections: 3,
+  connectionTimeout: 10_000,
 });
 
-// --- Fonction utilitaire : décodage Base64 si nécessaire ---
+// --- Utilitaires ---
 function getDecodedKey(): Buffer | string {
   if (!ALTCHA_HMAC_SECRET) return '';
   try {
@@ -43,7 +44,6 @@ function getDecodedKey(): Buffer | string {
   }
 }
 
-// --- Fonction utilitaire : échapper le HTML ---
 function escapeHTML(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -52,86 +52,141 @@ function escapeHTML(str: string): string {
     .replace(/"/g, '&quot;');
 }
 
-// --- Route POST /api/contact ---
+async function verifyAltcha(payload: string): Promise<boolean> {
+  if (!ALTCHA_HMAC_SECRET) return false;
+  try {
+    const decodedKey = getDecodedKey();
+    const valid = altcha.verifyServerSignature(payload, decodedKey);
+    if (!isProd) console.log('🔐 [ALTCHA] Vérification réussie →', valid);
+    return !!valid;
+  } catch (err) {
+    console.error('❌ [ALTCHA] Erreur de vérification :', err);
+    return false;
+  }
+}
+
+// --- 🧠 Mémoire interne pour limiter les messages ---
+const rateLimitMap = new Map<string, { count: number; firstRequest: number }>();
+const LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+const MAX_REQUESTS = 3;
+
+// Nettoyage périodique pour éviter une mémoire infinie
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap.entries()) {
+    if (now - data.firstRequest > LIMIT_WINDOW) rateLimitMap.delete(ip);
+  }
+}, 60_000); // toutes les 60s
+
+// --- Vérification du quota ---
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, firstRequest: now });
+    return true;
+  }
+
+  if (now - record.firstRequest > LIMIT_WINDOW) {
+    // fenêtre expirée → reset
+    rateLimitMap.set(ip, { count: 1, firstRequest: now });
+    return true;
+  }
+
+  if (record.count >= MAX_REQUESTS) {
+    return false;
+  }
+
+  record.count++;
+  rateLimitMap.set(ip, record);
+  return true;
+}
+
+// --- Helper pour extraire l’IP du client (Next.js + Vercel compatible) ---
+function getClientIp(request: Request): string {
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) return forwardedFor.split(',')[0].trim();
+  const realIp = request.headers.get('x-real-ip');
+  return realIp || 'unknown';
+}
+
+// --- POST /api/contact ---
 export async function POST(request: Request) {
-  console.log('🔹 [Contact API] Requête POST reçue');
+  const start = Date.now();
+  console.log('📩 [Contact API] POST reçu');
+
+  const ip = getClientIp(request);
+  if (!checkRateLimit(ip)) {
+    console.warn(`🚫 [RateLimit] Trop de requêtes depuis ${ip}`);
+    return NextResponse.json(
+      { success: false, message: 'Trop de messages envoyés. Réessayez dans quelques minutes.' },
+      { status: 429 }
+    );
+  }
 
   try {
     const body = await request.json();
-    console.log('📩 [Contact API] Données reçues :', body);
-
     const { name, email, subject, message, altcha: altchaPayload } = body;
 
-    // --- Vérifications basiques ---
+    // --- Validation basique ---
     if (!name || !email || !subject || !message) {
-      console.warn('⚠️ [Contact API] Champs manquants');
-      return NextResponse.json({ success: false, message: 'Tous les champs sont requis.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: 'Tous les champs sont requis.' },
+        { status: 400 }
+      );
     }
 
     if (!altchaPayload) {
-      console.warn('⚠️ [Contact API] Jeton ALTCHA manquant');
-      return NextResponse.json({ success: false, message: 'Veuillez compléter la vérification ALTCHA.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: 'Veuillez compléter la vérification ALTCHA.' },
+        { status: 400 }
+      );
     }
 
-    if (!ALTCHA_HMAC_SECRET) {
-      console.error('❌ [Contact API] ALTCHA_HMAC_SECRET manquant');
-      return NextResponse.json({ success: false, message: 'Erreur serveur : clé ALTCHA absente.' }, { status: 500 });
+    // --- Vérification ALTCHA ---
+    const validAltcha = await verifyAltcha(altchaPayload);
+    if (!validAltcha) {
+      return NextResponse.json(
+        { success: false, message: 'Vérification anti-bot échouée. Réessayez.' },
+        { status: 403 }
+      );
     }
 
-    // --- Vérification ALTCHA via verifyServerSignature ---
-    let isValid = false;
-    try {
-      const decodedKey = getDecodedKey();
-      console.log('📦 [Contact API] Vérification ALTCHA payload...');
-      isValid = altcha.verifyServerSignature(altchaPayload, decodedKey);
-
-      console.log('✅ [Contact API] ALTCHA vérifié →', isValid);
-    } catch (err: any) {
-      console.error('❌ [Contact API] Erreur lors de la vérification ALTCHA :', err);
-      return NextResponse.json({ success: false, message: 'Erreur lors de la vérification ALTCHA.' }, { status: 500 });
-    }
-
-    if (!isValid) {
-      console.warn('⚠️ [Contact API] Vérification ALTCHA invalide (signature incorrecte)');
-      return NextResponse.json({ success: false, message: 'Vérification anti-bot échouée. Réessayez.' }, { status: 403 });
-    }
-
-    // --- Vérification connexion SMTP ---
-    try {
-      await transporter.verify();
-      console.log('✅ [Contact API] Connexion SMTP OK');
-    } catch (smtpErr) {
-      console.error('❌ [Contact API] SMTP indisponible :', smtpErr);
-      return NextResponse.json({ success: false, message: 'Serveur mail indisponible. Réessayez plus tard.' }, { status: 500 });
-    }
-
-    // --- Préparer et envoyer l’e-mail ---
+    // --- Préparer le contenu du mail ---
     const sanitizedMessage = escapeHTML(message).replace(/\n/g, '<br>');
     const sanitizedName = escapeHTML(name);
     const sanitizedSubject = escapeHTML(subject);
     const sanitizedEmail = escapeHTML(email);
 
     const mailOptions = {
-      from: process.env.SMTP_USER,
+      from: `"Formulaire Contact" <${process.env.SMTP_USER}>`,
       to: CONTACT_EMAIL,
-      subject: `[CONTACT FTS Fais ta Sortie] ${sanitizedSubject} - De: ${sanitizedName}`,
+      subject: `[CONTACT FTS] ${sanitizedSubject} - ${sanitizedName}`,
       html: `
-        <p><strong>De:</strong> ${sanitizedName} &lt;${sanitizedEmail}&gt;</p>
-        <p><strong>Sujet:</strong> ${sanitizedSubject}</p>
+        <p><strong>De :</strong> ${sanitizedName} &lt;${sanitizedEmail}&gt;</p>
+        <p><strong>Sujet :</strong> ${sanitizedSubject}</p>
         <hr>
-        <p><strong>Message:</strong></p>
         <p>${sanitizedMessage}</p>
         <hr>
-        <p><small>Envoyé depuis le formulaire de contact du site.</small></p>
+        <p><small>Message envoyé via le site web.</small></p>
       `,
     };
 
+    // --- Envoi ---
     await transporter.sendMail(mailOptions);
-    console.log(`📨 [Contact API] Message envoyé par ${sanitizedName} <${sanitizedEmail}>`);
+    const duration = Date.now() - start;
+    console.log(`✅ [Contact API] Email envoyé (${duration}ms) de ${sanitizedEmail} [IP: ${ip}]`);
 
-    return NextResponse.json({ success: true, message: 'Message envoyé avec succès !' }, { status: 200 });
-  } catch (error: any) {
-    console.error('❌ [Contact API] Erreur interne :', JSON.stringify(error, null, 2));
-    return NextResponse.json({ success: false, message: 'Erreur interne du serveur. Réessayez plus tard.' }, { status: 500 });
+    return NextResponse.json(
+      { success: true, message: 'Message envoyé avec succès !' },
+      { status: 200 }
+    );
+  } catch (err: any) {
+    console.error('❌ [Contact API] Erreur interne :', err);
+    return NextResponse.json(
+      { success: false, message: 'Erreur interne du serveur. Réessayez plus tard.' },
+      { status: 500 }
+    );
   }
 }
