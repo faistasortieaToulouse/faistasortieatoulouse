@@ -1,16 +1,12 @@
 import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
-import runtimeCaching from 'next-pwa/cache'; // cache standard recommandé
+import runtimeCaching from 'next-pwa/cache';
 
-// Next.js config de base
+// Config Next.js de base
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true, // OK ici, à la racine
-  },
-  eslint: {
-    ignoreDuringBuilds: true, // OK ici, à la racine
-  },
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
@@ -23,14 +19,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-// On passe uniquement les options PWA reconnues à withPWA
-export default withPWA({
-  ...nextConfig,
-  pwa: {
-    dest: 'public',
-    register: true,
-    skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development',
-    runtimeCaching,
-  },
-});
+// Config PWA séparée
+const pwaConfig = {
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+  runtimeCaching,
+};
+
+// Export final : Next.js + PWA
+export default withPWA(nextConfig, pwaConfig);
