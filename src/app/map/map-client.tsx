@@ -31,9 +31,10 @@ const TOULOUSE_CENTER = { lat: 43.6047, lng: 1.4442 };
 const GUILD_ID = '1422806103267344416';
 const GOOGLE_MAPS_CLIENT_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_CLIENT_KEY || '';
 
-// Hook pour charger Google Maps côté client
+// --- Chargement de Google Maps côté client ---
 function useLoadGoogleMaps(apiKey: string) {
   const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
     if ((window as any).google?.maps) {
       setLoaded(true);
@@ -50,12 +51,14 @@ function useLoadGoogleMaps(apiKey: string) {
       document.head.removeChild(script);
     };
   }, [apiKey]);
+
   return loaded;
 }
 
 export default function MapClient({ initialEvents }: MapClientProps) {
   const [mappedEvents, setMappedEvents] = useState<MappedEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [autoRetryDone, setAutoRetryDone] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
 
@@ -66,6 +69,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     [initialEvents]
   );
 
+  // --- Géocodage des adresses ---
   const geocodeAll = useCallback(async () => {
     const temp: MappedEvent[] = [];
     for (const event of addressEvents) {
@@ -97,7 +101,7 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     geocodeAll();
   }, [geocodeAll]);
 
-  // Initialisation / mise à jour de la carte
+  // --- Initialisation / mise à jour de la carte ---
   useEffect(() => {
     if (!mapsLoaded || loading || !mapRef.current || mappedEvents.length === 0) return;
 
@@ -124,6 +128,18 @@ export default function MapClient({ initialEvents }: MapClientProps) {
 
     map.fitBounds(bounds);
   }, [mapsLoaded, loading, mappedEvents]);
+
+  // --- 🔁 Rafraîchissement automatique si la carte ne s’affiche pas ---
+  useEffect(() => {
+    if (!autoRetryDone && mapsLoaded && !loading && mappedEvents.length === 0) {
+      console.warn('⏳ Aucun événement mappable — nouvelle tentative dans 2 secondes...');
+      const retry = setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      setAutoRetryDone(true);
+      return () => clearTimeout(retry);
+    }
+  }, [mapsLoaded, loading, mappedEvents, autoRetryDone]);
 
   const handleRefresh = useCallback(() => window.location.reload(), []);
 
