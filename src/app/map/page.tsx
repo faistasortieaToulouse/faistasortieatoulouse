@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import MapClient from './map-client';
 
 interface DiscordEvent {
