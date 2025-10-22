@@ -1,4 +1,3 @@
-// src/app/api/discord/route.ts
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -12,27 +11,25 @@ export async function GET() {
   }
 
   try {
-    // --- Widget général (members + channels) ---
+    // --- Widget (canaux + membres) - public ---
     const widgetRes = await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/widget.json`, {
-      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
       cache: 'no-store',
     });
-
     const widgetData = widgetRes.ok ? await widgetRes.json() : { members: [], channels: [] };
 
-    // --- Événements à venir ---
-    const eventsRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/events?with_user_count=true`, {
-      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
-      cache: 'no-store',
-    });
+    // --- Événements à venir - nécessite token bot ---
+    const eventsRes = await fetch(
+      `https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/events?with_user_count=true`,
+      {
+        headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+        cache: 'no-store',
+      }
+    );
     const eventsData = eventsRes.ok ? await eventsRes.json() : [];
 
-    // --- Retour unifié ---
+    // --- Retour combiné ---
     return NextResponse.json(
-      {
-        widget: widgetData,
-        events: eventsData,
-      },
+      { widget: widgetData, events: eventsData },
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -41,6 +38,6 @@ export async function GET() {
     );
   } catch (err) {
     console.error('❌ Erreur Discord API :', err);
-    return NextResponse.json({ error: 'Erreur lors du chargement Discord' }, { status: 500 });
+    return NextResponse.json({ error: 'Impossible de charger les données Discord.' }, { status: 500 });
   }
 }
