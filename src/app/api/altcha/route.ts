@@ -31,7 +31,7 @@ export async function GET(req: Request) {
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
       maxNumber, // Ajuster la complexité en fonction de l'appareil
-      expiresIn: 180,
+      expires: 180,
       metadata: { device: isMobile ? 'mobile' : 'desktop' },
     });
 
