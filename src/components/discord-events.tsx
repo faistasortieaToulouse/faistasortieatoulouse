@@ -14,24 +14,51 @@ interface DiscordEvent {
   entity_metadata?: { location?: string };
 }
 
+interface DiscordAPIResponse {
+  id: string;
+  name: string;
+  instant_invite: string;
+  members?: any[];
+  presence_count?: number;
+  channels?: any[];
+  // ⚠️ Certains serveurs n'ont pas d'events dans le widget, donc optionnel
+  events?: DiscordEvent[];
+}
+
 export function DiscordEvents() {
   const [events, setEvents] = useState<DiscordEvent[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch('/api/discord', { cache: 'no-store' });
-        const json = await res.json();
-        setEvents(json.events ?? []);
-      } catch {}
+        if (!res.ok) throw new Error(`Erreur API Discord (${res.status})`);
+        const data: DiscordAPIResponse = await res.json();
+
+        // ⚡ Récupérer events si existants
+        if (data.events && Array.isArray(data.events)) {
+          setEvents(data.events);
+        } else {
+          setEvents([]);
+        }
+      } catch (err) {
+        console.error('Erreur fetch Discord:', err);
+        setError('Impossible de charger les événements Discord.');
+        setEvents([]);
+      }
     };
+
     fetchEvents();
   }, []);
 
+  if (error) return <p className="text-red-500">{error}</p>;
   if (!events) return <p>Chargement des événements Discord…</p>;
   if (events.length === 0) return <p>Aucun événement à venir pour le moment.</p>;
 
-  const sortedEvents = events.sort((a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime());
+  const sortedEvents = events.sort(
+    (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
+  );
 
   return (
     <Card>
@@ -55,12 +82,22 @@ export function DiscordEvents() {
               {event.entity_metadata?.location && (
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4" />
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.entity_metadata.location)}`} target="_blank" className="underline text-primary">{event.entity_metadata.location}</a>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.entity_metadata.location)}`}
+                    target="_blank"
+                    className="underline text-primary"
+                  >
+                    {event.entity_metadata.location}
+                  </a>
                 </div>
               )}
             </div>
             <Button asChild size="sm" variant="outline" className="mt-4">
-              <a href={`https://discord.com/events/1422806103267344416/${event.id}`} target="_blank" rel="noopener noreferrer">
+              <a
+                href={`https://discord.com/events/1422806103267344416/${event.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Voir sur Discord <ExternalLink className="ml-2 h-4 w-4" />
               </a>
             </Button>
