@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, Info, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, Info, ExternalLink, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from './ui/button';
@@ -20,6 +21,26 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
   const sortedEvents = events?.sort(
     (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
+
+  // ✅ Auto-refresh si aucun événement (avec sécurité pour éviter boucle infinie)
+  useEffect(() => {
+    if (!events || events.length === 0) {
+      const alreadyRetried = sessionStorage.getItem('discord-events-retry');
+      if (!alreadyRetried) {
+        console.log('🔄 Aucun événement trouvé, tentative de rechargement automatique dans 4 secondes...');
+        const timer = setTimeout(() => {
+          sessionStorage.setItem('discord-events-retry', 'true');
+          window.location.reload();
+        }, 4000);
+        return () => clearTimeout(timer);
+      } else {
+        console.warn('⚠️ Aucun événement trouvé après rechargement, arrêt des tentatives automatiques.');
+      }
+    } else {
+      // ✅ Réinitialise la protection si les événements se chargent correctement
+      sessionStorage.removeItem('discord-events-retry');
+    }
+  }, [events]);
 
   return (
     <Card>
@@ -40,7 +61,7 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
                   <div className="flex items-start gap-2">
                     <Calendar className="mt-0.5 h-4 w-4 flex-shrink-0" />
                     <span>
-                      {format(new Date(event.scheduled_start_time), "EEEE d MMMM yyyy", { locale: fr })}
+                      {format(new Date(event.scheduled_start_time), 'EEEE d MMMM yyyy', { locale: fr })}
                     </span>
                   </div>
                   {/* Heure */}
@@ -82,7 +103,22 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">Aucun événement à venir pour le moment.</p>
+          // 🔄 Affichage si aucun événement
+          <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+            <p className="mb-2">Aucun événement à venir pour le moment.</p>
+            <Button
+              onClick={() => {
+                sessionStorage.removeItem('discord-events-retry');
+                window.location.reload();
+              }}
+              variant="outline"
+              size="sm"
+              className="mt-2"
+            >
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin-slow" />
+              Rafraîchir
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
