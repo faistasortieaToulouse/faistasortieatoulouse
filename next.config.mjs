@@ -1,6 +1,6 @@
 // next-pwa.config.ts
 import withPWA from 'next-pwa';
-import runtimeCaching from 'next-pwa/cache';
+import runtimeCaching from 'next-pwa/cache.js';
 
 export default withPWA({
   dest: 'public',
