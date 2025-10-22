@@ -1,33 +1,33 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function GoogleTranslateWidget() {
+export function DiscordWidget() {
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
-    const addScript = () => {
-      const script = document.createElement('script');
-      script.id = 'google-translate-script';
-      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      script.async = true;
-      document.body.appendChild(script);
-    };
-
-    if (!(window as any).googleTranslateElementInit) {
-        (window as any).googleTranslateElementInit = () => {
-            new (window as any).google.translate.TranslateElement({
-            pageLanguage: 'fr',
-            includedLanguages: 'en,es,it,de,pt,ru,ar,tr,zh-CN,ja',
-            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-            }, 'google_translate_element');
-        };
-    }
-    
-    if (!document.getElementById('google-translate-script')) {
-        addScript();
-    }
-
+    setLoaded(true);
   }, []);
 
-  return <div id="google_translate_element" className="w-full h-full"></div>;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Rejoins la conversation</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loaded && (
+          <iframe
+            src="https://discord.com/widget?id=1422806103267344416&theme=dark"
+            width="350"
+            height="500"
+            allowtransparency="true"
+            frameBorder="0"
+            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+            className="rounded-lg"
+          ></iframe>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
