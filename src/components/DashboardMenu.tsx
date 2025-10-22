@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Menu, X, Download, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function DashboardMenu() {
+interface DashboardMenuProps {
+  ftsLogoUrl?: string;
+}
+
+export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen(prev => !prev);
 
