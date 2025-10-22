@@ -6,15 +6,10 @@ export const runtime = 'nodejs';
 
 const ALTCHA_HMAC_SECRET = process.env.ALTCHA_HMAC_SECRET;
 
-// --- Vérifie la configuration ---
 if (!ALTCHA_HMAC_SECRET) {
   console.warn('⚠️ [ALTCHA API] ALTCHA_HMAC_SECRET manquant. ALTCHA ne fonctionnera pas sans clé !');
 }
 
-/**
- * 🔹 Route GET /api/altcha
- * Génère un challenge ALTCHA adaptatif et performant
- */
 export async function GET(req: Request) {
   console.log('🔹 [ALTCHA API] Requête GET reçue pour challenge');
 
@@ -26,22 +21,17 @@ export async function GET(req: Request) {
   }
 
   try {
-    // --- Détection du type d’appareil ---
     const ua = req.headers.get('user-agent') || '';
     const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
 
-    // --- Génération du challenge ALTCHA ---
+    // Définir maxNumber en fonction de l'appareil
+    const maxNumber = isMobile ? 50000 : 100000;
+
     const challenge = await createChallenge({
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
-
-      // 🔹 Niveau de difficulté ajusté dynamiquement
-      difficulty: isMobile ? 16 : 18,
-
-      // 🔹 Durée de validité augmentée (3 min)
+      maxNumber, // Ajuster la complexité en fonction de l'appareil
       expiresIn: 180,
-
-      // 🔹 Métadonnées pour debug (facultatif)
       metadata: { device: isMobile ? 'mobile' : 'desktop' },
     });
 
@@ -49,7 +39,6 @@ export async function GET(req: Request) {
       console.log('✅ [ALTCHA API] Challenge généré :', challenge);
     }
 
-    // --- Envoi du challenge ---
     return NextResponse.json(challenge, {
       status: 200,
       headers: {
