@@ -34,7 +34,6 @@ export async function GET(req: Request) {
     const challenge = await createChallenge({
       hmacKey: ALTCHA_HMAC_SECRET,
       algorithm: 'SHA-256',
-      version: 'v5',
 
       // 🔹 Niveau de difficulté ajusté dynamiquement
       difficulty: isMobile ? 16 : 18,
