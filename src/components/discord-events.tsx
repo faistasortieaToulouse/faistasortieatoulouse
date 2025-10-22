@@ -14,37 +14,26 @@ interface DiscordEvent {
   entity_metadata?: { location?: string };
 }
 
-interface DiscordAPIResponse {
-  id: string;
-  name: string;
-  instant_invite: string;
-  members?: any[];
-  presence_count?: number;
-  channels?: any[];
-  // ⚠️ Certains serveurs n'ont pas d'events dans le widget, donc optionnel
-  events?: DiscordEvent[];
-}
-
 export function DiscordEvents() {
   const [events, setEvents] = useState<DiscordEvent[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch('/api/discord', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Erreur API Discord (${res.status})`);
-        const data: DiscordAPIResponse = await res.json();
+        const json = await res.json();
 
-        // ⚡ Récupérer events si existants
-        if (data.events && Array.isArray(data.events)) {
-          setEvents(data.events);
-        } else {
+        if (json.error) {
+          setError(true);
           setEvents([]);
+          return;
         }
+
+        setEvents(json.events ?? []);
       } catch (err) {
         console.error('Erreur fetch Discord:', err);
-        setError('Impossible de charger les événements Discord.');
+        setError(true);
         setEvents([]);
       }
     };
@@ -52,7 +41,7 @@ export function DiscordEvents() {
     fetchEvents();
   }, []);
 
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (error) return <p>Impossible de charger les événements Discord.</p>;
   if (!events) return <p>Chargement des événements Discord…</p>;
   if (events.length === 0) return <p>Aucun événement à venir pour le moment.</p>;
 
@@ -67,7 +56,7 @@ export function DiscordEvents() {
         <CardDescription>Prochains événements du serveur Discord</CardDescription>
       </CardHeader>
       <CardContent>
-        {sortedEvents.map(event => (
+        {sortedEvents.map((event) => (
           <div key={event.id} className="rounded-lg border bg-card p-4 shadow-sm mb-4">
             <h3 className="mb-2 font-semibold text-primary">{event.name}</h3>
             <div className="space-y-1 text-sm text-muted-foreground">
@@ -85,16 +74,18 @@ export function DiscordEvents() {
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.entity_metadata.location)}`}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="underline text-primary"
                   >
-                    {event.entity_metadata.location}
+                    📍 {event.entity_metadata.location}
                   </a>
                 </div>
               )}
             </div>
+
             <Button asChild size="sm" variant="outline" className="mt-4">
               <a
-                href={`https://discord.com/events/1422806103267344416/${event.id}`}
+                href={`https://discord.com/events/${process.env.DISCORD_GUILD_ID}/${event.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
