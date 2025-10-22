@@ -5,7 +5,8 @@ import altchaImport from 'altcha-lib';
 export const runtime = 'nodejs';
 
 // --- ALTCHA (compatibilité ESM / CJS)
-const altcha: any = altchaImport.default || altchaImport;
+import { verifySolution } from 'altcha-lib';
+// ou directement utiliser verifySolution / createChallenge selon le besoin
 
 // --- ENV ---
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'support@default.com';
@@ -56,7 +57,7 @@ async function verifyAltcha(payload: string): Promise<boolean> {
   if (!ALTCHA_HMAC_SECRET) return false;
   try {
     const decodedKey = getDecodedKey();
-    const valid = altcha.verifyServerSignature(payload, decodedKey);
+    const valid = altcha.verifySolution(payload, decodedKey);
     if (!isProd) console.log('🔐 [ALTCHA] Vérification réussie →', valid);
     return !!valid;
   } catch (err) {
