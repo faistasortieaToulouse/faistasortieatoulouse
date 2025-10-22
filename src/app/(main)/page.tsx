@@ -102,7 +102,7 @@ const totalMembersCount = membersData.length;
       };
 
   return (
-    <div className="flex flex-col gap-8 p-4 md:p-8 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-8 p-4 md:p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
       {/* Header côté serveur */}
       <header className="flex items-start justify-between">
         <div>
