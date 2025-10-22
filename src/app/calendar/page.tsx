@@ -1,11 +1,10 @@
 import CalendarClient from './page-client';
 
-// Garder la construction dynamique
+// --- Construction dynamique + revalidation ---
 export const dynamic = 'force-dynamic'; 
-// ✅ CORRECTION : Réintroduction d'une revalidation de 5 minutes (300s) pour éviter le rate-limiting 429.
-export const revalidate = 300; 
+export const revalidate = 300; // 5 minutes
 
-// Interface complète pour les événements Discord (pour la robustesse du typage)
+// --- Interface des événements Discord ---
 interface DiscordEvent {
   id: string;
   name: string;
@@ -20,7 +19,7 @@ interface DiscordEvent {
 
 const GUILD_ID = '1422806103267344416';
 
-// --- Fetch des événements Discord (Version avec cache contrôlé) ---
+// --- Fetch serveur des événements Discord ---
 async function fetchEventsData(): Promise<DiscordEvent[]> {
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
   if (!DISCORD_TOKEN) {
@@ -33,16 +32,12 @@ async function fetchEventsData(): Promise<DiscordEvent[]> {
       `https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`,
       { 
         headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, 
-        // ✅ CORRECTION : Utilisation de l'option 'next' pour la revalidation gérée par Next.js
-        next: { revalidate: 300 },
-        // L'option 'cache: no-store' est retirée pour laisser 'next' prendre le relais.
+        next: { revalidate: 300 }, // Revalidation Next.js
       }
     );
     
     if (!res.ok) {
-      // Le statut 429 s'affichera ici. En cas de 429, on renvoie un tableau vide
-      // pour que l'application ne plante pas et puisse se revalider plus tard.
-      console.error(`Erreur Discord API: Échec du fetch avec statut ${res.status} (${res.statusText}). Le token est-il valide ?`);
+      console.error(`Erreur Discord API: statut ${res.status} (${res.statusText})`);
       return [];
     }
     
@@ -50,7 +45,7 @@ async function fetchEventsData(): Promise<DiscordEvent[]> {
     return events;
     
   } catch (err) {
-    console.error("Erreur lors de la récupération des événements (Network Error):", err);
+    console.error("Erreur lors de la récupération des événements :", err);
     return [];
   }
 }
