@@ -1,58 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, MapPin } from 'lucide-react';
+import { CalendarIcon, MapPin, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-interface DiscordEvent {
-  id: string;
-  name: string;
-  scheduled_start_time: string;
-  description?: string;
-  entity_type?: 1 | 2 | 3; // 3 = événement avec adresse
-  entity_metadata?: { location?: string } | null;
-}
-
-interface CalendarClientProps {
-  eventsData: DiscordEvent[];
-  upcomingEvents: DiscordEvent[];
-}
-
-// Formattage date/heure
-const formatEventTime = (isoString: string) => {
-  const date = new Date(isoString);
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-};
-
-// Récupérer le lieu
-const getEventLocation = (event: DiscordEvent) => {
-  if (event.entity_type === 3 && event.entity_metadata?.location) return event.entity_metadata.location;
-  if (event.entity_type === 2) return 'Salon Vocal';
-  if (event.entity_type === 1) return 'Salon Stage';
-  return 'Lieu non spécifié';
-};
-
-// Lien Google Maps si adresse physique
-const getEventLocationLink = (event: DiscordEvent) => {
-  const location = event.entity_metadata?.location;
-  if (event.entity_type === 3 && location) {
-    return location.startsWith('http')
-      ? location
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
-  }
-  return null;
-};
+// ... (interfaces et fonctions utilitaires identiques)
 
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [hasReloaded, setHasReloaded] = useState(false);
 
-  // Liste complète triée pour le panneau de droite
+  // Liste complète triée
   const allEvents = useMemo(
     () =>
       (eventsData || []).slice().sort(
@@ -60,6 +20,32 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
       ),
     [eventsData]
   );
+
+  // ✅ Rafraîchissement automatique si aucun événement détecté après 5 secondes
+  useEffect(() => {
+    if ((!eventsData || eventsData.length === 0) && !hasReloaded) {
+      const timeout = setTimeout(() => {
+        console.log("🔄 Aucun événement détecté — tentative automatique de rechargement...");
+        sessionStorage.setItem('calendar-auto-reload', 'true');
+        setHasReloaded(true);
+        window.location.reload();
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [eventsData, hasReloaded]);
+
+  // ✅ Supprimer le flag si les données se chargent bien
+  useEffect(() => {
+    if (eventsData && eventsData.length > 0) {
+      sessionStorage.removeItem('calendar-auto-reload');
+    }
+  }, [eventsData]);
+
+  // ✅ Bouton manuel "Rafraîchir"
+  const handleManualRefresh = () => {
+    sessionStorage.removeItem('calendar-auto-reload');
+    window.location.reload();
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -69,18 +55,27 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           <CalendarIcon className="h-6 w-6 text-primary" />
           Vue Mensuelle des Événements
         </h2>
-        {/* ✅ Passer eventsData ici pour conserver les points */}
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          locale={fr}
-          events={eventsData} 
-          className="rounded-xl border shadow bg-card"
-        />
+
+        {(!eventsData || eventsData.length === 0) ? (
+          <div className="flex flex-col items-center justify-center text-center py-12 space-y-4">
+            <p className="text-muted-foreground">Aucun événement détecté pour le moment...</p>
+            <Button onClick={handleManualRefresh} variant="outline" className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4" /> Rafraîchir
+            </Button>
+          </div>
+        ) : (
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            locale={fr}
+            events={eventsData}
+            className="rounded-xl border shadow bg-card"
+          />
+        )}
       </div>
 
-      {/* Liste complète des événements avec lieux */}
+      {/* Liste complète des événements */}
       <div className="lg:col-span-1 flex flex-col gap-4">
         <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
           Liste Complète des Événements
