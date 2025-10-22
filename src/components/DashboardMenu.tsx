@@ -46,6 +46,18 @@ export function DashboardMenu() {
             </Button>
           </li>
 
+          {/* Nouveau : logo FTST après le bouton */}
+<li className="flex justify-center mt-2">
+  {ftsLogoUrl && (
+    <Image
+      src={ftsLogoUrl}
+      alt="Logo FTST"
+      width={40}  // ajuste la taille si besoin
+      height={40}
+    />
+  )}
+</li>
+
           {/* Événements désactivés en dessous */}
           <li className="mt-2">
             <Button size="lg" variant="outline" disabled className="w-full mb-1">
