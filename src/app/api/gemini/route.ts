@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 const SERVICE_ACCOUNT_KEY = process.env.GEMINI_SERVICE_ACCOUNT_KEY;
 
 if (!SERVICE_ACCOUNT_KEY) {
-  console.error("Configuration manquante : GEMINI_SERVICE_ACCOUNT_KEY n'est pas définie.");
+  console.error("⚠️ Configuration manquante : GEMINI_SERVICE_ACCOUNT_KEY n'est pas définie.");
 }
 
 let ai: GoogleGenAI | null = null;
@@ -14,10 +14,13 @@ let initError: string | null = null;
 try {
   if (SERVICE_ACCOUNT_KEY) {
     const credentials = JSON.parse(SERVICE_ACCOUNT_KEY);
-    // ⚠️ Correct: utiliser "auth" au lieu de "credentials"
-    ai = new GoogleGenAI({ auth: credentials });
+
+    // ✅ Initialisation correcte avec clientOptions
+    ai = new GoogleGenAI({
+      clientOptions: { credentials },
+    });
   } else {
-    initError = "Clé de compte de service (GEMINI_SERVICE_ACCOUNT_KEY) manquante.";
+    initError = "Clé de compte de service GEMINI_SERVICE_ACCOUNT_KEY manquante.";
   }
 } catch (e) {
   initError = "Erreur de parsing de la clé JSON.";
@@ -25,6 +28,7 @@ try {
 }
 
 export async function POST(request: Request) {
+  // Vérification initiale du client
   if (!ai) {
     console.error(`[AI_RUNTIME_ERROR] Échec de l'initialisation du client Gemini. Raison: ${initError || 'Inconnue'}`);
     return new NextResponse(`Erreur de configuration du serveur IA: ${initError || 'Client non initialisé.'}`, { status: 500 });
@@ -46,6 +50,7 @@ export async function POST(request: Request) {
       Ta réponse doit être directe, conviviale, et ne doit pas inclure les données Discord brutes.
     `;
 
+    // Appel à l'API Gemini
     const response = await ai.generateContent({
       model: "gemini-2.5-flash",
       contents: finalPrompt,
