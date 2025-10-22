@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CalendarHeart } from 'lucide-react';
 
@@ -11,9 +14,41 @@ interface DiscordWidgetData {
   events: any[];
 }
 
-export function DiscordStats({ data }: { data: DiscordWidgetData | null }) {
+export function DiscordStats() {
+  const [data, setData] = useState<DiscordWidgetData | null>(null);
+  const [error, setError] = useState(false);
+
+  const fetchDiscordData = async (retry = false) => {
+    try {
+      const res = await fetch('/api/discord', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Discord API error (${res.status})`);
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      console.warn('⚠️ Erreur lors de la récupération des données Discord :', err);
+      if (!retry) {
+        // Nouvelle tentative automatique après 2 secondes
+        setTimeout(() => fetchDiscordData(true), 2000);
+      } else {
+        setError(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchDiscordData();
+  }, []);
+
   const memberCount = data?.presence_count ?? 0;
   const eventCount = data?.events?.length ?? 0;
+
+  if (error) {
+    return <p className="text-sm text-destructive">Impossible de charger les statistiques Discord 😢</p>;
+  }
+
+  if (!data) {
+    return <p>Chargement des statistiques Discord…</p>;
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
