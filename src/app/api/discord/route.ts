@@ -12,20 +12,33 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/widget.json`, {
+    // --- Widget général (members + channels) ---
+    const widgetRes = await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/widget.json`, {
       headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
       cache: 'no-store',
     });
 
-    if (!res.ok) throw new Error(`Erreur Discord API (${res.status})`);
+    const widgetData = widgetRes.ok ? await widgetRes.json() : { members: [], channels: [] };
 
-    const data = await res.json();
-
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      },
+    // --- Événements à venir ---
+    const eventsRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/events?with_user_count=true`, {
+      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+      cache: 'no-store',
     });
+    const eventsData = eventsRes.ok ? await eventsRes.json() : [];
+
+    // --- Retour unifié ---
+    return NextResponse.json(
+      {
+        widget: widgetData,
+        events: eventsData,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (err) {
     console.error('❌ Erreur Discord API :', err);
     return NextResponse.json({ error: 'Erreur lors du chargement Discord' }, { status: 500 });
