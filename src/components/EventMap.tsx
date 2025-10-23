@@ -1,15 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import dynamic from 'next/dynamic';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 
-// Fix icône par défaut Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
+// 🧩 Import dynamique de react-leaflet (évite le bug SSR "window is not defined")
+const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
+
+// 🛠️ Fix icônes Leaflet (corrige ton erreur TypeScript)
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/leaflet/marker-icon-2x.png',
   iconUrl: '/leaflet/marker-icon.png',
@@ -41,7 +47,9 @@ export default function EventMap({ events }: EventMapProps) {
         const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
         const data = await res.json();
         if (data.status === 'OK' && data.results.length > 0) {
-          return data.results[0]; // { lat, lng }
+          // ⚠️ Corrigé : récupérer lat/lng depuis geometry.location
+          const { lat, lng } = data.results[0].geometry.location;
+          return { lat, lng };
         }
         console.warn('Adresse introuvable :', address);
         return null;
@@ -63,7 +71,9 @@ export default function EventMap({ events }: EventMapProps) {
       setEventsWithCoords(mapped.filter(Boolean) as EventWithCoords[]);
     }
 
-    geocodeAll();
+    if (events.length > 0) {
+      geocodeAll();
+    }
   }, [events]);
 
   if (events.length === 0) return <p>Aucun événement à afficher.</p>;
@@ -78,39 +88,16 @@ export default function EventMap({ events }: EventMapProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {/* Cluster */}
-      {eventsWithCoords.length > 0 && (
-        <MarkerClusterGroup>
-          {eventsWithCoords.map((ev) => (
-            <Marker key={ev.id} position={[ev.latitude, ev.longitude]}>
-              <Popup>
-                <strong>{ev.name}</strong>
-                <br />
-                {ev.location}
-              </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
-      )}
+      {/* Markers */}
+      {eventsWithCoords.map((ev) => (
+        <Marker key={ev.id} position={[ev.latitude, ev.longitude]}>
+          <Popup>
+            <strong>{ev.name}</strong>
+            <br />
+            {ev.location}
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
-}
-
-// ⚠️ Note : MarkerClusterGroup n'est pas directement exporté par react-leaflet v4,
-// il faut soit créer un composant wrapper, soit utiliser "react-leaflet-markercluster" si v3.
-// Exemple wrapper minimal : 
-function MarkerClusterGroup({ children }: { children: React.ReactNode }) {
-  const [cluster, setCluster] = useState<L.MarkerClusterGroup | null>(null);
-
-  useEffect(() => {
-    const c = L.markerClusterGroup();
-    setCluster(c);
-    return () => {
-      c.clearLayers();
-    };
-  }, []);
-
-  if (!cluster) return null;
-
-  return <>{children}</>; // les enfants doivent être ajoutés manuellement au cluster si nécessaire
 }
