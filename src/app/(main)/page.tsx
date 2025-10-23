@@ -1,5 +1,6 @@
+// src/app/(main)/page.tsx
 import DashboardClient from '@/components/DashboardClient';
-import { DiscordChannel, DiscordEvent } from '@/types/types';
+import { DiscordChannel, DiscordEvent, DiscordWidgetData } from '@/types/types';
 import { TimeWeatherBar } from '@/components/time-weather-bar';
 import Image from 'next/image';
 import { ClientOnly } from '@/components/ClientOnly';
@@ -10,17 +11,6 @@ const GUILD_ID = '1422806103267344416';
 const POLLS_CHANNEL_ID = '1422806103904882842';
 const FTS_LOGO_URL =
   'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c';
-
-
-interface DiscordWidgetData {
-  id: string;
-  name: string;
-  instant_invite: string | null;
-  channels: DiscordChannel[];
-  members: any[];
-  presence_count: number;
-  events: DiscordEvent[];
-}
 
 export default async function DashboardPage() {
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
@@ -37,29 +27,28 @@ export default async function DashboardPage() {
     } catch {}
   }
 
-// --- Fetch Members ---
-let membersData: any[] = [];
-if (DISCORD_TOKEN) {
-  try {
-    const res = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, {
-      headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
-      next: { revalidate: 300 },
-    });
-    membersData = res.ok ? await res.json() : [];
-  } catch {}
-}
+  // --- Fetch Members ---
+  let membersData: any[] = [];
+  if (DISCORD_TOKEN) {
+    try {
+      const res = await fetch(
+        `https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`,
+        { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 300 } }
+      );
+      membersData = res.ok ? await res.json() : [];
+    } catch {}
+  }
 
-// --- Calcul du total de membres ---
-const totalMembersCount = membersData.length;
+  const totalMembersCount = membersData.length;
 
   // --- Fetch Events ---
   let eventsData: DiscordEvent[] = [];
   if (DISCORD_TOKEN) {
     try {
-      const res = await fetch(
-        `https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`,
-        { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 60 } }
-      );
+      const res = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
+        headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
+        next: { revalidate: 60 },
+      });
       eventsData = res.ok ? await res.json() : [];
     } catch {}
   }
@@ -88,18 +77,14 @@ const totalMembersCount = membersData.length;
     } catch {}
   }
 
-  // --- Préparer discordData simple JSON-safe ---
-  const discordData: DiscordWidgetData = widgetData
-    ? { ...widgetData, channels: channelsData, events: eventsData }
-    : {
-        id: GUILD_ID,
-        name: 'Fais Ta Sortie à Toulouse',
-        instant_invite: null,
-        channels: channelsData,
-        members: membersData,
-        presence_count: 0,
-        events: eventsData,
-      };
+  // --- Préparer discordData conforme à l'interface DiscordWidgetData ---
+  const discordData: DiscordWidgetData = {
+    channels: channelsData,
+    events: eventsData,
+    images: widgetData?.images || [],
+    guildId: GUILD_ID,
+    presence_count: widgetData?.presence_count || 0,
+  };
 
   return (
     <div className="flex flex-col gap-8 p-4 md:p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
@@ -122,13 +107,14 @@ const totalMembersCount = membersData.length;
       <ClientOnly>
         <TimeWeatherBar />
       </ClientOnly>
+
       {/* Client Component pour le dashboard interactif */}
       <DashboardClient
         discordData={discordData}
         discordPolls={discordPolls}
         eventsData={eventsData}
-        totalMembers={totalMembersCount} // <-- nouvelle prop
-        ftsLogoUrl={FTS_LOGO_URL} // peut être supprimé si logo retiré dans DashboardClient
+        totalMembers={totalMembersCount}
+        ftsLogoUrl={FTS_LOGO_URL}
       />
     </div>
   );
