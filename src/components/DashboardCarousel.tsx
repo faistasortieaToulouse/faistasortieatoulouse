@@ -32,22 +32,35 @@ const CAROUSEL_IMAGES: string[] = [
   'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2Fftszumba600.jpg?alt=media&token=86c38701-02ee-4ab1-8ae7-6cf94480966e',
 ];
 
-// --- Interface pour les données du widget Discord ---
+// --- Interface des données du widget ---
 interface DiscordWidgetData {
-  channels?: DiscordChannel[];
-  events?: DiscordEvent[];
-  images?: CarouselImage[];
-  guildId?: string;
+  channels: DiscordChannel[];
+  events: DiscordEvent[];
+  images: CarouselImage[];
+  guildId: string;
 }
 
 // --- Composant principal ---
 export default function DashboardCarousel() {
+  // Conversion des images en CarouselImage valide
+  const images: CarouselImage[] = CAROUSEL_IMAGES.map((url, index) => ({
+    id: `img-${index}`,       // identifiant unique
+    imageUrl: url,            // champ requis par CarouselImage
+    description: '',          // description vide par défaut
+  }));
+
   const widgetData: DiscordWidgetData = {
     channels: [],
     events: [],
-    images: CAROUSEL_IMAGES.map((url) => ({ url } as CarouselImage)),
+    images,
     guildId: GUILD_ID,
   };
 
-  return <DashboardClient {...widgetData} logoUrl={FTS_LOGO_URL} pollsChannelId={POLLS_CHANNEL_ID} />;
+  return (
+    <DashboardClient
+      {...widgetData}
+      logoUrl={FTS_LOGO_URL}
+      pollsChannelId={POLLS_CHANNEL_ID}
+    />
+  );
 }
