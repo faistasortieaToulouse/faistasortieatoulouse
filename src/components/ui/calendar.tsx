@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
+import { DayPicker, DayPickerProps, SelectSingleEventHandler } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,16 +14,16 @@ export type DiscordEvent = {
   scheduled_start_time: string;
 };
 
-// --- Déclarer CalendarProps AVANT le composant ---
-export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, "children"> & {
+// Props du composant Calendar
+export type CalendarProps = Omit<DayPickerProps, "children"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
   onSelect?: SelectSingleEventHandler;
 };
 
-// Composant Calendar
 export function Calendar({ events = [], className, classNames, onSelect, ...props }: CalendarProps) {
+  // Construire eventMap à partir des événements Discord
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
     events.forEach((event) => {
@@ -33,8 +33,6 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
     });
     return map;
   }, [events]);
-
-  const dayPickerProps = props;
 
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
@@ -71,10 +69,9 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
           ...classNames,
         }}
         components={{
-          Day: ({ date, modifiers, ...dayProps }) => {
+          Day: ({ date, ...buttonProps }) => {
             const dateKey = date.toDateString();
             const eventsForDay = eventMap[dateKey] || [];
-            const { displayMonth, ...buttonProps } = dayProps;
 
             return (
               <button
@@ -106,7 +103,7 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
           ),
         }}
         onSelect={onSelect}
-        {...dayPickerProps}
+        {...props}
       />
     </section>
   );
