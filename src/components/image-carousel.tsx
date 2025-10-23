@@ -1,31 +1,49 @@
-// src/components/client-carousel.tsx
+// src/components/image-carousel.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import placeholderImages from '@/lib/placeholder-images.json';
+import Image from 'next/image';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Card, CardContent } from './ui/card';
 import { CarouselImage } from '@/types/types';
-import { ImageCarousel } from './image-carousel'; // ✅ Assurez-vous que ImageCarousel est exporté nommé
+import React from 'react';
 
-export function ClientCarousel() {
-  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+interface Props {
+  images: CarouselImage[]; // ← Tableau de CarouselImage
+}
 
-  useEffect(() => {
-    // Convertit string[] en CarouselImage[] compatible
-    const imagesArray: CarouselImage[] = placeholderImages.carouselImages.map(
-      (src: string, index: number) => ({
-        id: index.toString(),
-        imageUrl: src,
-        description: `Image ${index + 1}`, // description simple
-      })
-    );
+// ✅ Export nommé pour résoudre l'erreur d'import
+export function ImageCarousel({ images }: Props) {
+  if (!images || images.length === 0) return <p>Aucune image disponible</p>;
 
-    // Shuffle et garde les 3 premières images
-    const shuffled = [...imagesArray].sort(() => 0.5 - Math.random());
-    setCarouselImages(shuffled.slice(0, 3));
-  }, []);
+  // Index aléatoire de départ
+  const startIndex = React.useMemo(() => Math.floor(Math.random() * images.length), [images]);
 
-  if (carouselImages.length === 0) return null;
-
-  // Passe CarouselImage[] au ImageCarousel
-  return <ImageCarousel images={carouselImages} />;
+  return (
+    <Carousel
+      className="w-full max-w-4xl mx-auto"
+      opts={{ align: 'start', loop: true, startIndex }}
+    >
+      <CarouselContent>
+        {images.map((img) => (
+          <CarouselItem key={img.id} className="md:basis-1/2 lg:basis-1/3">
+            <div className="p-1">
+              <Card>
+                <CardContent className="relative flex aspect-video md:aspect-[4/3] lg:aspect-[16/9] items-center justify-center p-0 overflow-hidden rounded-lg">
+                  <Image
+                    src={img.imageUrl}
+                    alt={img.description}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="hidden sm:flex" />
+      <CarouselNext className="hidden sm:flex" />
+    </Carousel>
+  );
 }
