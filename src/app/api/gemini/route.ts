@@ -2,7 +2,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
-// ✅ Clé API définie dans ton environnement (Vercel)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 let ai: GoogleGenAI | null = null;
@@ -44,17 +43,14 @@ export async function POST(request: Request) {
       Ta réponse doit être directe, conviviale et sans inclure les données Discord brutes.
     `;
 
-    // ✅ Nouvelle syntaxe pour le SDK @google/genai
+    // ✅ SDK actuel @google/genai
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
     });
 
-    // 🔹 Récupération sécurisée du texte généré selon la dernière structure du SDK
-    const resultText =
-      response.output_texts?.[0]?.text ||
-      response.candidates?.[0]?.content ||
-      "Pas de réponse générée";
+    // 🔹 Récupération du texte généré selon le SDK actuel
+    const resultText = response.candidates?.[0]?.content ?? "Pas de réponse générée";
 
     return NextResponse.json({ result: resultText });
   } catch (error: any) {
