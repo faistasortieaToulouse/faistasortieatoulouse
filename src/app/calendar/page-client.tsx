@@ -55,7 +55,6 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
   const [events, setEvents] = useState<DiscordEvent[]>(eventsData || []);
   const [autoRefreshCount, setAutoRefreshCount] = useState(0);
 
-  // Liste complète triée
   const allEvents = useMemo(
     () =>
       events.slice().sort(
@@ -77,7 +76,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
 
   const handleManualRefresh = () => window.location.reload();
 
-  // ✅ Handler typé pour react-day-picker
+  // Handler typé pour react-day-picker
   const handleSelect: SelectSingleEventHandler = (day) => {
     setSelectedDate(day);
   };
@@ -105,9 +104,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           </div>
         ) : (
           <Calendar
-            mode="single"
             selected={selectedDate}
-            onSelect={handleSelect} // ✅ Handler typé
+            onSelect={handleSelect}
             locale={fr}
             events={events}
             className="rounded-xl border shadow bg-card w-full"
