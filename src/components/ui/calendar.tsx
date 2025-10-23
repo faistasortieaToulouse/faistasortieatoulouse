@@ -7,23 +7,27 @@ import "react-day-picker/dist/style.css";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-// Type d’événement Discord
 export type DiscordEvent = {
   id: string;
   name: string;
   scheduled_start_time: string;
 };
 
-// Props du composant Calendar
-export type CalendarProps = Omit<DayPickerProps, "children" | "mode"> & {
+export type CalendarProps = Omit<DayPickerProps, "children"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
   onSelect?: SelectSingleEventHandler;
 };
 
-export function Calendar({ events = [], className, classNames, onSelect, ...props }: CalendarProps) {
-  // Construire eventMap à partir des événements Discord
+export function Calendar({
+  events = [],
+  className,
+  classNames,
+  onSelect,
+  mode = "single", // ✅ valeur par défaut
+  ...props
+}: CalendarProps) {
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
     events.forEach((event) => {
@@ -37,7 +41,9 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
       <DayPicker
-        mode="single" // ✅ forcer le mode single pour SelectSingleEventHandler
+        mode={mode} // ✅ accepte "single", "multiple" ou "range"
+        selected={props.selected}
+        onSelect={onSelect}
         showOutsideDays
         className={cn("p-3 text-foreground", className)}
         classNames={{
@@ -103,7 +109,6 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
             <ChevronRight className={cn("h-4 w-4", className)} {...iconProps} />
           ),
         }}
-        onSelect={onSelect} // ✅ fonctionne maintenant avec SelectSingleEventHandler
         {...props}
       />
     </section>
