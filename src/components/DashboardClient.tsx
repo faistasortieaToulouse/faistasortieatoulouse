@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo } from "react";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import Image from "next/image";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { Users, Calendar as CalendarIcon, BellRing, Store, Apple, Share2 } from 
 import { useToast } from "@/hooks/use-toast";
 
 import { DiscordEvent, DiscordWidgetData, CarouselImage } from "@/types/types";
-import { ImageCarousel } from "@/components/image-carousel"; // ✅ export nommé
+import { ClientCarousel } from "./client-carousel"; // ← utilise le client-carousel
 import placeholderData from "@/lib/placeholder-images.json";
 
 import { DashboardMenu } from "./DashboardMenu";
@@ -22,7 +22,6 @@ import { DiscordEvents } from "./discord-events";
 import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
 
-// Import dynamique → pas de SSR
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
   { ssr: false }
@@ -44,21 +43,6 @@ export default function DashboardClient({
   ftsLogoUrl,
 }: DashboardClientProps) {
   const { toast } = useToast();
-
-  // ✅ Convertir les images JSON en CarouselImage[]
-  const carouselImages: CarouselImage[] = placeholderData.carouselImages
-    .map((img: string | CarouselImage, index: number) => {
-      if (typeof img === "string") {
-        return {
-          id: index.toString(),
-          imageUrl: img,
-          description: `Image ${index + 1}`,
-        } as CarouselImage;
-      } else {
-        return img;
-      }
-    })
-    .filter(img => !!img.imageUrl);
 
   const onlineMembers = discordData.presence_count ?? 0;
 
@@ -102,11 +86,19 @@ export default function DashboardClient({
     }
   };
 
+  // Préparer les images pour ClientCarousel
+  const carouselImages: CarouselImage[] = placeholderData.carouselImages.map(
+    (img: string | CarouselImage, index: number) =>
+      typeof img === "string"
+        ? { id: index.toString(), imageUrl: img, description: `Image ${index + 1}` }
+        : img
+  );
+
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
-        <ImageCarousel images={carouselImages} />
+        <ClientCarousel />
       </section>
 
       {/* Stats rapides */}
@@ -139,6 +131,7 @@ export default function DashboardClient({
 
       {/* Grille principale */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Colonne gauche */}
         <div className="flex flex-col gap-8">
           <Card className="p-4">
             <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
@@ -158,6 +151,7 @@ export default function DashboardClient({
           </Card>
         </div>
 
+        {/* Colonne droite */}
         <div className="flex flex-col gap-8">
           <DiscordWidget />
           <DiscordChannelList channels={discordData.channels} />
