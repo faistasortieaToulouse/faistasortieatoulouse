@@ -7,11 +7,12 @@ import { RefreshCw } from 'lucide-react';
 
 export function DiscordWidget() {
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    // ✅ Délai de sécurité pour vérifier si le widget s'affiche
+    // Timeout pour vérifier si le widget s'affiche
     const timeout = setTimeout(() => {
-      if (!loaded) {
+      if (!loaded && !error) {
         const hasRetried = sessionStorage.getItem('discord-widget-auto-refresh');
         if (!hasRetried) {
           console.log('🔄 Widget Discord non chargé — tentative automatique de rechargement...');
@@ -19,14 +20,15 @@ export function DiscordWidget() {
           window.location.reload();
         } else {
           console.warn('⚠️ Widget Discord toujours absent après un rechargement — arrêt des tentatives.');
+          setError(true);
         }
       } else {
         sessionStorage.removeItem('discord-widget-auto-refresh');
       }
-    }, 5000); // 5 secondes avant de considérer que ça n’a pas chargé
+    }, 5000); // 5s
 
     return () => clearTimeout(timeout);
-  }, [loaded]);
+  }, [loaded, error]);
 
   return (
     <Card>
@@ -34,9 +36,15 @@ export function DiscordWidget() {
         <CardTitle>Rejoins la conversation</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center">
-        {!loaded && (
+        {!loaded && !error && (
           <p className="text-sm text-muted-foreground mb-2">
             Chargement du widget Discord…
+          </p>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-500 mb-2 text-center">
+            Impossible de charger le widget Discord. Veuillez réessayer.
           </p>
         )}
 
@@ -49,9 +57,9 @@ export function DiscordWidget() {
           sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
           className="rounded-lg"
           onLoad={() => setLoaded(true)}
-        ></iframe>
+        />
 
-        {!loaded && (
+        {(!loaded || error) && (
           <div className="mt-3">
             <Button
               onClick={() => {
