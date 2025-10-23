@@ -14,7 +14,6 @@ import { ImageCarousel } from "@/components/image-carousel";
 import placeholderData from "@/lib/placeholder-images.json";
 
 import { DashboardMenu } from "./DashboardMenu";
-import { DiscordStats } from "./discord-stats";
 import { DiscordWidget } from "./discord-widget";
 import { DiscordChannelList } from "./discord-channel-list";
 import { DiscordEvents } from "./discord-events";
@@ -23,18 +22,17 @@ import { AiRecommendations } from "./ai-recommendations";
 
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-// Import dynamique de TimeWeatherBar → pas de SSR
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
   { ssr: false }
 );
 
 interface DashboardClientProps {
-  discordData: DiscordWidgetData;
+  discordData: DiscordWidgetData & { presence_count?: number }; // Ajout de presence_count
   discordPolls: any[];
   eventsData: DiscordEvent[];
   totalMembers: number;
-  ftsLogoUrl?: string; // ✅ Correctement typé
+  ftsLogoUrl?: string;
 }
 
 export default function DashboardClient({
@@ -46,7 +44,6 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const { toast } = useToast();
 
-  // Convertir les images JSON en tableau de string
   const carouselImages: string[] = placeholderData.carouselImages
     .map((img: string | CarouselImage) => typeof img === "string" ? img : img.imageUrl)
     .filter((url): url is string => !!url && url.length > 0);
@@ -76,12 +73,8 @@ export default function DashboardClient({
           text: "Téléchargez Mon Application pour ne rien manquer de nos événements et discussions !",
           url: "https://mon-appli-fictive.com",
         });
-        toast({
-          title: "Partage réussi 🎉",
-          description: "Merci d'avoir partagé l'application !",
-        });
+        toast({ title: "Partage réussi 🎉", description: "Merci d'avoir partagé l'application !" });
       } catch (error) {
-        console.error("Erreur de partage :", error);
         toast({
           title: "Partage annulé",
           description: "Le partage a été interrompu ou le navigateur ne le supporte pas.",
@@ -99,12 +92,10 @@ export default function DashboardClient({
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* Carrousel */}
       <section>
         <ImageCarousel images={carouselImages} />
       </section>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="relative p-4 flex flex-col justify-between h-28">
           <div className="flex justify-between items-start">
@@ -129,14 +120,11 @@ export default function DashboardClient({
         </Card>
       </div>
 
-      {/* DashboardMenu */}
       <div className="w-full mt-4">
         <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
       </div>
 
-      {/* Main Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-hidden">
-        {/* Colonne gauche */}
         <div className="flex flex-col gap-8">
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
             <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
@@ -156,7 +144,6 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* Colonne droite */}
         <div className="flex flex-col gap-8">
           <DiscordWidget />
           <DiscordChannelList channels={discordData?.channels} />
@@ -183,7 +170,6 @@ export default function DashboardClient({
         </div>
       </section>
 
-      {/* Notifications */}
       <section>
         <Alert>
           <BellRing className="h-4 w-4" />
@@ -200,7 +186,6 @@ export default function DashboardClient({
         </Alert>
       </section>
 
-      {/* Section téléchargement / partage */}
       <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
         <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
           <Link
