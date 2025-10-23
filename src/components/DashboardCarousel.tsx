@@ -58,9 +58,14 @@ export default function DashboardCarousel() {
 
   return (
     <DashboardClient
-      {...widgetData}
-      logoUrl={FTS_LOGO_URL}
-      pollsChannelId={POLLS_CHANNEL_ID}
+      discordData={{
+        channels: widgetData.channels,
+        events: widgetData.events,
+      }}
+      eventsData={widgetData.events}
+      discordPolls={[]}        // ou passe les sondages réels si disponibles
+      totalMembers={0}         // ou passe le nombre réel si disponible
+      ftsLogoUrl={FTS_LOGO_URL} // ✅ corrige logoUrl → ftsLogoUrl
     />
   );
 }
