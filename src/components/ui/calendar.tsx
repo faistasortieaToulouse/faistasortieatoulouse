@@ -1,3 +1,28 @@
+'use client';
+
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+
+// Type d’événement Discord
+export type DiscordEvent = {
+  id: string;
+  name: string;
+  scheduled_start_time: string;
+};
+
+// --- Déclarer CalendarProps AVANT le composant ---
+export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, "children"> & {
+  events?: DiscordEvent[];
+  className?: string;
+  classNames?: Record<string, string>;
+  onSelect?: SelectSingleEventHandler;
+};
+
+// Composant Calendar
 export function Calendar({ events = [], className, classNames, onSelect, ...props }: CalendarProps) {
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
@@ -9,7 +34,6 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
     return map;
   }, [events]);
 
-  // Props pour DayPicker
   const dayPickerProps = props;
 
   return (
@@ -87,3 +111,5 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
     </section>
   );
 }
+
+Calendar.displayName = "Calendar";
