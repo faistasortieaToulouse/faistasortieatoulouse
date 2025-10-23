@@ -2,24 +2,21 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, DayPickerProps, SelectSingleEventHandler } from "react-day-picker";
+import { DayPicker, SelectSingleEventHandler, DayPickerSingleProps } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-// Type d’événement Discord
 export type DiscordEvent = {
   id: string;
   name: string;
   scheduled_start_time: string;
 };
 
-// --- Props du calendrier ---
-export type CalendarProps = Omit<DayPickerProps, "children" | "mode" | "onSelect"> & {
+export type CalendarProps = Omit<DayPickerSingleProps, "children"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
-  mode?: "single"; // on force "single" pour ce calendrier
   onSelect?: SelectSingleEventHandler;
 };
 
@@ -32,10 +29,9 @@ export function Calendar({
   className,
   classNames,
   onSelect,
-  mode = "single", // ✅ forcé à "single"
+  selected,
   ...props
 }: CalendarProps) {
-  // Construire eventMap par date
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
     events.forEach((event) => {
@@ -49,9 +45,9 @@ export function Calendar({
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
       <DayPicker
-        mode={mode} // ✅ TS sait que c'est "single"
-        selected={props.selected}
-        onSelect={onSelect} // ✅ Type correct maintenant
+        mode="single"
+        selected={selected} // ✅ typé Date | undefined
+        onSelect={onSelect} // ✅ SelectSingleEventHandler
         showOutsideDays
         className={cn("p-3 text-foreground", className)}
         classNames={{
