@@ -2,18 +2,20 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, SelectSingleEventHandler, DayPickerSingleProps } from "react-day-picker";
+import { DayPicker, DayPickerSingleProps, SelectSingleEventHandler } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
+// --- Type d’événement Discord ---
 export type DiscordEvent = {
   id: string;
   name: string;
   scheduled_start_time: string;
 };
 
-export type CalendarProps = Omit<DayPickerSingleProps, "children"> & {
+// --- Props du composant Calendar ---
+export type CalendarProps = Omit<DayPickerSingleProps, "children" | "mode"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
@@ -22,7 +24,7 @@ export type CalendarProps = Omit<DayPickerSingleProps, "children"> & {
 
 /**
  * Composant Calendar
- * Mode unique: "single" pour utiliser SelectSingleEventHandler
+ * Mode unique "single" pour utiliser SelectSingleEventHandler
  */
 export function Calendar({
   events = [],
@@ -32,6 +34,7 @@ export function Calendar({
   selected,
   ...props
 }: CalendarProps) {
+  // Créer un mapping date → événements
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
     events.forEach((event) => {
@@ -45,7 +48,7 @@ export function Calendar({
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
       <DayPicker
-        mode="single"
+        mode="single" // ✅ forcer le mode single
         selected={selected} // ✅ typé Date | undefined
         onSelect={onSelect} // ✅ SelectSingleEventHandler
         showOutsideDays
@@ -113,7 +116,7 @@ export function Calendar({
             <ChevronRight className={cn("h-4 w-4", className)} {...iconProps} />
           ),
         }}
-        {...props}
+        {...props} // ✅ props restants (locale, styles, etc.)
       />
     </section>
   );
