@@ -12,7 +12,7 @@ import { Users, Calendar as CalendarIcon, BellRing, Store, Apple, Share2 } from 
 import { useToast } from "@/hooks/use-toast";
 
 import { DiscordEvent, DiscordWidgetData, CarouselImage } from "@/types/types";
-import { ImageCarousel } from "@/components/image-carousel";
+import { ImageCarousel } from "@/components/image-carousel"; // ✅ export nommé
 import placeholderData from "@/lib/placeholder-images.json";
 
 import { DashboardMenu } from "./DashboardMenu";
@@ -45,10 +45,20 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const { toast } = useToast();
 
-  // Convertir les images JSON en tableau de strings
-  const carouselImages: string[] = placeholderData.carouselImages
-    .map((img: string | CarouselImage) => typeof img === "string" ? img : img.imageUrl)
-    .filter((url): url is string => !!url && url.length > 0);
+  // ✅ Convertir les images JSON en CarouselImage[]
+  const carouselImages: CarouselImage[] = placeholderData.carouselImages
+    .map((img: string | CarouselImage, index: number) => {
+      if (typeof img === "string") {
+        return {
+          id: index.toString(),
+          imageUrl: img,
+          description: `Image ${index + 1}`,
+        } as CarouselImage;
+      } else {
+        return img;
+      }
+    })
+    .filter(img => !!img.imageUrl);
 
   const onlineMembers = discordData.presence_count ?? 0;
 
@@ -129,7 +139,6 @@ export default function DashboardClient({
 
       {/* Grille principale */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Colonne gauche */}
         <div className="flex flex-col gap-8">
           <Card className="p-4">
             <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
@@ -149,7 +158,6 @@ export default function DashboardClient({
           </Card>
         </div>
 
-        {/* Colonne droite */}
         <div className="flex flex-col gap-8">
           <DiscordWidget />
           <DiscordChannelList channels={discordData.channels} />
