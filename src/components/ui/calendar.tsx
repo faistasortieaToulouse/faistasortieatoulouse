@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,13 +14,15 @@ export type DiscordEvent = {
   scheduled_start_time: string;
 };
 
+// Props du composant Calendar
 export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, "children"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
+  onSelect?: SelectSingleEventHandler; // <-- exposé pour TypeScript
 };
 
-export function Calendar({ events = [], className, classNames, ...props }: CalendarProps) {
+export function Calendar({ events = [], className, classNames, onSelect, ...props }: CalendarProps) {
   // Construire eventMap à partir des événements Discord
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
@@ -32,14 +34,13 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
     return map;
   }, [events]);
 
-  // Filtrer les props pour éviter de passer displayMonth ou autres props internes à <button>
+  // Séparer les props pour DayPicker
   const { children, ...dayPickerProps } = props;
 
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
-      <h2 className="text-xl font-bold mb-3 text-primary">Calendrier des Événements Discord</h2>
       <DayPicker
-        showOutsideDays={true}
+        showOutsideDays
         className={cn("p-3 text-foreground", className)}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -75,7 +76,7 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
             const dateKey = date.toDateString();
             const eventsForDay = eventMap[dateKey] || [];
 
-            // On supprime les props internes pour éviter les warnings React
+            // Supprime les props internes pour éviter warnings
             const { displayMonth, ...buttonProps } = dayProps;
 
             return (
@@ -90,11 +91,11 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
                 {eventsForDay.length > 0 && (
                   <>
                     <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
-<span className="absolute bottom-full mb-1 hidden group-hover:block bg-card text-card-foreground p-1 rounded shadow text-xs z-50 whitespace-nowrap">
-  {eventsForDay.map((e) => (
-    <div key={e.id}>{e.name}</div>
-  ))}
-</span>
+                    <span className="absolute bottom-full mb-1 hidden group-hover:block bg-card text-card-foreground p-1 rounded shadow text-xs z-50 whitespace-nowrap">
+                      {eventsForDay.map((e) => (
+                        <div key={e.id}>{e.name}</div>
+                      ))}
+                    </span>
                   </>
                 )}
               </button>
@@ -107,6 +108,7 @@ export function Calendar({ events = [], className, classNames, ...props }: Calen
             <ChevronRight className={cn("h-4 w-4", className)} {...iconProps} />
           ),
         }}
+        onSelect={onSelect} // <-- propagation vers DayPicker
         {...dayPickerProps}
       />
     </section>
