@@ -1,29 +1,29 @@
-// /app/api/gemini/route.ts
+// src/app/api/gemini/route.ts
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
+// ✅ Clé API définie dans ton environnement (Vercel)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 let ai: GoogleGenAI | null = null;
 let initError: string | null = null;
 
 try {
-  if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY non définie dans les variables d'environnement.");
+  if (GEMINI_API_KEY) {
+    ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+  } else {
+    initError = "Clé GEMINI_API_KEY manquante.";
+    console.error(initError);
   }
-
-  // ✅ Initialisation conforme à la version actuelle du SDK
-  ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 } catch (e) {
-  initError = "Impossible d'initialiser le client Gemini.";
-  console.error(`[AI_INIT_ERROR] ${initError}`, e);
-  ai = null;
+  initError = "Erreur d'initialisation du client Gemini.";
+  console.error(`[AI_INIT_ERROR] ${initError}:`, e);
 }
 
 export async function POST(request: Request) {
   if (!ai) {
     return new NextResponse(
-      `Erreur de configuration du serveur IA: ${initError || "Client non initialisé."}`,
+      `Erreur de configuration IA : ${initError || "Client non initialisé."}`,
       { status: 500 }
     );
   }
@@ -32,9 +32,7 @@ export async function POST(request: Request) {
     const { prompt, eventData } = await request.json();
 
     if (!prompt) {
-      return new NextResponse("Le prompt (requête utilisateur) est requis.", {
-        status: 400,
-      });
+      return new NextResponse("Le champ 'prompt' est requis.", { status: 400 });
     }
 
     const finalPrompt = `
@@ -43,19 +41,20 @@ export async function POST(request: Request) {
       Événements Discord:
       ${eventData}
 
-      Ta réponse doit être directe, conviviale, et ne doit pas inclure les données Discord brutes.
+      Ta réponse doit être directe, conviviale et sans inclure les données Discord brutes.
     `;
 
-    const response = await ai.generateContent({
+    // ✅ Nouvelle syntaxe pour le SDK @google/genai
+    const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
     });
 
-    return NextResponse.json({ result: response.response.text() });
+    return NextResponse.json({ result: response.output_text });
   } catch (error: any) {
     console.error("Erreur lors de l'appel à Gemini:", error);
     const status = error.status || 500;
-    const message = `Erreur IA: ${error.message || "Le service Gemini a renvoyé une erreur."}`;
+    const message = `Erreur IA: ${error.message || "Le service Gemini a échoué."}`;
     return new NextResponse(message, { status });
   }
 }
