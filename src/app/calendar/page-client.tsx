@@ -5,13 +5,14 @@ import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, MapPin, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { SelectSingleEventHandler } from 'react-day-picker';
 
 interface DiscordEvent {
   id: string;
   name: string;
   scheduled_start_time: string;
   description?: string;
-  entity_type?: 1 | 2 | 3; // 3 = événement avec adresse
+  entity_type?: 1 | 2 | 3;
   entity_metadata?: { location?: string } | null;
 }
 
@@ -21,7 +22,6 @@ interface CalendarClientProps {
 }
 
 // --- Fonctions utilitaires ---
-
 const formatEventTime = (isoString: string) => {
   const date = new Date(isoString);
   return new Intl.DateTimeFormat('fr-FR', {
@@ -50,7 +50,6 @@ const getEventLocationLink = (event: DiscordEvent) => {
 };
 
 // --- Composant principal ---
-
 export default function CalendarClient({ eventsData, upcomingEvents }: CalendarClientProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<DiscordEvent[]>(eventsData || []);
@@ -65,21 +64,22 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
     [events]
   );
 
-  // --- Rafraîchissement automatique si aucun événement n'est chargé
+  // Rafraîchissement automatique
   useEffect(() => {
     if (events.length === 0 && autoRefreshCount < 3) {
       const timer = setTimeout(() => {
-        // On relance le fetch des événements via la page (reload)
         window.location.reload();
         setAutoRefreshCount(autoRefreshCount + 1);
-      }, 3000); // tous les 3s
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [events, autoRefreshCount]);
 
-  // --- Fonction pour bouton manuel
-  const handleManualRefresh = () => {
-    window.location.reload();
+  const handleManualRefresh = () => window.location.reload();
+
+  // ✅ Handler typé pour react-day-picker
+  const handleSelect: SelectSingleEventHandler = (day) => {
+    setSelectedDate(day);
   };
 
   return (
@@ -102,15 +102,15 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={setSelectedDate}
+            onSelect={handleSelect} // ✅ Handler typé
             locale={fr}
-            events={events} 
+            events={events}
             className="rounded-xl border shadow bg-card w-full"
           />
         )}
       </div>
 
-      {/* Liste complète des événements */}
+      {/* Liste des événements */}
       <div className="lg:col-span-1 flex flex-col gap-4">
         <h2 className="text-2xl font-semibold mb-2 text-card-foreground">
           Liste Complète des Événements
@@ -121,7 +121,7 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
               Aucun événement Discord trouvé.
             </p>
           )}
-          {allEvents.map(event => {
+          {allEvents.map((event) => {
             const location = getEventLocation(event);
             const link = getEventLocationLink(event);
 
