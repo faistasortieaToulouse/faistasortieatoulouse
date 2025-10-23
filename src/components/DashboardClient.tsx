@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-import { DiscordEvent, DiscordWidgetData } from "@/types/types";
+import { DiscordEvent, DiscordWidgetData, CarouselImage } from "@/types/types";
 import { ImageCarousel } from "@/components/image-carousel";
 import placeholderData from "@/lib/placeholder-images.json";
 
@@ -24,14 +24,17 @@ import { AiRecommendations } from "./ai-recommendations";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // Import dynamique de TimeWeatherBar → pas de SSR
-const TimeWeatherBar = dynamic(() => import("./time-weather-bar").then(mod => mod.TimeWeatherBar), { ssr: false });
+const TimeWeatherBar = dynamic(
+  () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
+  { ssr: false }
+);
 
 interface DashboardClientProps {
   discordData: DiscordWidgetData;
   discordPolls: any[];
   eventsData: DiscordEvent[];
   totalMembers: number;
-  ftsLogoUrl?: string;
+  ftsLogoUrl?: string; // ✅ Correctement typé
 }
 
 export default function DashboardClient({
@@ -43,8 +46,9 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const { toast } = useToast();
 
+  // Convertir les images JSON en tableau de string
   const carouselImages: string[] = placeholderData.carouselImages
-    .map((img: any) => (typeof img === 'string' ? img : img.imageUrl))
+    .map((img: string | CarouselImage) => typeof img === "string" ? img : img.imageUrl)
     .filter((url): url is string => !!url && url.length > 0);
 
   const onlineMembers = discordData?.presence_count || 0;
@@ -58,7 +62,6 @@ export default function DashboardClient({
     const now = new Date();
     const sevenDays = new Date();
     sevenDays.setDate(now.getDate() + 7);
-
     return eventsData.filter(ev => {
       const start = new Date(ev.scheduled_start_time);
       return start >= now && start <= sevenDays;
@@ -101,7 +104,7 @@ export default function DashboardClient({
         <ImageCarousel images={carouselImages} />
       </section>
 
-      {/* Stats au-dessus de la barre date/heure/météo */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="relative p-4 flex flex-col justify-between h-28">
           <div className="flex justify-between items-start">
@@ -133,6 +136,7 @@ export default function DashboardClient({
 
       {/* Main Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-hidden">
+        {/* Colonne gauche */}
         <div className="flex flex-col gap-8">
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
             <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
@@ -147,16 +151,16 @@ export default function DashboardClient({
               Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
             </p>
             <AiRecommendations
-              eventData={
-                discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'
-              }
+              eventData={discordData?.events ? JSON.stringify(discordData.events, null, 2) : 'No event data available.'}
             />
           </div>
         </div>
 
+        {/* Colonne droite */}
         <div className="flex flex-col gap-8">
           <DiscordWidget />
           <DiscordChannelList channels={discordData?.channels} />
+
           <div className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
             <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
             <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
