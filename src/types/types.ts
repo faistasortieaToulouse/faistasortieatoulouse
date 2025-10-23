@@ -1,4 +1,5 @@
 // src/types/types.ts
+
 export interface CarouselImage {
   id: string;
   imageUrl: string;
@@ -25,5 +26,12 @@ export interface DiscordEvent {
   };
 }
 
+// --- Nouveau type pour DashboardClient ---
+export interface DiscordWidgetData {
+  channels: DiscordChannel[];
+  events: DiscordEvent[];
+  images: CarouselImage[];
+  guildId: string;
+}
 
-// Ajoute d’autres types partagés ici...
+// Tu peux ajouter d’autres types partagés ici...
