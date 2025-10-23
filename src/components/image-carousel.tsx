@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { CarouselImage } from '@/types/types';
-import { ImageCarousel } from './image-carousel';
+import { ImageCarousel } from './image-carousel'; // ✅ Assurez-vous que ImageCarousel est exporté nommé
 
 export function ClientCarousel() {
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
@@ -26,5 +26,6 @@ export function ClientCarousel() {
 
   if (carouselImages.length === 0) return null;
 
+  // Passe CarouselImage[] au ImageCarousel
   return <ImageCarousel images={carouselImages} />;
 }
