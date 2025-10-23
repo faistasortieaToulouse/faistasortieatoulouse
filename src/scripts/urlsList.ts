@@ -11,7 +11,7 @@ interface Category {
 }
 
 // Liste complète et dédoublée (mais incluant les répertoires/chemins différents) des 205 URLs
-const rawUrls: string[] = [
+const rawUrls: Record<string, string> = {
     "https://www.toulousebouge.com": "",
     "https://www.clutchmag.fr/evenements": "",
     "https://www.lepetittou.com/activite/culture/": "",
@@ -247,12 +247,12 @@ const rawUrls: string[] = [
     "https://www.komoot.com/discover/Toulouse/@43.6046000,1.4451000/tours?sport=hike": "",
     "https://fr.wikiloc.com/wikiloc/map.do?sw=43.2371%2C0.9537&ne=43.9215%2C2.0483&place=Toulouse": "",
     "https://www.visorando.com/?component=rando&task=searchCircuitV2&loc=Toulouse": "OK" 
-];
+};
 
 // Mappe les URLs brutes en objets Link pour le script
-const allLinks: Link[] = rawUrls.map(url => ({
-    url: url,
-    description: "URL à vérifier pour la validité et la disponibilité.",
+const allLinks: Link[] = Object.entries(rawUrls).map(([url, description]) => ({
+  url,
+  description: description || "URL à vérifier pour la validité et la disponibilité.",
 }));
 
 // Crée la structure Category pour l'export
