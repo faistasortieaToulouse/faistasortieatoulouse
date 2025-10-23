@@ -141,7 +141,7 @@ const rawUrls: Record<string, string> = {
     "https://www.ouestaveyron.fr/": "", // Remplacement de https://www.tourisme-ouest-aveyron.fr
     "https://www.causses-aubrac-tourisme.com": "",
     "https://www.payssegali.fr/": "", // Remplacement de https://www.tourisme-pays-segali.fr
-    "https://www.montsdelacauneetmontagneduhautlanguedoc.fr/": "", // Remplacement de https://www.tourisme-montsetlacs.fr
+    "https://www.destinationhautlanguedoc.fr/": "", // Remplacement de https://www.tourisme-montsetlacs.fr
     "https://nimes-tourisme.com": "",
     "https://www.uzes-pontdugard.com": "",
     "https://www.cevennes-tourisme.fr": "",
