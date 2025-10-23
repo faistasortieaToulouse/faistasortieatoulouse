@@ -24,7 +24,9 @@ export default async function DashboardPage() {
         next: { revalidate: 300 },
       });
       channelsData = res.ok ? await res.json() : [];
-    } catch {}
+    } catch {
+      channelsData = [];
+    }
   }
 
   // --- Fetch Members ---
@@ -36,31 +38,36 @@ export default async function DashboardPage() {
         { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 300 } }
       );
       membersData = res.ok ? await res.json() : [];
-    } catch {}
+    } catch {
+      membersData = [];
+    }
   }
-
   const totalMembersCount = membersData.length;
 
   // --- Fetch Events ---
   let eventsData: DiscordEvent[] = [];
   if (DISCORD_TOKEN) {
     try {
-      const res = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`, {
-        headers: { Authorization: `Bot ${DISCORD_TOKEN}` },
-        next: { revalidate: 60 },
-      });
+      const res = await fetch(
+        `https://discord.com/api/v10/guilds/${GUILD_ID}/scheduled-events`,
+        { headers: { Authorization: `Bot ${DISCORD_TOKEN}` }, next: { revalidate: 60 } }
+      );
       eventsData = res.ok ? await res.json() : [];
-    } catch {}
+    } catch {
+      eventsData = [];
+    }
   }
 
   // --- Fetch Widget ---
-  let widgetData: any = null;
+  let widgetData: Partial<DiscordWidgetData & { presence_count?: number }> = {};
   try {
     const res = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, {
       next: { revalidate: 300 },
     });
-    widgetData = res.ok ? await res.json() : null;
-  } catch {}
+    widgetData = res.ok ? await res.json() : {};
+  } catch {
+    widgetData = {};
+  }
 
   // --- Fetch Polls ---
   let discordPolls: any[] = [];
@@ -74,16 +81,18 @@ export default async function DashboardPage() {
         const messages = await res.json();
         discordPolls = messages.filter((msg: any) => msg.poll && !msg.poll.expired);
       }
-    } catch {}
+    } catch {
+      discordPolls = [];
+    }
   }
 
-  // --- Préparer discordData conforme à l'interface DiscordWidgetData ---
-  const discordData: DiscordWidgetData = {
+  // --- Préparer discordData conforme à DiscordWidgetData ---
+  const discordData: DiscordWidgetData & { presence_count: number } = {
     channels: channelsData,
     events: eventsData,
-    images: widgetData?.images || [],
+    images: widgetData.images || [],
     guildId: GUILD_ID,
-    presence_count: widgetData?.presence_count || 0,
+    presence_count: widgetData.presence_count || 0,
   };
 
   return (
