@@ -12,7 +12,7 @@ import { Users, Calendar as CalendarIcon, BellRing, Store, Apple, Share2 } from 
 import { useToast } from "@/hooks/use-toast";
 
 import { DiscordEvent, DiscordWidgetData, CarouselImage } from "@/types/types";
-import { ClientCarousel } from "./client-carousel"; // ← utilise le client-carousel
+import { ClientCarousel } from "./client-carousel";
 import placeholderData from "@/lib/placeholder-images.json";
 
 import { DashboardMenu } from "./DashboardMenu";
@@ -87,18 +87,23 @@ export default function DashboardClient({
   };
 
   // Préparer les images pour ClientCarousel
-  const carouselImages: CarouselImage[] = placeholderData.carouselImages.map(
-    (img: string | CarouselImage, index: number) =>
-      typeof img === "string"
-        ? { id: index.toString(), imageUrl: img, description: `Image ${index + 1}` }
-        : img
-  );
+  const carouselImages: CarouselImage[] = Array.isArray(placeholderData.carouselImages)
+    ? placeholderData.carouselImages.map((img: any, index: number) =>
+        typeof img === "string"
+          ? { id: index.toString(), imageUrl: img, description: `Image ${index + 1}` }
+          : {
+              id: img.id ?? index.toString(),
+              imageUrl: img.imageUrl ?? "",
+              description: img.description ?? `Image ${index + 1}`,
+            }
+      )
+    : [];
 
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
-        <ClientCarousel />
+        <ClientCarousel images={carouselImages} />
       </section>
 
       {/* Stats rapides */}
@@ -194,7 +199,12 @@ export default function DashboardClient({
             className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
           >
             <Store className="h-5 w-5" />
-            <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} />
+            <Image
+              src="/images/google-play-badge.png"
+              alt="Disponible sur Google Play"
+              width={180}
+              height={53}
+            />
           </Link>
 
           <Link
