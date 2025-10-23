@@ -3,6 +3,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const GOOGLE_MAPS_SERVER_KEY = process.env.GOOGLE_MAPS_SERVER_KEY;
 
+// Typage pour les composants d'adresse de l'API Google
+type AddressComponent = {
+  long_name: string;
+  short_name: string;
+  types: string[];
+};
+
+// Typage pour la réponse partielle de Google Geocoding
+type GeocodeResult = {
+  geometry: {
+    location: { lat: number; lng: number };
+  };
+  address_components: AddressComponent[];
+};
+
+type GeocodeResponse = {
+  status: string;
+  results: GeocodeResult[];
+  error_message?: string;
+};
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const address = searchParams.get('address')?.trim();
@@ -29,7 +50,7 @@ export async function GET(req: NextRequest) {
     )}&components=country:FR&key=${GOOGLE_MAPS_SERVER_KEY}`;
 
     const res = await fetch(url);
-    const data = await res.json();
+    const data: GeocodeResponse = await res.json();
 
     if (data.status !== 'OK' || !data.results.length) {
       console.warn(`❌ Adresse introuvable : "${address}" (status: ${data.status})`);
@@ -43,9 +64,11 @@ export async function GET(req: NextRequest) {
     const location = data.results[0].geometry.location;
     const components = data.results[0].address_components;
 
-    // Vérifie si l'adresse est en Haute-Garonne
+    // ✅ Typage explicite pour TypeScript
     const inHauteGaronne = components.some(
-      c => c.types.includes('administrative_area_level_2') && /Haute-Garonne/i.test(c.long_name)
+      (c: AddressComponent) =>
+        c.types.includes('administrative_area_level_2') &&
+        /Haute-Garonne/i.test(c.long_name)
     );
 
     if (!inHauteGaronne) {
