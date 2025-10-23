@@ -1,4 +1,3 @@
-// src/components/client-carousel.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
