@@ -1,29 +1,4 @@
-'use client';
-
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
-import "react-day-picker/dist/style.css";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
-
-// Type d’événement Discord
-export type DiscordEvent = {
-  id: string;
-  name: string;
-  scheduled_start_time: string;
-};
-
-// Props du composant Calendar
-export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, "children"> & {
-  events?: DiscordEvent[];
-  className?: string;
-  classNames?: Record<string, string>;
-  onSelect?: SelectSingleEventHandler; // <-- exposé pour TypeScript
-};
-
 export function Calendar({ events = [], className, classNames, onSelect, ...props }: CalendarProps) {
-  // Construire eventMap à partir des événements Discord
   const eventMap: Record<string, DiscordEvent[]> = React.useMemo(() => {
     const map: Record<string, DiscordEvent[]> = {};
     events.forEach((event) => {
@@ -34,8 +9,8 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
     return map;
   }, [events]);
 
-  // Séparer les props pour DayPicker
-  const { children, ...dayPickerProps } = props;
+  // Props pour DayPicker
+  const dayPickerProps = props;
 
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
@@ -75,8 +50,6 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
           Day: ({ date, modifiers, ...dayProps }) => {
             const dateKey = date.toDateString();
             const eventsForDay = eventMap[dateKey] || [];
-
-            // Supprime les props internes pour éviter warnings
             const { displayMonth, ...buttonProps } = dayProps;
 
             return (
@@ -108,11 +81,9 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
             <ChevronRight className={cn("h-4 w-4", className)} {...iconProps} />
           ),
         }}
-        onSelect={onSelect} // <-- propagation vers DayPicker
+        onSelect={onSelect}
         {...dayPickerProps}
       />
     </section>
   );
 }
-
-Calendar.displayName = "Calendar";
