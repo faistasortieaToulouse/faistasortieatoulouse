@@ -2,22 +2,23 @@
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 
-// ⚠️ Le SDK lit automatiquement GOOGLE_APPLICATION_CREDENTIALS
 let ai: GoogleGenAI | null = null;
+let initError: string | null = null;
 
 try {
+  // initialisation sans passer explicitement credentials/auth, car le SDK
+  // prend en charge l’authentification via variables d’environnement. :contentReference[oaicite:2]{index=2}
   ai = new GoogleGenAI();
 } catch (e) {
-  console.error("[AI_INIT_ERROR] Impossible d'initialiser Gemini :", e);
+  initError = "Impossible d'initialiser le client Gemini.";
+  console.error(`[AI_INIT_ERROR] ${initError}`, e);
   ai = null;
 }
 
 export async function POST(request: Request) {
   if (!ai) {
-    return new NextResponse(
-      "Client Gemini non initialisé. Vérifiez la variable d'environnement GOOGLE_APPLICATION_CREDENTIALS.",
-      { status: 500 }
-    );
+    console.error(`[AI_RUNTIME_ERROR] Client Gemini non initialisé. Raison: ${initError}`);
+    return new NextResponse(`Erreur de configuration du serveur IA: ${initError || 'Client non initialisé.'}`, { status: 500 });
   }
 
   try {
