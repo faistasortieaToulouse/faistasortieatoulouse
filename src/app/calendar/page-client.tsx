@@ -68,8 +68,8 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
   useEffect(() => {
     if (events.length === 0 && autoRefreshCount < 3) {
       const timer = setTimeout(() => {
+        setAutoRefreshCount((prev) => prev + 1);
         window.location.reload();
-        setAutoRefreshCount(autoRefreshCount + 1);
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -90,15 +90,20 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
           <CalendarIcon className="h-6 w-6 text-primary" />
           Vue Mensuelle des Événements
         </h2>
-        {events.length === 0 && (
+
+        {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10">
             <p className="text-muted-foreground mb-4">Aucun événement Discord trouvé pour le moment…</p>
-            <Button onClick={handleManualRefresh} size="sm" variant="outline" className="flex items-center gap-2">
+            <Button
+              onClick={handleManualRefresh}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+            >
               <RefreshCw className="h-4 w-4" /> Rafraîchir
             </Button>
           </div>
-        )}
-        {events.length > 0 && (
+        ) : (
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -135,7 +140,12 @@ export default function CalendarClient({ eventsData, upcomingEvents }: CalendarC
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-4 w-4 text-green-600" />
                   {link ? (
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
                       {location}
                     </a>
                   ) : (
