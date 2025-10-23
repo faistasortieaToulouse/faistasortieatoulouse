@@ -15,7 +15,7 @@ export type DiscordEvent = {
 };
 
 // Props du composant Calendar
-export type CalendarProps = Omit<DayPickerProps, "children"> & {
+export type CalendarProps = Omit<DayPickerProps, "children" | "mode"> & {
   events?: DiscordEvent[];
   className?: string;
   classNames?: Record<string, string>;
@@ -37,6 +37,7 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
   return (
     <section className="border rounded-lg shadow-sm p-4 bg-card text-card-foreground">
       <DayPicker
+        mode="single" // ✅ forcer le mode single pour SelectSingleEventHandler
         showOutsideDays
         className={cn("p-3 text-foreground", className)}
         classNames={{
@@ -102,7 +103,7 @@ export function Calendar({ events = [], className, classNames, onSelect, ...prop
             <ChevronRight className={cn("h-4 w-4", className)} {...iconProps} />
           ),
         }}
-        onSelect={onSelect}
+        onSelect={onSelect} // ✅ fonctionne maintenant avec SelectSingleEventHandler
         {...props}
       />
     </section>
