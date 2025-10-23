@@ -50,7 +50,13 @@ export async function POST(request: Request) {
       contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
     });
 
-    return NextResponse.json({ result: response.output_text });
+    // 🔹 Récupération sécurisée du texte généré selon la dernière structure du SDK
+    const resultText =
+      response.output_texts?.[0]?.text ||
+      response.candidates?.[0]?.content ||
+      "Pas de réponse générée";
+
+    return NextResponse.json({ result: resultText });
   } catch (error: any) {
     console.error("Erreur lors de l'appel à Gemini:", error);
     const status = error.status || 500;
