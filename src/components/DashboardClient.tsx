@@ -45,6 +45,7 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const { toast } = useToast();
 
+  // Convertir les images JSON en tableau de strings
   const carouselImages: string[] = placeholderData.carouselImages
     .map((img: string | CarouselImage) => typeof img === "string" ? img : img.imageUrl)
     .filter((url): url is string => !!url && url.length > 0);
