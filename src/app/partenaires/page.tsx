@@ -28,13 +28,13 @@ export default function PartenairesPage() {
     {
       name: 'Happy People 31',
       description: 'Communauté d\'échange et de sorties conviviales.',
-      reversedUrl: 'fn.rf.elpoepyppah.www//:sptth',
+      reversedUrl: '/fn.f.rp.elpoepyppah.www//:sptth', // inversé exact avec www
       imageUrl: 'https://secure.meetupstatic.com/photos/event/4/f/d/b/clean_522560443.webp',
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d\'échange linguistique et culturel.',
-      reversedUrl: 'fn.rf.eugnilib.www//:sptth',
+      reversedUrl: '/fn.f.rp.eugnilib.www//:sptth', // inversé exact avec www
       imageUrl: 'https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp',
     }
   ];
@@ -70,7 +70,7 @@ export default function PartenairesPage() {
               <CardContent className="flex flex-col items-center flex-grow">
                 {/* Image cliquable */}
                 <div
-                  className="w-40 h-40 mb-4 cursor-pointer relative"
+                  className="w-64 h-64 mb-4 cursor-pointer relative"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
                 >
                   <Image
