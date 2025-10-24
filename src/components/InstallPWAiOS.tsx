@@ -4,28 +4,33 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function InstallPWAiOS() {
+export default function InstallPWAiOS() {
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Détection du type d’appareil
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+    const isAndroid = /Android/.test(ua);
 
-    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+    if (isIOS) {
       setDeviceType('ios');
-    } else if (/Android/.test(ua)) {
+    } else if (isAndroid) {
       setDeviceType('android');
     } else {
       setDeviceType('desktop');
     }
 
+    // Vérifie si l'app est déjà ouverte en mode standalone
     if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
     }
   }, []);
 
-  if (isStandalone) return null;
+  if (isStandalone) return null; // Ne rien afficher si déjà installée
 
+  // --- 🖥️ Cas Desktop ---
   if (deviceType === 'desktop') {
     return (
       <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
@@ -33,7 +38,7 @@ export function InstallPWAiOS() {
           Version mobile disponible
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 text-center">
-          Notre application est optimisée pour les téléphones.
+          Notre application est optimisée pour les téléphones.<br />
           Scannez le QR code pour y accéder :
         </p>
         <Image
@@ -48,6 +53,7 @@ export function InstallPWAiOS() {
     );
   }
 
+  // --- 🍎 Cas iOS ---
   if (deviceType === 'ios') {
     return (
       <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
@@ -78,6 +84,7 @@ export function InstallPWAiOS() {
     );
   }
 
+  // --- 🤖 Cas Android ---
   if (deviceType === 'android') {
     return (
       <div className="text-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
