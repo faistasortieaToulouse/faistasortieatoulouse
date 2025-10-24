@@ -19,7 +19,7 @@ import { DiscordChannelList } from "./discord-channel-list";
 import { DiscordEvents } from "./discord-events";
 import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
-import { InstallPWAiOS } from "@/components/InstallPWAiOS";
+import InstallPWAiOS from "@/components/InstallPWAiOS";
 
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
