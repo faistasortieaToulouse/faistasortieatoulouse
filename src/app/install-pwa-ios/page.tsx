@@ -26,6 +26,10 @@ export function InstallPWAiOS() {
 
   if (isStandalone) return null; // ne pas afficher si déjà installé
 
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
       {deviceType === 'ios' && (
@@ -53,7 +57,7 @@ export function InstallPWAiOS() {
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <span className="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">
             Vous pourrez ensuite lancer l’application directement depuis votre écran d’accueil.
           </span>
         </>
@@ -82,7 +86,7 @@ export function InstallPWAiOS() {
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
             Notre application est optimisée pour les téléphones. Scannez le QR code pour y accéder :
           </p>
-          <div className="relative w-32 h-32 mx-auto">
+          <div className="relative w-32 h-32 mx-auto mb-3">
             <Image
               src="/images/qrcode.png"
               alt="QR code vers version mobile"
@@ -92,6 +96,14 @@ export function InstallPWAiOS() {
           </div>
         </div>
       )}
+
+      {/* Bouton Retour (visible partout) */}
+      <button
+        onClick={handleGoBack}
+        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+      >
+        Retour
+      </button>
     </div>
   );
 }
