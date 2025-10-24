@@ -6,29 +6,33 @@ import { Button } from '@/components/ui/button';
 import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-// --- Nouvelle fonction : ajoute automatiquement "www." si manquant ---
+// --- Fonction robuste pour décoder l'URL inversée et FORCER www. ---
 const decodeUrl = (reversedUrl: string) => {
-  // 1️⃣ Inverse la chaîne
-  let url = reversedUrl.split('').reverse().join('');
+  // 1) nettoyer les slashs initiaux/final
+  const cleanReversed = reversedUrl.replace(/^\/+|\/+$/g, '');
 
-  // 2️⃣ Supprime les doubles / ou caractères parasites
-  url = url.replace(/^\/+/, '').replace(/\/+$/, '');
+  // 2) inversion stricte caractère à caractère
+  let decoded = cleanReversed.split('').reverse().join(''); // ex: 'https://happypeople.fr.nf' ou 'https://www.happypeople.fr.nf/'
 
-  // 3️⃣ Ajoute "https://" si absent
-  if (!url.startsWith('https://')) {
-    url = 'https://' + url;
-  }
+  // 3) garantir protocole (pour new URL)
+  if (!/^https?:\/\//i.test(decoded)) decoded = 'https://' + decoded;
 
-  // 4️⃣ Si l’URL n’a pas "www.", on l’insère avant le domaine principal
+  // 4) parser proprement et forcer 'www.' si absente du hostname
   try {
-    const u = new URL(url);
+    const u = new URL(decoded);
+
     if (!u.hostname.startsWith('www.')) {
       u.hostname = 'www.' + u.hostname;
     }
+
+    // normalise et retourne la forme complète
     return u.toString();
-  } catch {
-    // en cas d'erreur, ajoute directement "www."
-    return url.replace('https://', 'https://www.');
+  } catch (err) {
+    // fallback (rare) : basique mais robuste
+    let fallback = decoded;
+    if (!/^https?:\/\//i.test(fallback)) fallback = 'https://' + fallback;
+    if (!fallback.includes('www.')) fallback = fallback.replace(/^https:\/\//i, 'https://www.');
+    return fallback;
   }
 };
 
@@ -40,20 +44,23 @@ interface Partenaire {
 
 export default function PartenairesPage() {
   const handleVisit = useCallback((reversedUrl: string) => {
-    const url = decodeUrl(reversedUrl);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const finalUrl = decodeUrl(reversedUrl);
+    // DEBUG: affiche dans la console l'URL exactement ouverte (retire si ok)
+    console.log('URL décodée ->', finalUrl);
+    window.open(finalUrl, '_blank', 'noopener,noreferrer');
   }, []);
 
   const partenaires: Partenaire[] = [
     {
       name: 'Happy People 31',
       description: 'Communauté d’échange et de sorties conviviales.',
-      reversedUrl: '/fn.rf.elpoepyppah//:sptth', // plus besoin d’y inclure www
+      // tu peux garder ou enlever le slash initial, la fonction gère les deux
+      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth', // inverse exact de https://www.happypeople.fr.nf/
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d’échange linguistique et culturel.',
-      reversedUrl: '/fn.rf.eugnilib//:sptth', // idem ici
+      reversedUrl: '/fn.rf.eugnilib.www//:sptth', // inverse exact de https://www.bilingue.fr.nf/
     },
   ];
 
