@@ -6,39 +6,29 @@ import { Button } from '@/components/ui/button';
 import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-// --- Fonction robuste pour décoder l'URL inversée et forcer www ---
+// --- Nouvelle fonction : ajoute automatiquement "www." si manquant ---
 const decodeUrl = (reversedUrl: string) => {
-  // 1) nettoyer les / initiaux éventuels
-  const cleanReversed = reversedUrl.replace(/^\/+/, '');
+  // 1️⃣ Inverse la chaîne
+  let url = reversedUrl.split('').reverse().join('');
 
-  // 2) inverser caractère par caractère
-  let decoded = cleanReversed.split('').reverse().join('');
+  // 2️⃣ Supprime les doubles / ou caractères parasites
+  url = url.replace(/^\/+/, '').replace(/\/+$/, '');
 
-  // 3) s'assurer d'un protocole pour que new URL fonctionne
-  if (!/^https?:\/\//i.test(decoded)) {
-    decoded = 'https://' + decoded;
+  // 3️⃣ Ajoute "https://" si absent
+  if (!url.startsWith('https://')) {
+    url = 'https://' + url;
   }
 
-  // 4) parser et forcer 'www.' sur hostname
+  // 4️⃣ Si l’URL n’a pas "www.", on l’insère avant le domaine principal
   try {
-    const u = new URL(decoded);
-
-    // si le hostname ne commence pas par www., on le préfixe
+    const u = new URL(url);
     if (!u.hostname.startsWith('www.')) {
       u.hostname = 'www.' + u.hostname;
     }
-
-    // s'assurer qu'il y a bien un slash final (optionnel)
-    const final = u.toString();
-    // DEBUG — retire en production si tu veux
-    // console.log('decodeUrl:', { reversedUrl, cleanReversed, decoded, final });
-    return final;
-  } catch (err) {
-    // fallback simple si parsing échoue : tenter un ajout basique
-    let fallback = decoded;
-    if (!/^https?:\/\//i.test(fallback)) fallback = 'https://' + fallback;
-    if (!fallback.includes('www.')) fallback = fallback.replace(/^https:\/\//i, 'https://www.');
-    return fallback;
+    return u.toString();
+  } catch {
+    // en cas d'erreur, ajoute directement "www."
+    return url.replace('https://', 'https://www.');
   }
 };
 
@@ -51,8 +41,6 @@ interface Partenaire {
 export default function PartenairesPage() {
   const handleVisit = useCallback((reversedUrl: string) => {
     const url = decodeUrl(reversedUrl);
-    // debug temporaire
-    console.log('Ouverture URL:', url);
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
@@ -60,13 +48,12 @@ export default function PartenairesPage() {
     {
       name: 'Happy People 31',
       description: 'Communauté d’échange et de sorties conviviales.',
-      // NOTE : tu peux garder ou enlever le slash initial, decodeUrl gère les deux
-      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth', // inverse exact de "https://www.happypeople.fr.nf/"
+      reversedUrl: '/fn.rf.elpoepyppah//:sptth', // plus besoin d’y inclure www
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d’échange linguistique et culturel.',
-      reversedUrl: '/fn.rf.eugnilib.www//:sptth', // inverse exact de "https://www.bilingue.fr.nf/"
+      reversedUrl: '/fn.rf.eugnilib//:sptth', // idem ici
     },
   ];
 
