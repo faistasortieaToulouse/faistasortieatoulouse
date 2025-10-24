@@ -21,22 +21,20 @@ interface Partenaire {
 export default function PartenairesPage() {
   const handleVisit = useCallback((reversedUrl: string) => {
     const url = decodeUrl(reversedUrl);
-    // URL complète avec www conservé
-    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
   const partenaires: Partenaire[] = [
     {
       name: 'Happy People 31',
       description: 'Communauté d\'échange et de sorties conviviales.',
-      reversedUrl: 'fn.www.elpoepyppah.moc//:sptth',
+      reversedUrl: 'fn.rf.elpoepyppah.www//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/4/f/d/b/clean_522560443.webp',
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d\'échange linguistique et culturel.',
-      reversedUrl: 'fn.www.eugnilib.moc//:sptth',
+      reversedUrl: 'fn.rf.eugnilib.www//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp',
     }
   ];
@@ -64,35 +62,35 @@ export default function PartenairesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {partenaires.map((partenaire) => (
             <Card key={partenaire.name} className="flex flex-col items-center">
-              <CardHeader className="text-center">
+              <CardHeader>
                 <CardTitle>{partenaire.name}</CardTitle>
                 <CardDescription>{partenaire.description}</CardDescription>
               </CardHeader>
 
-              <CardContent className="flex flex-col items-center">
-                {/* Image cliquable, taille réduite mais conservée */}
+              <CardContent className="flex flex-col items-center flex-grow">
+                {/* Image cliquable */}
                 <div
-                  className="w-48 h-48 mb-4 cursor-pointer"
+                  className="w-40 h-40 mb-4 cursor-pointer relative"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
                 >
                   <Image
                     src={partenaire.imageUrl}
                     alt={`Image pour ${partenaire.name}`}
-                    width={192}
-                    height={192}
-                    style={{ objectFit: 'contain' }}
+                    fill
+                    style={{ objectFit: 'cover', borderRadius: '0.5rem' }}
                   />
                 </div>
 
+                {/* Bouton pour visiter le site */}
                 <Button
+                  asChild
                   variant="outline"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
-                  className="w-full flex justify-center"
                 >
-                  <div className="flex items-center">
+                  <a className="flex items-center">
                     Visiter le site
                     <ExternalLink className="ml-2 h-4 w-4" />
-                  </div>
+                  </a>
                 </Button>
               </CardContent>
             </Card>
