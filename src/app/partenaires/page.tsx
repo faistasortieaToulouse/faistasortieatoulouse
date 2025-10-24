@@ -6,13 +6,22 @@ import { Button } from '@/components/ui/button';
 import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-// --- Fonction pour décoder les URL inversées ---
+// --- Fonction pour décoder correctement l'URL inversée ---
 const decodeUrl = (reversedUrl: string) => {
-  const url = reversedUrl.split('').reverse().join('');
-  // Si l’URL commence par https:// mais pas avec www., on l’ajoute
-  if (url.startsWith('https://') && !url.startsWith('https://www.')) {
-    return url.replace('https://', 'https://www.');
+  // On enlève d'abord les / initiaux pour éviter les erreurs
+  const cleanReversed = reversedUrl.replace(/^\/+/, '');
+  let url = cleanReversed.split('').reverse().join('');
+
+  // Si l'URL ne commence pas par https://, on l'ajoute
+  if (!url.startsWith('https://')) {
+    url = 'https://' + url;
   }
+
+  // Si elle n'a pas www., on l'ajoute juste après https://
+  if (!url.startsWith('https://www.')) {
+    url = url.replace('https://', 'https://www.');
+  }
+
   return url;
 };
 
@@ -32,12 +41,12 @@ export default function PartenairesPage() {
     {
       name: 'Happy People 31',
       description: 'Communauté d’échange et de sorties conviviales.',
-      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth', // inversé exact avec www
+      reversedUrl: 'fn.rf.elpoepyppah.www//:sptth', // sans le / initial
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d’échange linguistique et culturel.',
-      reversedUrl: '/fn.rf.eugnilib.www//:sptth', // inversé exact avec www
+      reversedUrl: 'fn.rf.eugnilib.www//:sptth', // sans le / initial
     },
   ];
 
