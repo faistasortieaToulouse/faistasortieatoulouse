@@ -5,16 +5,16 @@ import { ChevronLeft, HeartHandshake, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-// --- Fonction robuste pour décoder l'URL inversée et FORCER www. ---
+// --- Fonction robuste pour décoder l'URL inversée et FORCER www. + http ---
 const decodeUrl = (reversedUrl: string) => {
   // 1) nettoyer les slashs initiaux/final
   const cleanReversed = reversedUrl.replace(/^\/+|\/+$/g, '');
 
   // 2) inversion stricte caractère à caractère
-  let decoded = cleanReversed.split('').reverse().join(''); // ex: 'https://happypeople.fr.nf' ou 'https://www.happypeople.fr.nf/'
+  let decoded = cleanReversed.split('').reverse().join('');
 
-  // 3) garantir protocole (pour new URL)
-  if (!/^https?:\/\//i.test(decoded)) decoded = 'https://' + decoded;
+  // 3) garantir protocole http (pour new URL)
+  if (!/^https?:\/\//i.test(decoded)) decoded = 'http://' + decoded;
 
   // 4) parser proprement et forcer 'www.' si absente du hostname
   try {
@@ -24,13 +24,14 @@ const decodeUrl = (reversedUrl: string) => {
       u.hostname = 'www.' + u.hostname;
     }
 
-    // normalise et retourne la forme complète
+    // retourne l'URL avec http
+    u.protocol = 'http:';
     return u.toString();
   } catch (err) {
-    // fallback (rare) : basique mais robuste
+    // fallback
     let fallback = decoded;
-    if (!/^https?:\/\//i.test(fallback)) fallback = 'https://' + fallback;
-    if (!fallback.includes('www.')) fallback = fallback.replace(/^https:\/\//i, 'https://www.');
+    if (!/^https?:\/\//i.test(fallback)) fallback = 'http://' + fallback;
+    if (!fallback.includes('www.')) fallback = fallback.replace(/^http:\/\//i, 'http://www.');
     return fallback;
   }
 };
@@ -46,12 +47,12 @@ export default function PartenairesPage() {
     {
       name: 'Happy People 31',
       description: 'Communauté d’échange et de sorties conviviales.',
-      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth',
+      reversedUrl: '/fn.rf.elpoepyppah.www//:ptth', // inversé exact
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d’échange linguistique et culturel.',
-      reversedUrl: '/fn.rf.eugnilib.www//:sptth',
+      reversedUrl: '/fn.rf.eugnilib.www//:ptth', // inversé exact
     },
   ];
 
@@ -87,7 +88,6 @@ export default function PartenairesPage() {
                 </CardHeader>
 
                 <CardContent>
-                  {/* ✅ Lien HTML direct : fiable, gère bien le www et les redirections */}
                   <Button asChild variant="outline" className="mt-2">
                     <a href={finalUrl} target="_blank" rel="noopener noreferrer">
                       Voir le site
