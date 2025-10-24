@@ -83,7 +83,7 @@ export function AppSidebar() {
 
         {/* Lien Discord spécifique */}
         <a
-          href="https://discord.gg/yourinvite"
+          href="https://discord.com/channels/1422806103267344416/1422806103904882842"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full flex items-center justify-center p-2 mt-4 rounded-lg text-white font-bold transition hover:brightness-110"
