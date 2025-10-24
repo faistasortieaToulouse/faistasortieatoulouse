@@ -19,12 +19,12 @@ export default function PartenairesPage() {
         {
             name: 'Happy People 31',
             description: 'Communauté d\'échange et de sorties conviviales.',
-            reversedUrl: '/fn.rf.elpoepyppah.www//:sptth',
+            reversedUrl: 'f./fn.rf.elpoepyppah.www//:sptth',
         },
         {
             name: 'Bilingue 31',
             description: 'Événements d\'échange linguistique et culturel.',
-            reversedUrl: '/fn.rf.eugnilib.www//:sptth',
+            reversedUrl: 'f./fn.rf.eugnilib.www//:sptth',
         }
     ];
 
