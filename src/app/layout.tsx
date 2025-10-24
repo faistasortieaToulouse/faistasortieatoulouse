@@ -26,8 +26,9 @@ export default function RootLayout({
         {/* Meta PWA / iOS */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="FTST" />
+        <meta name="theme-color" content="#2563eb" />
 
         {/* Logo iOS */}
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/logoFTS180iphone.png" />
