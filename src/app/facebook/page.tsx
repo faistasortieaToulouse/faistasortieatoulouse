@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Facebook } from 'lucide-react';
 
 const facebookGroups = [
-  { name: "Happy People Toulouse", url: "http://www.facebook.com/groups/6515076697699" },
-  { name: "Toulouse Le Bon Plan", url: "http://www.facebook.com/groups/718054099140755" },
-  { name: "Toulouse libre ou gratuit", url: "http://www.facebook.com/groups/567884480138156" },
-  { name: "Sorties Soirées Toulouse", url: "http://www.facebook.com/groups/172131720757965" },
-  { name: "La Carte des Colocs Toulouse", url: "http://www.facebook.com/groups/7391160561172721" },
-  { name: "Les Concerts Gratuits de Toulouse", url: "http://www.facebook.com/groups/846721435122" },
-  { name: "Sorties culturelles à Toulouse", url: "http://www.facebook.com/groups/35064485113515" },
-  { name: "Sorties Visite Toulouse, Occitanie et Région Toulousaine", url: "http://www.facebook.com/groups/274405525650645" },
-  { name: "Soirées sorties entre filles Toulouse et Occitanie", url: "http://www.facebook.com/groups/294148708770931" },
-  { name: "Aller au théâtre, impro, stand up, spectacles, comédie à Toulouse", url: "http://www.facebook.com/groups/98729730965931" }
+  { name: "Happy People Toulouse", url: "https://www.facebook.com/groups/996796667051330" },
+  { name: "Toulouse Le Bon Plan", url: "https://www.facebook.com/groups/550741995050817" },
+  { name: "Toulouse libre ou gratuit", url: "https://www.facebook.com/groups/651831044888765" },
+  { name: "Sorties Soirées Toulouse", url: "https://www.facebook.com/groups/596757027131271" },
+  { name: "Colocation hébergement gratuit Toulouse", url: "https://www.facebook.com/groups/559216034241574" },
+  { name: "Les Concerts Gratuits de Toulouse", url: "https://www.facebook.com/groups/221534187648" },
+  { name: "Sorties culturelles à Toulouse", url: "https://www.facebook.com/groups/513531158446053" },
+  { name: "Sorties Visite Toulouse, Occitanie et Région Toulousaine", url: "https://www.facebook.com/groups/546506525504472" },
+  { name: "Soirées sorties entre filles Toulouse et Occitanie", url: "https://www.facebook.com/groups/1397077878141492" },
+  { name: "Aller au théâtre, impro, stand up, spectacles, comédie à Toulouse", url: "https://www.facebook.com/groups/1396560737927890" }
 ];
 
 interface FacebookGroupCardProps {
