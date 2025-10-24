@@ -127,50 +127,51 @@ export default function DashboardClient({
       {/* Menu dashboard */}
       <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
 
-      {/* Grille principale */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Colonne gauche */}
-        <div className="flex flex-col gap-8">
-          <Card className="p-4">
-            <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-            <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-              <DiscordEvents events={discordData.events} />
-            </div>
-          </Card>
+{/* Grille principale */}
+<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Colonne gauche */}
+  <div className="flex flex-col gap-8">
+    <Card className="p-4">
+      <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
+      <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <DiscordEvents events={discordData.events} />
+      </div>
+    </Card>
 
-          <Card className="p-4">
-            <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
-            </p>
-            <AiRecommendations
-              eventData={JSON.stringify(discordData.events ?? [], null, 2)}
-            />
-          </Card>
-        </div>
+    <Card className="p-4">
+      <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
+      </p>
+      <AiRecommendations
+        eventData={JSON.stringify(discordData.events ?? [], null, 2)}
+      />
+    </Card>
 
-        {/* Colonne droite */}
-        <div className="flex flex-col gap-8">
-          <DiscordWidget />
-          <DiscordChannelList channels={discordData.channels} />
+    {/* Card déplacée ici */}
+    <Card className="p-4 flex justify-between items-start h-28">
+      <div>
+        <div className="text-sm text-gray-700">Membres sur le serveur</div>
+        <div className="text-2xl font-bold">{totalMembers}</div>
+        <div className="text-xs text-gray-500">Inscrits sur le Discord</div>
+      </div>
+      <Users className="h-5 w-5 text-primary" />
+    </Card>
+  </div>
 
-          <Card className="p-4">
-            <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
-            <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
-              <DiscordPolls polls={discordPolls} />
-            </div>
-          </Card>
+  {/* Colonne droite */}
+  <div className="flex flex-col gap-8">
+    <DiscordWidget />
+    <DiscordChannelList channels={discordData.channels} />
 
-          <Card className="p-4 flex justify-between items-start h-28">
-            <div>
-              <div className="text-sm text-gray-700">Membres sur le serveur</div>
-              <div className="text-2xl font-bold">{totalMembers}</div>
-              <div className="text-xs text-gray-500">Inscrits sur le Discord</div>
-            </div>
-            <Users className="h-5 w-5 text-primary" />
-          </Card>
-        </div>
-      </section>
+    <Card className="p-4">
+      <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
+      <div className="max-h-[400px] overflow-y-auto pr-2 bg-gray-100 dark:bg-gray-800">
+        <DiscordPolls polls={discordPolls} />
+      </div>
+    </Card>
+  </div>
+</section>
 
       {/* Notifications */}
       <Alert>
