@@ -22,7 +22,7 @@ const meetupGroups: MeetupGroup[] = [
   },
   {
     name: "Toulouse sorties évènements soirées balades visites randos",
-    reversedUrl: "/sodnar-setisiv-sedalab-seeries-stnemeneve-setisros-esioluot/moc.puteem.www//:sptth",
+    reversedUrl: "/sodnar-ssetiv-sedalab-seirees-stnemeneve-setiros-esuoluot/moc.puteem.www//:sptth",
     imageUrl: "https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp",
     description: "Un grand groupe pour toutes sortes de sorties à Toulouse."
   }
