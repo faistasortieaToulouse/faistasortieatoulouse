@@ -21,20 +21,22 @@ interface Partenaire {
 export default function PartenairesPage() {
   const handleVisit = useCallback((reversedUrl: string) => {
     const url = decodeUrl(reversedUrl);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Ajoute le protocole si absent pour être sûr que window.open ouvre correctement
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(fullUrl, '_blank', 'noopener,noreferrer');
   }, []);
 
   const partenaires: Partenaire[] = [
     {
       name: 'Happy People 31',
       description: 'Communauté d\'échange et de sorties conviviales.',
-      reversedUrl: 'fn.rf.elpoepyppah.www//sptth',
+      reversedUrl: 'fn.rf.elpoepyppah.www//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/4/f/d/b/clean_522560443.webp',
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d\'échange linguistique et culturel.',
-      reversedUrl: 'fn.rf.eugnilib.www//sptth',
+      reversedUrl: 'fn.rf.eugnilib.www//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp',
     }
   ];
@@ -68,8 +70,9 @@ export default function PartenairesPage() {
               </CardHeader>
 
               <CardContent className="flex flex-col flex-grow">
+                {/* Image cliquable avec hauteur réduite */}
                 <div
-                  className="aspect-video w-full overflow-hidden rounded-lg border mb-4 relative cursor-pointer"
+                  className="w-full h-40 overflow-hidden rounded-lg border mb-4 relative cursor-pointer"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
                 >
                   <Image
@@ -80,11 +83,16 @@ export default function PartenairesPage() {
                   />
                 </div>
 
-                <Button asChild variant="outline" onClick={() => handleVisit(partenaire.reversedUrl)}>
-                  <a className="flex items-center">
+                {/* Bouton pour ouvrir le site */}
+                <Button
+                  variant="outline"
+                  onClick={() => handleVisit(partenaire.reversedUrl)}
+                  className="w-full"
+                >
+                  <div className="flex items-center justify-center">
                     Visiter le site
                     <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
+                  </div>
                 </Button>
               </CardContent>
             </Card>
