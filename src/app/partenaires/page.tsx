@@ -3,8 +3,31 @@
 import Link from 'next/link';
 import { ChevronLeft, HeartHandshake, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCallback } from 'react';
+
+// --- Utilitaire pour décoder l'URL inversée ---
+const decodeUrl = (reversedUrl: string) =>
+  reversedUrl.split('').reverse().join('');
 
 export default function PartenairesPage() {
+    const handleVisit = useCallback((reversedUrl: string) => {
+        const url = decodeUrl(reversedUrl);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }, []);
+
+    const partenaires = [
+        {
+            name: 'Happy People 31',
+            description: 'Communauté d\'échange et de sorties conviviales.',
+            reversedUrl: '/f.nf.elpeepyppah.www//:sptth',
+        },
+        {
+            name: 'Bilingue 31',
+            description: 'Événements d\'échange linguistique et culturel.',
+            reversedUrl: '/f.nf.euqilgnib.www//:sptth',
+        }
+    ];
+
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
             <header className="flex justify-between items-center">
@@ -30,43 +53,23 @@ export default function PartenairesPage() {
                         Réseaux Amicaux et Linguistiques
                     </h2>
 
-                    {/* Partenaire 1: Happy People 31 */}
-                    <div className="bg-background p-4 rounded-lg shadow-sm border flex items-center justify-between">
-                        <div>
-                            <p className="font-bold text-lg text-primary">Happy People 31</p>
-                            <p className="text-sm text-muted-foreground">Communauté d'échange et de sorties conviviales.</p>
+                    {partenaires.map((partenaire) => (
+                        <div
+                            key={partenaire.name}
+                            className="bg-background p-4 rounded-lg shadow-sm border flex items-center justify-between"
+                        >
+                            <div>
+                                <p className="font-bold text-lg text-primary">{partenaire.name}</p>
+                                <p className="text-sm text-muted-foreground">{partenaire.description}</p>
+                            </div>
+                            <Button onClick={() => handleVisit(partenaire.reversedUrl)}>
+                                <div className="flex items-center">
+                                    Visiter le site
+                                    <ExternalLink className="h-4 w-4 ml-2" />
+                                </div>
+                            </Button>
                         </div>
-                        <Button asChild>
-                            <a 
-                                href="http://www.happypeople.fr.nf/" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center"
-                            >
-                                Visiter le site
-                                <ExternalLink className="h-4 w-4 ml-2" />
-                            </a>
-                        </Button>
-                    </div>
-                    
-                    {/* Partenaire 2: Bilingue 31 */}
-                    <div className="bg-background p-4 rounded-lg shadow-sm border flex items-center justify-between">
-                        <div>
-                            <p className="font-bold text-lg text-primary">Bilingue 31</p>
-                            <p className="text-sm text-muted-foreground">Événements d'échange linguistique et culturel.</p>
-                        </div>
-                        <Button asChild>
-                            <a 
-                                href="http://www.bilingue.fr.nf/" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center"
-                            >
-                                Visiter le site
-                                <ExternalLink className="h-4 w-4 ml-2" />
-                            </a>
-                        </Button>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>
