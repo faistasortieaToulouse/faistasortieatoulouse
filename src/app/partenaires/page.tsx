@@ -1,16 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronLeft, HeartHandshake, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-// --- Utilitaire pour décoder l'URL inversée ---
+// --- Fonction pour décoder les URL inversées ---
 const decodeUrl = (reversedUrl: string) => {
   const url = reversedUrl.split('').reverse().join('');
-  // on ajoute "www." si elle manque après https://
+  // Si l’URL commence par https:// mais pas avec www., on l’ajoute
   if (url.startsWith('https://') && !url.startsWith('https://www.')) {
     return url.replace('https://', 'https://www.');
   }
@@ -21,7 +20,6 @@ interface Partenaire {
   name: string;
   description: string;
   reversedUrl: string;
-  imageUrl: string;
 }
 
 export default function PartenairesPage() {
@@ -33,16 +31,14 @@ export default function PartenairesPage() {
   const partenaires: Partenaire[] = [
     {
       name: 'Happy People 31',
-      description: 'Communauté d\'échange et de sorties conviviales.',
+      description: 'Communauté d’échange et de sorties conviviales.',
       reversedUrl: '/fn.rf.elpoepyppah.www//:sptth', // inversé exact avec www
-      imageUrl: 'https://secure.meetupstatic.com/photos/event/4/f/d/b/clean_522560443.webp',
     },
     {
       name: 'Bilingue 31',
-      description: 'Événements d\'échange linguistique et culturel.',
+      description: 'Événements d’échange linguistique et culturel.',
       reversedUrl: '/fn.rf.eugnilib.www//:sptth', // inversé exact avec www
-      imageUrl: 'https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp',
-    }
+    },
   ];
 
   return (
@@ -67,36 +63,20 @@ export default function PartenairesPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {partenaires.map((partenaire) => (
-            <Card key={partenaire.name} className="flex flex-col items-center">
+            <Card key={partenaire.name} className="flex flex-col items-center text-center">
               <CardHeader>
-                <CardTitle>{partenaire.name}</CardTitle>
+                <CardTitle className="text-primary">{partenaire.name}</CardTitle>
                 <CardDescription>{partenaire.description}</CardDescription>
               </CardHeader>
 
-              <CardContent className="flex flex-col items-center flex-grow">
-                {/* Image cliquable */}
-                <div
-                  className="w-80 h-80 mb-4 cursor-pointer relative"
-                  onClick={() => handleVisit(partenaire.reversedUrl)}
-                >
-                  <Image
-                    src={partenaire.imageUrl}
-                    alt={`Image pour ${partenaire.name}`}
-                    fill
-                    style={{ objectFit: 'cover', borderRadius: '0.5rem' }}
-                  />
-                </div>
-
-                {/* Bouton pour visiter le site */}
+              <CardContent>
                 <Button
-                  asChild
-                  variant="outline"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
+                  variant="outline"
+                  className="mt-2"
                 >
-                  <a className="flex items-center">
-                    Visiter le site
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
+                  Voir le site
+                  <ExternalLink className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
