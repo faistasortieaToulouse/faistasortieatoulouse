@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Facebook } from 'lucide-react';
 
@@ -17,17 +16,33 @@ const facebookGroups = [
   { name: "aller au théâtre, impro, stand up, spectacles, comédie à Toulouse", reversedUrl: "/098729730965931/spuorg/moc.koobecaf.www//:sptth" }
 ];
 
+// Fonction pour inverser et forcer http://www.
+const decodeFacebookUrl = (reversedUrl: string) => {
+  let url = reversedUrl.replace(/^\/+|\/+$/g, '').split('').reverse().join('');
+  
+  // Forcer http://
+  if (!/^https?:\/\//.test(url)) url = 'http://' + url;
+  
+  try {
+    const u = new URL(url);
+    if (!u.hostname.startsWith('www.')) u.hostname = 'www.' + u.hostname;
+    u.protocol = 'http:';
+    return u.toString();
+  } catch {
+    let fallback = url;
+    if (!/^https?:\/\//.test(fallback)) fallback = 'http://' + fallback;
+    if (!fallback.includes('www.')) fallback = fallback.replace(/^http:\/\//, 'http://www.');
+    return fallback;
+  }
+};
+
 interface FacebookGroupCardProps {
   name: string;
   reversedUrl: string;
 }
 
 function FacebookGroupCard({ name, reversedUrl }: FacebookGroupCardProps) {
-  const [facebookUrl, setFacebookUrl] = useState('');
-
-  useEffect(() => {
-    setFacebookUrl(reversedUrl.split('').reverse().join(''));
-  }, [reversedUrl]);
+  const facebookUrl = decodeFacebookUrl(reversedUrl);
 
   return (
     <Card className="flex flex-col items-center justify-between p-4">
@@ -40,12 +55,10 @@ function FacebookGroupCard({ name, reversedUrl }: FacebookGroupCardProps) {
 
       <CardContent>
         <a
-          href={facebookUrl || '#'}
+          href={facebookUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-block mt-2 text-blue-600 font-medium hover:underline ${
-            !facebookUrl ? 'pointer-events-none opacity-50' : ''
-          }`}
+          className="inline-block mt-2 text-blue-600 font-medium hover:underline"
         >
           Voir le groupe sur Facebook
         </a>
@@ -66,7 +79,11 @@ export default function FacebookGroupsPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {facebookGroups.map((group) => (
-          <FacebookGroupCard key={group.name} name={group.name} reversedUrl={group.reversedUrl} />
+          <FacebookGroupCard
+            key={group.name}
+            name={group.name}
+            reversedUrl={group.reversedUrl}
+          />
         ))}
       </div>
     </div>
