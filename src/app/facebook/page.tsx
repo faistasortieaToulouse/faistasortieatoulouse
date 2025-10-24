@@ -1,6 +1,6 @@
 'use client';
 
-import { FacebookGroupCard } from '@/components/facebook-group-card';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Facebook } from 'lucide-react';
 
@@ -16,6 +16,43 @@ const facebookGroups = [
   { name: "Soirées sorties entre filles Toulouse et Occitanie", reversedUrl: "/294148708770931/spuorg/moc.koobecaf.www//:sptth" },
   { name: "aller au théâtre, impro, stand up, spectacles, comédie à Toulouse", reversedUrl: "/098729730965931/spuorg/moc.koobecaf.www//:sptth" }
 ];
+
+interface FacebookGroupCardProps {
+  name: string;
+  reversedUrl: string;
+}
+
+function FacebookGroupCard({ name, reversedUrl }: FacebookGroupCardProps) {
+  const [facebookUrl, setFacebookUrl] = useState('');
+
+  useEffect(() => {
+    setFacebookUrl(reversedUrl.split('').reverse().join(''));
+  }, [reversedUrl]);
+
+  return (
+    <Card className="flex flex-col items-center justify-between p-4">
+      <CardHeader className="text-center">
+        <CardTitle className="text-lg font-semibold flex items-center justify-center gap-2">
+          <Facebook className="h-5 w-5 text-blue-600" />
+          {name}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <a
+          href={facebookUrl || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-block mt-2 text-blue-600 font-medium hover:underline ${
+            !facebookUrl ? 'pointer-events-none opacity-50' : ''
+          }`}
+        >
+          Voir le groupe sur Facebook
+        </a>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function FacebookGroupsPage() {
   return (
