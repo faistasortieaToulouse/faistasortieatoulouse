@@ -8,8 +8,14 @@ import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 // --- Utilitaire pour décoder l'URL inversée ---
-const decodeUrl = (reversedUrl: string) =>
-  reversedUrl.split('').reverse().join('');
+const decodeUrl = (reversedUrl: string) => {
+  const url = reversedUrl.split('').reverse().join('');
+  // on ajoute "www." si elle manque après https://
+  if (url.startsWith('https://') && !url.startsWith('https://www.')) {
+    return url.replace('https://', 'https://www.');
+  }
+  return url;
+};
 
 interface Partenaire {
   name: string;
