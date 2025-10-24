@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-export function InstallPWAiOS() {
+function InstallPWAiOS() {
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -100,10 +100,4 @@ export function InstallPWAiOS() {
       {/* Bouton Retour (visible partout) */}
       <button
         onClick={handleGoBack}
-        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-500 transition"
-      >
-        Retour
-      </button>
-    </div>
-  );
-}
+        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-g
