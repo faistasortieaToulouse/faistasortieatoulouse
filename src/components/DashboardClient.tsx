@@ -2,9 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import Image from "next/image";
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -12,7 +10,7 @@ import { Users, Calendar as CalendarIcon, BellRing, Store, Apple, Share2 } from 
 import { useToast } from "@/hooks/use-toast";
 
 import { DiscordEvent, DiscordWidgetData, CarouselImage } from "@/types/types";
-import { ClientCarousel } from "./client-carousel"; // ← utilise le client-carousel
+import { ClientCarousel } from "./client-carousel";
 import placeholderData from "@/lib/placeholder-images.json";
 
 import { DashboardMenu } from "./DashboardMenu";
@@ -188,36 +186,41 @@ export default function DashboardClient({
       {/* Section téléchargement / partage */}
       <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
         <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
-          <Link
+          {/* Google Play */}
+          <a
             href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
           >
             <Store className="h-5 w-5" />
             <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} />
-          </Link>
+          </a>
 
-<a
-  href="/votre-application.apk"
-  download
-  className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
->
-  <Store className="h-5 w-5" />
-  <span className="text-center leading-tight">
-    Télécharger le fichier APK (TWA)
-    <br />
-    <span className="text-sm opacity-90">pour Android</span>
-  </span>
-</a>
-  
-          <Link
+          {/* APK */}
+          <a
+            href="/votre-application.apk"
+            download
+            className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+          >
+            <Store className="h-5 w-5" />
+            <span className="text-center leading-tight">
+              Télécharger le fichier APK (TWA)
+              <br />
+              <span className="text-sm opacity-90">pour Android</span>
+            </span>
+          </a>
+
+          {/* PWA iOS */}
+          <a
             href="/install-pwa-ios"
             className="flex items-center space-x-2 p-3 bg-white text-gray-800 border rounded-lg shadow-md hover:bg-gray-100 transition dark:bg-gray-700 dark:text-white dark:border-gray-600"
           >
             <Apple className="h-5 w-5" />
             <span className="font-semibold">Installer l'Appli sur iPhone (PWA)</span>
-          </Link>
+          </a>
 
+          {/* Partage */}
           <Button
             onClick={handleShare}
             className="flex items-center space-x-2 p-3 bg-primary text-primary-foreground rounded-lg shadow-md hover:bg-primary/90 transition"
