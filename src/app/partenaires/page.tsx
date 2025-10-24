@@ -21,7 +21,7 @@ interface Partenaire {
 export default function PartenairesPage() {
   const handleVisit = useCallback((reversedUrl: string) => {
     const url = decodeUrl(reversedUrl);
-    // Ajoute le protocole si absent pour être sûr que window.open ouvre correctement
+    // URL complète avec www conservé
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(fullUrl, '_blank', 'noopener,noreferrer');
   }, []);
@@ -30,13 +30,13 @@ export default function PartenairesPage() {
     {
       name: 'Happy People 31',
       description: 'Communauté d\'échange et de sorties conviviales.',
-      reversedUrl: 'fn.rf.elpoepyppah.www//:sptth',
+      reversedUrl: 'fn.www.elpoepyppah.moc//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/4/f/d/b/clean_522560443.webp',
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d\'échange linguistique et culturel.',
-      reversedUrl: 'fn.rf.eugnilib.www//:sptth',
+      reversedUrl: 'fn.www.eugnilib.moc//:sptth',
       imageUrl: 'https://secure.meetupstatic.com/photos/event/6/a/7/1/clean_513687249.webp',
     }
   ];
@@ -63,33 +63,33 @@ export default function PartenairesPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {partenaires.map((partenaire) => (
-            <Card key={partenaire.name} className="flex flex-col">
-              <CardHeader>
+            <Card key={partenaire.name} className="flex flex-col items-center">
+              <CardHeader className="text-center">
                 <CardTitle>{partenaire.name}</CardTitle>
                 <CardDescription>{partenaire.description}</CardDescription>
               </CardHeader>
 
-              <CardContent className="flex flex-col flex-grow">
-                {/* Image cliquable avec hauteur réduite */}
+              <CardContent className="flex flex-col items-center">
+                {/* Image cliquable, taille réduite mais conservée */}
                 <div
-                  className="w-full h-40 overflow-hidden rounded-lg border mb-4 relative cursor-pointer"
+                  className="w-48 h-48 mb-4 cursor-pointer"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
                 >
                   <Image
                     src={partenaire.imageUrl}
                     alt={`Image pour ${partenaire.name}`}
-                    fill
-                    style={{ objectFit: 'cover' }}
+                    width={192}
+                    height={192}
+                    style={{ objectFit: 'contain' }}
                   />
                 </div>
 
-                {/* Bouton pour ouvrir le site */}
                 <Button
                   variant="outline"
                   onClick={() => handleVisit(partenaire.reversedUrl)}
-                  className="w-full"
+                  className="w-full flex justify-center"
                 >
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center">
                     Visiter le site
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </div>
