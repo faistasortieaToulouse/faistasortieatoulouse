@@ -10,7 +10,7 @@ function InstallPWAiOS() {
   useEffect(() => {
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
 
-    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+    if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) {
       setDeviceType('ios');
     } else if (/Android/.test(ua)) {
       setDeviceType('android');
@@ -19,7 +19,10 @@ function InstallPWAiOS() {
     }
 
     // Vérifie si l'app est déjà installée en mode standalone
-    if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    if (
+      (window.navigator as any).standalone ||
+      window.matchMedia('(display-mode: standalone)').matches
+    ) {
       setIsStandalone(true);
     }
   }, []);
@@ -100,4 +103,19 @@ function InstallPWAiOS() {
       {/* Bouton Retour (visible partout) */}
       <button
         onClick={handleGoBack}
-        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-g
+        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+      >
+        Retour
+      </button>
+    </div>
+  );
+}
+
+// ✅ Export par défaut pour Next.js
+export default function InstallPwaIosPage() {
+  return (
+    <div className="flex justify-center items-center min-h-screen p-4">
+      <InstallPWAiOS />
+    </div>
+  );
+}
