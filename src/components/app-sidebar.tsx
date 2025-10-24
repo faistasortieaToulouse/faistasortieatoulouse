@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, Zap, ExternalLink, Mountain, Footprints } from 'lucide-react';
 import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
-import { Map, LifeBuoy } from "lucide-react"; // si ces icônes existent
-import { SidebarTrigger } from "@/components/ui/sidebar"; // Remplacé SidebarClose par SidebarTrigger
+import { Map, LifeBuoy } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import GoogleTranslate from '@/components/GoogleTranslate';
 
 const navItems = [
@@ -25,29 +25,27 @@ const navItems = [
   { href: "/help", icon: LifeBuoy, label: "Aide" },
 ];
 
-
 export function AppSidebar() {
   const ftsLogo = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
 
-return (
+  return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
-      
-<Link href="/" className="flex items-center gap-3">
-  <div className="relative w-10 h-10 flex-shrink-0">
-    <Image
-      src={ftsLogo}
-      alt="FTS Logo"
-      fill
-      className="rounded-full object-cover"
-      sizes="40px"
-    />
-  </div>
-  <div>
-    <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
-    <p className="text-xs text-gray-600">à Toulouse</p>
-  </div>
-</Link>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative w-10 h-10 flex-shrink-0">
+            <Image
+              src={ftsLogo}
+              alt="FTS Logo"
+              fill
+              className="rounded-full object-cover"
+              sizes="40px"
+            />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Fais ta Sortie</h2>
+            <p className="text-xs text-gray-600">à Toulouse</p>
+          </div>
+        </Link>
 
         <SidebarTrigger className="lg:hidden cursor-pointer" />
       </div>
@@ -55,15 +53,35 @@ return (
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const linkProps = item.external ? { href: item.href, target: "_blank", rel: "noopener noreferrer" } : { href: item.href };
+          // Si lien externe, utiliser <a>, sinon <Link>
+          if (item.external) {
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200"
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
+              </a>
+            );
+          }
+
           return (
-            <Link key={item.label} {...linkProps} className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200">
+            <Link
+              key={item.label}
+              href={item.href} // typedRoutes OK
+              className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200"
+            >
               <Icon className="w-5 h-5" />
               {item.label}
             </Link>
           );
         })}
 
+        {/* Lien Discord spécifique */}
         <a
           href="https://discord.gg/yourinvite"
           target="_blank"
