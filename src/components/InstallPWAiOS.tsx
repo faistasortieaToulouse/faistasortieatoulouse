@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function InstallPWAiOS() {
@@ -30,8 +29,6 @@ export default function InstallPWAiOS() {
 
   if (isStandalone) return null; // Ne rien afficher si déjà installée
 
-  const handleGoBack = () => window.history.back();
-
   return (
     <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
       
@@ -40,10 +37,10 @@ export default function InstallPWAiOS() {
         <>
           <Image src="/images/app-icon.png" alt="App Icon" width={80} height={80} className="rounded-lg mb-3" />
           <h3 className="font-bold text-gray-800 dark:text-white mb-2 text-center">
-            Installer l'App sur iPhone / iPad
+            Installer l'application sur iPhone / iPad
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 text-center">
-            Ouvrez Safari → appuyez sur <strong>Partager</strong> puis <strong>Ajouter à l’écran d’accueil</strong>.
+            Pour ajouter l’application à l’écran d’accueil sur iPhone, appuyez sur <strong>Partager</strong> puis <strong>Ajouter à l’écran d’accueil</strong>.
           </p>
           <Image src="/images/pwa-ios-guide.png" alt="Guide iOS" width={200} height={60} className="object-contain mb-2" />
         </>
@@ -52,10 +49,12 @@ export default function InstallPWAiOS() {
       {/* Android */}
       {deviceType === 'android' && (
         <>
-          <h3 className="font-bold text-gray-800 dark:text-white mb-2">Installer l'App sur Android</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Téléchargez depuis le Play Store :</p>
+          <h3 className="font-bold text-gray-800 dark:text-white mb-2 text-center">Installer l'application sur Android</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 text-center">
+            Téléchargez depuis le Play Store :
+          </p>
           <a href="https://play.google.com/store/apps/details?id=com.votre.appli.android" target="_blank" rel="noopener noreferrer">
-            <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={160} height={48} />
+            <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={160} height={48} className="mx-auto" />
           </a>
         </>
       )}
@@ -68,11 +67,10 @@ export default function InstallPWAiOS() {
             Scannez ce QR code pour accéder à l’application sur votre téléphone :
           </p>
           <QRCodeCanvas value="https://mon-appli-fictive.com" size={120} className="mb-3" />
+          {/* Pas de bouton retour pour Desktop / tablette */}
         </>
       )}
 
-      {/* Bouton Retour visible partout */}
-      <Button onClick={handleGoBack} className="mt-4">⬅️ Retour</Button>
     </div>
   );
 }
