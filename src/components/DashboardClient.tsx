@@ -1,5 +1,3 @@
-version vercel OK
-
 'use client';
 
 import { useMemo } from "react";
