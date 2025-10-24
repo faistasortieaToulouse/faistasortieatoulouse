@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { ChevronLeft, HeartHandshake, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 // --- Fonction robuste pour décoder l'URL inversée et FORCER www. ---
@@ -43,24 +42,16 @@ interface Partenaire {
 }
 
 export default function PartenairesPage() {
-  const handleVisit = useCallback((reversedUrl: string) => {
-    const finalUrl = decodeUrl(reversedUrl);
-    // DEBUG: affiche dans la console l'URL exactement ouverte (retire si ok)
-    console.log('URL décodée ->', finalUrl);
-    window.open(finalUrl, '_blank', 'noopener,noreferrer');
-  }, []);
-
   const partenaires: Partenaire[] = [
     {
       name: 'Happy People 31',
       description: 'Communauté d’échange et de sorties conviviales.',
-      // tu peux garder ou enlever le slash initial, la fonction gère les deux
-      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth', // inverse exact de https://www.happypeople.fr.nf/
+      reversedUrl: '/fn.rf.elpoepyppah.www//:sptth',
     },
     {
       name: 'Bilingue 31',
       description: 'Événements d’échange linguistique et culturel.',
-      reversedUrl: '/fn.rf.eugnilib.www//:sptth', // inverse exact de https://www.bilingue.fr.nf/
+      reversedUrl: '/fn.rf.eugnilib.www//:sptth',
     },
   ];
 
@@ -85,25 +76,28 @@ export default function PartenairesPage() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {partenaires.map((partenaire) => (
-            <Card key={partenaire.name} className="flex flex-col items-center text-center">
-              <CardHeader>
-                <CardTitle className="text-primary">{partenaire.name}</CardTitle>
-                <CardDescription>{partenaire.description}</CardDescription>
-              </CardHeader>
+          {partenaires.map((partenaire) => {
+            const finalUrl = decodeUrl(partenaire.reversedUrl);
 
-              <CardContent>
-                <Button
-                  onClick={() => handleVisit(partenaire.reversedUrl)}
-                  variant="outline"
-                  className="mt-2"
-                >
-                  Voir le site
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+            return (
+              <Card key={partenaire.name} className="flex flex-col items-center text-center">
+                <CardHeader>
+                  <CardTitle className="text-primary">{partenaire.name}</CardTitle>
+                  <CardDescription>{partenaire.description}</CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  {/* ✅ Lien HTML direct : fiable, gère bien le www et les redirections */}
+                  <Button asChild variant="outline" className="mt-2">
+                    <a href={finalUrl} target="_blank" rel="noopener noreferrer">
+                      Voir le site
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
