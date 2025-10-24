@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 interface MeetupGroup {
   name: string;
@@ -30,7 +29,7 @@ const meetupGroups: MeetupGroup[] = [
 ];
 
 function MeetupCard({ group }: { group: MeetupGroup }) {
-  const [meetupUrl, setMeetupUrl] = useState('');
+  const [meetupUrl, setMeetupUrl] = useState<string>('');
 
   useEffect(() => {
     setMeetupUrl(group.reversedUrl.split('').reverse().join(''));
@@ -40,24 +39,40 @@ function MeetupCard({ group }: { group: MeetupGroup }) {
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>{group.name}</CardTitle>
-        <CardDescription>
-          {group.description}
-        </CardDescription>
+        <CardDescription>{group.description}</CardDescription>
       </CardHeader>
+
       <CardContent className="flex flex-col flex-grow">
         <div className="aspect-video w-full overflow-hidden rounded-lg border mb-4 relative">
-          <Link href={meetupUrl} target="_blank" rel="noopener noreferrer" className={`block h-full w-full relative ${!meetupUrl ? 'pointer-events-none' : ''}`}>
-            <Image
-              src={group.imageUrl}
-              alt={`Image pour ${group.name}`}
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </Link>
+          {meetupUrl ? (
+            <a
+              href={meetupUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full relative"
+            >
+              <Image
+                src={group.imageUrl}
+                alt={`Image pour ${group.name}`}
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            </a>
+          ) : (
+            <div className="block h-full w-full relative pointer-events-none opacity-50">
+              <Image
+                src={group.imageUrl}
+                alt={`Image pour ${group.name}`}
+                fill
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+          )}
         </div>
+
         <div className="mt-auto">
           <Button asChild variant="outline" disabled={!meetupUrl} className="w-full">
-            <a href={meetupUrl} target="_blank" rel="noopener noreferrer">
+            <a href={meetupUrl || '#'} target="_blank" rel="noopener noreferrer">
               Ouvrir sur Meetup.com
               <ExternalLink className="ml-2 h-4 w-4" />
             </a>
@@ -65,7 +80,7 @@ function MeetupCard({ group }: { group: MeetupGroup }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export default function MeetupPage() {
