@@ -197,19 +197,19 @@ export default function DashboardClient({
             <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} />
           </Link>
 
-          <Link
-            href="/votre-application.apk"
-            download
-            className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
-          >
-            <Store className="h-5 w-5" />
-            <span className="text-center leading-tight">
-              Télécharger le fichier APK (TWA)
-              <br />
-              <span className="text-sm opacity-90">pour Android</span>
-            </span>
-          </Link>
-
+<a
+  href="/votre-application.apk"
+  download
+  className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+>
+  <Store className="h-5 w-5" />
+  <span className="text-center leading-tight">
+    Télécharger le fichier APK (TWA)
+    <br />
+    <span className="text-sm opacity-90">pour Android</span>
+  </span>
+</a>
+  
           <Link
             href="/install-pwa-ios"
             className="flex items-center space-x-2 p-3 bg-white text-gray-800 border rounded-lg shadow-md hover:bg-gray-100 transition dark:bg-gray-700 dark:text-white dark:border-gray-600"
