@@ -31,7 +31,7 @@ export function AppSidebar() {
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href={{ pathname: "/" }} className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
             <Image
               src={ftsLogo}
@@ -72,7 +72,7 @@ export function AppSidebar() {
           return (
             <Link
               key={item.label}
-              href={item.href} // typedRoutes OK
+              href={{ pathname: item.href }} // <-- correction ici
               className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200"
             >
               <Icon className="w-5 h-5" />
