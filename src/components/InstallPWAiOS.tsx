@@ -9,28 +9,24 @@ export default function InstallPWAiOS() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Détection du type d’appareil
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
-    const isAndroid = /Android/.test(ua);
 
-    if (isIOS) {
+    if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) {
       setDeviceType('ios');
-    } else if (isAndroid) {
+    } else if (/Android/.test(ua)) {
       setDeviceType('android');
     } else {
       setDeviceType('desktop');
     }
 
-    // Vérifie si l'app est déjà ouverte en mode standalone
-    if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    // ✅ Correction ici
+    if ((window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
     }
   }, []);
 
-  if (isStandalone) return null; // Ne rien afficher si déjà installée
+  if (isStandalone) return null;
 
-  // --- 🖥️ Cas Desktop ---
   if (deviceType === 'desktop') {
     return (
       <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
@@ -38,7 +34,7 @@ export default function InstallPWAiOS() {
           Version mobile disponible
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 text-center">
-          Notre application est optimisée pour les téléphones.<br />
+          Notre application est optimisée pour les téléphones.
           Scannez le QR code pour y accéder :
         </p>
         <Image
@@ -53,7 +49,6 @@ export default function InstallPWAiOS() {
     );
   }
 
-  // --- 🍎 Cas iOS ---
   if (deviceType === 'ios') {
     return (
       <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
@@ -84,7 +79,6 @@ export default function InstallPWAiOS() {
     );
   }
 
-  // --- 🤖 Cas Android ---
   if (deviceType === 'android') {
     return (
       <div className="text-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
