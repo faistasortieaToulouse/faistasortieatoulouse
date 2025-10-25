@@ -202,7 +202,7 @@ export default function DashboardClient({
 
     {/* APK */}
     <a
-      href="/votre-application.apk"
+      href="/app-release-signed.apk"
       download
       className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
     >
