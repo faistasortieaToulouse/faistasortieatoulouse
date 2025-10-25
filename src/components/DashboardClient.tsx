@@ -191,16 +191,15 @@ export default function DashboardClient({
                     <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
 
                         {/* Google Play */}
-                        <a
-                            href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
-                        >
-                            <Store className="h-5 w-5" />
-                            {/* Remplacement de next/image par img standard */}
-                            <img src="https://placehold.co/180x53/065f46/ffffff?text=Google+Play" alt="Disponible sur Google Play" width={180} height={53} />
-                        </a>
+    <a
+      href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+    >
+      <Store className="h-5 w-5" />
+      <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} />
+    </a>
 
                         {/* APK (Utilise le modal pour les avertissements) - CORRECTIF APPLIQUÉ */}
                         <APKDownloadModal />
