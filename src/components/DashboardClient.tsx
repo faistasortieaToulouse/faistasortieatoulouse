@@ -20,6 +20,7 @@ import { DiscordEvents } from "./discord-events";
 import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
 import InstallPWAiOS from "@/components/InstallPWAiOS";
+import APKDownloadModal from "@/components/APKDownloadModal"; // Assurez-vous que le chemin est correct
 
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
@@ -201,6 +202,7 @@ export default function DashboardClient({
     </a>
 
     {/* APK */}
+    {/* APK (Utilise le modal pour les avertissements) */}
     <a
       href="/app-release-signed.apk"
       download
@@ -213,6 +215,9 @@ export default function DashboardClient({
         <span className="text-sm opacity-90">pour Android</span>
       </span>
     </a>
+
+    {/* NOUVEAU: APK (Utilise le modal pour les avertissements) */}
+    <APKDownloadModal />
 
     {/* PWA iOS */}
     <InstallPWAiOS />
