@@ -186,53 +186,39 @@ export default function DashboardClient({
         </AlertDescription>
       </Alert>
 
-{/* Section téléchargement / partage */}
-<section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border">
-  <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
+{/* Section téléchargement / partage (CORRIGÉE) */}
+                <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl">
+                    <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
 
-    {/* Google Play */}
-    <a
-      href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
-    >
-      <Store className="h-5 w-5" />
-      <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} />
-    </a>
+                        {/* Google Play */}
+                        <a
+                            href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition"
+                        >
+                            <Store className="h-5 w-5" />
+                            {/* Remplacement de next/image par img standard */}
+                            <img src="https://placehold.co/180x53/065f46/ffffff?text=Google+Play" alt="Disponible sur Google Play" width={180} height={53} />
+                        </a>
 
-    {/* APK */}
-    {/* APK (Utilise le modal pour les avertissements) */}
-    <a
-      href="/app-release-signed.apk"
-      download
-      className="flex items-center space-x-2 p-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
-    >
-      <Store className="h-5 w-5" />
-      <span className="text-center leading-tight">
-        Télécharger le fichier APK (TWA)
-        <br />
-        <span className="text-sm opacity-90">pour Android</span>
-      </span>
-    </a>
+                        {/* APK (Utilise le modal pour les avertissements) - CORRECTIF APPLIQUÉ */}
+                        <APKDownloadModal />
 
-    {/* NOUVEAU: APK (Utilise le modal pour les avertissements) */}
-    <APKDownloadModal />
+                        {/* PWA iOS */}
+                        <InstallPWAiOS />
 
-    {/* PWA iOS */}
-    <InstallPWAiOS />
+                        {/* Partage */}
+                        <Button
+                            onClick={handleShare}
+                            className="flex items-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg transition"
+                        >
+                            <Share2 className="h-5 w-5" />
+                            <span className="font-semibold">Partager l'application</span>
+                        </Button>
 
-    {/* Partage */}
-    <Button
-      onClick={handleShare}
-      className="flex items-center space-x-2 p-3 bg-primary text-primary-foreground rounded-lg shadow-md hover:bg-primary/90 transition"
-    >
-      <Share2 className="h-5 w-5" />
-      <span className="font-semibold">Partager l'application</span>
-    </Button>
-
-  </div>
-</section>
+                    </div>
+                </section>
 
     </div>
   );
