@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import L from 'leaflet';
+import L, { LeafletMouseEvent } from 'leaflet'; // ⚠️ Import de 'LeafletMouseEvent'
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -15,8 +15,8 @@ const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContai
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
-// Le composant Tooltip n'est pas nécessaire ici si l'on veut le titre au clic/tap (via Popup)
-// const Tooltip = dynamic(() => import('react-leaflet').then(m => m.Tooltip), { ssr: false }); 
+// 🟢 Import du Tooltip
+const Tooltip = dynamic(() => import('react-leaflet').then(m => m.Tooltip), { ssr: false }); 
 
 // 🛠️ Fix icônes Leaflet (corrige ton erreur TypeScript)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -85,6 +85,15 @@ export default function EventMap({ events }: EventMapProps) {
 
   const center = [eventsWithCoords[0].latitude, eventsWithCoords[0].longitude] as [number, number];
 
+  // 🟢 Gestionnaire de clic pour le mobile
+  const handleMarkerClick = (e: LeafletMouseEvent) => {
+    // 1. Fermer tous les Tooltips ouverts (si un Tooltip permanent était affiché)
+    e.target.closeTooltip(); 
+    // 2. Ouvrir la Popup (le comportement par défaut du clic/tap)
+    e.target.openPopup(); 
+  };
+
+
   return (
     <MapContainer center={center} zoom={12} style={{ height: '500px', width: '100%' }}>
       <TileLayer
@@ -92,33 +101,36 @@ export default function EventMap({ events }: EventMapProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {/* 🟢 Ajout du MarkerClusterGroup pour regrouper les marqueurs et améliorer l'interaction mobile */}
-      {/* Sur mobile, le clic sur un marqueur affichera le Popup. */}
-      {/* Sur desktop, le Popup s'affiche au clic, mais si vous utilisiez Tooltip, celui-ci s'afficherait au survol. */}
       <MarkerClusterGroup chunkedLoading>
         {eventsWithCoords.map((ev) => (
           <Marker 
             key={ev.id} 
             position={[ev.latitude, ev.longitude]}
-            // 💡 Pour le débogage : Ajouter une option pour rendre le marqueur cliquable
-            // bien que ce soit le défaut si un Popup est présent.
-            // eventHandlers={{
-            //   click: (e) => {
-            //     e.target.openPopup();
-            //   },
-            // }}
+            // 🟢 Gestion des événements : Au clic/tap, ouvrir la popup
+            eventHandlers={{
+                // Utiliser le gestionnaire personnalisé pour le clic
+                click: handleMarkerClick, 
+                // 💡 Pour le mobile, on peut forcer l'ouverture du Tooltip (le titre) au premier tap
+                // Le second tap ouvrira le Popup grâce à handleMarkerClick
+                // Cependant, la meilleure pratique est de n'utiliser le Tooltip que pour le survol.
+            }}
           >
-            {/* Le Popup est l'élément qui s'ouvre au clic/tap (y compris sur mobile) */}
+            {/* Le Popup s'ouvre au clic/tap et affiche le détail */}
             <Popup>
               <strong>{ev.name}</strong>
               <br />
               {ev.location}
             </Popup>
-
-            {/* Si vous voulez VRAIMENT le titre au survol sur desktop ET rien de plus sur mobile 
-                (le premier tap ouvre le Popup), vous pouvez ajouter un Tooltip :
-            <Tooltip>{ev.name}</Tooltip> 
-            */}
+            
+            {/* 🟢 Ajout du Tooltip (le titre) : */}
+            <Tooltip
+                // 💡 Astuce : 'sticky' maintient le Tooltip centré sur le curseur, ce qui est meilleur sur desktop.
+                // 'permanent' forcerait l'affichage constant, ce qui n'est pas ce que vous voulez.
+                // Le Tooltip s'affiche naturellement au survol sur desktop.
+                sticky
+            >
+              {ev.name}
+            </Tooltip>
 
           </Marker>
         ))}
