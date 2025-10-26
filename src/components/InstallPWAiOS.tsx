@@ -1,53 +1,10 @@
 'use client';
 
-// --- VOS IMPORTS RÉELS (SIMULATION POUR LA COMPILATION) ---
-// NOTE IMPORTANTE: Les imports réels suivants sont COMMENTÉS et SIMULÉS ci-dessous,
-// car les modules "next/image" et "qrcode.react" ne sont pas disponibles dans cet environnement.
-// import Image from "next/image"; 
-// import { QRCodeCanvas } from "qrcode.react"; 
+// --- IMPORTS RÉELS (Nécessaires pour Next.js et qrcode.react) ---
+// C'est la version correcte pour votre projet local.
+import Image from "next/image"; 
+import { QRCodeCanvas } from "qrcode.react"; 
 import { useEffect, useState } from "react"; 
-
-// --- DÉFINITION DE TYPES POUR LA SIMULATION ---
-interface ImageProps {
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
-    className?: string;
-}
-
-interface QRCodeCanvasProps {
-    value: string;
-    size: number;
-    className?: string;
-    level?: 'L' | 'M' | 'Q' | 'H'; // Typage plus strict du level
-    bgColor?: string;
-    fgColor?: string;
-}
-// ---------------------------------------------
-
-
-// --- Simulation des composants externes (À RETIRER DANS VOTRE PROJET LOCAL) ---
-// Le composant Image utilise maintenant le type ImageProps
-const Image = ({ src, alt, width, height, className = '' }: ImageProps) => (
-    // Remplacement simple par une balise img HTML
-    <img 
-        src={src} 
-        alt={alt} 
-        style={{ width: width, height: height, maxWidth: '100%', display: 'block', margin: '0 auto' }} 
-        className={className} 
-        // Ajout d'une gestion d'erreur visuelle si l'image ne charge pas
-        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; console.error('Image non trouvée:', src); }}
-    />
-);
-
-// Le composant QRCodeCanvas utilise maintenant le type QRCodeCanvasProps
-const QRCodeCanvas = ({ value, size, className = '', ...props }: QRCodeCanvasProps) => (
-    // Remplacement du composant réel par un simple div de placeholder (avec taille respectée)
-    <div className={`p-3 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
-        <span className="text-xs text-gray-500 font-mono text-center break-all">QR Code Placeholder ({value.substring(0, 20)}...)</span>
-    </div>
-);
 // ---------------------------------------------------------------------
 
 
@@ -78,10 +35,10 @@ const isDesktop = () => {
 // --------------------------------------------------
 
 
-const QrCodeBlock = ({ appUrl, title }: { appUrl: string, title: string }) => (
+const QrCodeBlock = ({ appUrl, title, device }: { appUrl: string, title: string, device: 'ios' | 'android' | 'desktop' }) => (
     <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
         <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center">
-            {title}
+            {title} (Affiché pour: {device.toUpperCase()})
         </p>
         <div className="p-2 bg-white rounded-lg shadow-inner mx-auto w-fit">
             <QRCodeCanvas 
@@ -131,7 +88,7 @@ export default function InstallPWAiOS() {
       {/* iOS: Guide d'installation PWA amélioré (pour les iPhones/iPads) */}
       {deviceType === 'ios' && (
         <>
-          {/* Rétablissement de l'icône de l'application pour l'affichage iOS */}
+          {/* L'Image de Next.js est maintenant importée et utilisée */}
           <Image src="/images/app-icon.png" alt="App Icon" width={80} height={80} className="rounded-2xl mb-4 shadow-md" />
           
           <h3 className="font-bold text-xl text-indigo-700 dark:text-indigo-300 mb-2 text-center">
@@ -160,10 +117,11 @@ export default function InstallPWAiOS() {
             </ol>
           </div>
 
-          {/* AJOUT DU QR CODE POUR iOS */}
+          {/* AJOUT DU QR CODE POUR iOS (maintenant avec l'import réel) */}
           <QrCodeBlock 
             appUrl={appUrl} 
             title="Ou scannez pour partager le lien : " 
+            device="ios"
           />
         </>
       )}
@@ -175,6 +133,7 @@ export default function InstallPWAiOS() {
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">
               Téléchargez l'application PWA depuis le Play Store (TWA) :
             </p>
+            {/* L'Image de Next.js est maintenant importée et utilisée */}
             <a href="https://play.google.com/store/apps/details?id=com.votre.appli.android" target="_blank" rel="noopener noreferrer" className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={160} height={48} className="mx-auto" />
             </a>
@@ -182,10 +141,11 @@ export default function InstallPWAiOS() {
               *Ou utilisez la bannière d'installation PWA si elle apparaît.
             </p>
 
-            {/* AJOUT DU QR CODE POUR Android */}
+            {/* AJOUT DU QR CODE POUR Android (maintenant avec l'import réel) */}
             <QrCodeBlock 
                 appUrl={appUrl} 
                 title="Ou scannez pour partager le lien : " 
+                device="android"
             />
         </>
       )}
@@ -198,6 +158,7 @@ export default function InstallPWAiOS() {
             Scannez ce QR code pour accéder à l’application sur votre téléphone :
           </p>
           <div className="p-3 bg-white rounded-lg shadow-inner mx-auto w-fit">
+            {/* QRCodeCanvas réel utilisé ici */}
             <QRCodeCanvas 
                 value={appUrl} 
                 size={120} 
