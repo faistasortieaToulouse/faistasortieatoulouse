@@ -7,8 +7,29 @@
 // import { QRCodeCanvas } from "qrcode.react"; 
 import { useEffect, useState } from "react"; 
 
+// --- DÉFINITION DE TYPES POUR LA SIMULATION ---
+interface ImageProps {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+    className?: string;
+}
+
+interface QRCodeCanvasProps {
+    value: string;
+    size: number;
+    className?: string;
+    level?: string;
+    bgColor?: string;
+    fgColor?: string;
+}
+// ---------------------------------------------
+
+
 // --- Simulation des composants externes (À RETIRER DANS VOTRE PROJET LOCAL) ---
-const Image = ({ src, alt, width, height, className = '' }) => (
+// Le composant Image utilise maintenant le type ImageProps
+const Image = ({ src, alt, width, height, className = '' }: ImageProps) => (
     // Remplacement simple par une balise img HTML
     <img 
         src={src} 
@@ -20,7 +41,8 @@ const Image = ({ src, alt, width, height, className = '' }) => (
     />
 );
 
-const QRCodeCanvas = ({ value, size, className = '', ...props }) => (
+// Le composant QRCodeCanvas utilise maintenant le type QRCodeCanvasProps
+const QRCodeCanvas = ({ value, size, className = '', ...props }: QRCodeCanvasProps) => (
     // Remplacement du composant réel par un simple div de placeholder
     <div className={`p-2 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
         <span className="text-xs text-gray-500 font-mono text-center break-all">QR Code Placeholder ({value.substring(0, 20)}...)</span>
