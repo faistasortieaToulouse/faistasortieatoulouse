@@ -20,7 +20,7 @@ interface QRCodeCanvasProps {
     value: string;
     size: number;
     className?: string;
-    level?: string;
+    level?: 'L' | 'M' | 'Q' | 'H'; // Typage plus strict du level
     bgColor?: string;
     fgColor?: string;
 }
@@ -43,7 +43,7 @@ const Image = ({ src, alt, width, height, className = '' }: ImageProps) => (
 
 // Le composant QRCodeCanvas utilise maintenant le type QRCodeCanvasProps
 const QRCodeCanvas = ({ value, size, className = '', ...props }: QRCodeCanvasProps) => (
-    // Remplacement du composant réel par un simple div de placeholder
+    // Remplacement du composant réel par un simple div de placeholder (avec taille respectée)
     <div className={`p-2 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
         <span className="text-xs text-gray-500 font-mono text-center break-all">QR Code Placeholder ({value.substring(0, 20)}...)</span>
     </div>
@@ -112,16 +112,9 @@ export default function InstallPWAiOS() {
       {/* iOS: Guide d'installation PWA amélioré (pour les iPhones/iPads) */}
       {deviceType === 'ios' && (
         <>
-          {/* Icône SVG fiable qui ne nécessite pas d'asset externe */}
-          <div className="mb-4 p-3 rounded-full bg-indigo-500 shadow-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                <path d="M12 20.94c.94-2.14 2.1-5.18 2.1-7.94 0-2.8-.75-3.81-2.1-3.81-1.35 0-2.1.99-2.1 3.8 0 2.76 1.16 5.8 2.1 7.95z"></path>
-                <path d="M14.1 2.92c-1.35 0-2.1.99-2.1 3.8 0 2.76 1.16 5.8 2.1 7.95.94-2.14 2.1-5.18 2.1-7.94 0-2.8-.75-3.81-2.1-3.81z"></path>
-                <path d="M12 21.05c.94-2.14 2.1-5.18 2.1-7.95 0-2.8-.75-3.81-2.1-3.81-1.35 0-2.1.99-2.1 3.8 0 2.77 1.16 5.81 2.1 7.95z"></path>
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                <path d="M12 2v20"></path>
-            </svg>
-          </div>
+          {/* Rétablissement de l'icône de l'application pour l'affichage iOS */}
+          <Image src="/images/app-icon.png" alt="App Icon" width={80} height={80} className="rounded-2xl mb-4 shadow-md" />
+          
           <h3 className="font-bold text-xl text-indigo-700 dark:text-indigo-300 mb-2 text-center">
             Installer sur iPhone / iPad
           </h3>
