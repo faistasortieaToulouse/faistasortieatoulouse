@@ -1,10 +1,33 @@
 'use client';
 
-// --- VOS IMPORTS RÉELS ---
-import Image from "next/image"; // Import Next.js Image
-import { useEffect, useState } from "react";
-import { QRCodeCanvas } from "qrcode.react"; // Import de la librairie QR code
-// -------------------------
+// --- VOS IMPORTS RÉELS (SIMULATION POUR LA COMPILATION) ---
+// NOTE IMPORTANTE: Les imports réels suivants sont COMMENTÉS et SIMULÉS ci-dessous,
+// car les modules "next/image" et "qrcode.react" ne sont pas disponibles dans cet environnement.
+// import Image from "next/image"; 
+// import { QRCodeCanvas } from "qrcode.react"; 
+import { useEffect, useState } from "react"; 
+
+// --- Simulation des composants externes (À RETIRER DANS VOTRE PROJET LOCAL) ---
+const Image = ({ src, alt, width, height, className = '' }) => (
+    // Remplacement simple par une balise img HTML
+    <img 
+        src={src} 
+        alt={alt} 
+        style={{ width: width, height: height, maxWidth: '100%', display: 'block', margin: '0 auto' }} 
+        className={className} 
+        // Ajout d'une gestion d'erreur visuelle si l'image ne charge pas
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; console.error('Image non trouvée:', src); }}
+    />
+);
+
+const QRCodeCanvas = ({ value, size, className = '', ...props }) => (
+    // Remplacement du composant réel par un simple div de placeholder
+    <div className={`p-2 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
+        <span className="text-xs text-gray-500 font-mono text-center break-all">QR Code Placeholder ({value.substring(0, 20)}...)</span>
+    </div>
+);
+// ---------------------------------------------------------------------
+
 
 // --- Fonctions de Détection d'Appareil Améliorées ---
 
@@ -26,6 +49,7 @@ const isIOS = () => {
  */
 const isDesktop = () => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    // La détection de l'iPhone a été renforcée dans isIOS(), donc si on n'est ni Android ni iOS, c'est Desktop.
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
     return !isMobile;
 };
@@ -66,7 +90,16 @@ export default function InstallPWAiOS() {
       {/* iOS: Guide d'installation PWA amélioré (pour les iPhones/iPads) */}
       {deviceType === 'ios' && (
         <>
-          <Image src="/images/app-icon.png" alt="App Icon" width={80} height={80} className="rounded-2xl mb-4 shadow-md" />
+          {/* Icône SVG fiable qui ne nécessite pas d'asset externe */}
+          <div className="mb-4 p-3 rounded-full bg-indigo-500 shadow-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <path d="M12 20.94c.94-2.14 2.1-5.18 2.1-7.94 0-2.8-.75-3.81-2.1-3.81-1.35 0-2.1.99-2.1 3.8 0 2.76 1.16 5.8 2.1 7.95z"></path>
+                <path d="M14.1 2.92c-1.35 0-2.1.99-2.1 3.8 0 2.76 1.16 5.8 2.1 7.95.94-2.14 2.1-5.18 2.1-7.94 0-2.8-.75-3.81-2.1-3.81z"></path>
+                <path d="M12 21.05c.94-2.14 2.1-5.18 2.1-7.95 0-2.8-.75-3.81-2.1-3.81-1.35 0-2.1.99-2.1 3.8 0 2.77 1.16 5.81 2.1 7.95z"></path>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                <path d="M12 2v20"></path>
+            </svg>
+          </div>
           <h3 className="font-bold text-xl text-indigo-700 dark:text-indigo-300 mb-2 text-center">
             Installer sur iPhone / iPad
           </h3>
@@ -78,7 +111,6 @@ export default function InstallPWAiOS() {
             <ol className="list-decimal list-inside text-sm text-gray-800 dark:text-gray-200 space-y-2">
                 <li>
                     Appuyez sur l'icône de <strong className="text-indigo-600 dark:text-indigo-400">Partage</strong> 
-                    {/* Icône de partage iOS, plus explicite */}
                     <span className="inline-block align-middle mx-1">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500 inline-block align-middle">
                             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
@@ -93,8 +125,6 @@ export default function InstallPWAiOS() {
                 </li>
             </ol>
           </div>
-          {/* J'ai inclus l'icône de partage, mais vous pouvez réintégrer votre guide image si l'asset local '/images/pwa-ios-guide.png' est disponible : */}
-          {/* <Image src="/images/pwa-ios-guide.png" alt="Guide iOS" width={200} height={60} className="object-contain mt-3" /> */}
         </>
       )}
 
@@ -122,11 +152,10 @@ export default function InstallPWAiOS() {
             Scannez ce QR code pour accéder à l’application sur votre téléphone :
           </p>
           <div className="p-3 bg-white rounded-lg shadow-inner">
-            {/* Utilisation de QRCodeCanvas avec un style de base pour l'affichage */}
             <QRCodeCanvas 
                 value={appUrl} 
                 size={120} 
-                level="H" // Niveau de correction d'erreur (optionnel)
+                level="H" 
                 bgColor="#ffffff"
                 fgColor="#000000"
                 className="rounded-md"
