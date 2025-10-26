@@ -44,7 +44,7 @@ const Image = ({ src, alt, width, height, className = '' }: ImageProps) => (
 // Le composant QRCodeCanvas utilise maintenant le type QRCodeCanvasProps
 const QRCodeCanvas = ({ value, size, className = '', ...props }: QRCodeCanvasProps) => (
     // Remplacement du composant réel par un simple div de placeholder (avec taille respectée)
-    <div className={`p-2 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
+    <div className={`p-3 border border-gray-300 bg-gray-50 flex items-center justify-center ${className} rounded-lg`} style={{ width: size, height: size }}>
         <span className="text-xs text-gray-500 font-mono text-center break-all">QR Code Placeholder ({value.substring(0, 20)}...)</span>
     </div>
 );
@@ -76,6 +76,25 @@ const isDesktop = () => {
     return !isMobile;
 };
 // --------------------------------------------------
+
+
+const QrCodeBlock = ({ appUrl, title }: { appUrl: string, title: string }) => (
+    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center">
+            {title}
+        </p>
+        <div className="p-2 bg-white rounded-lg shadow-inner mx-auto w-fit">
+            <QRCodeCanvas 
+                value={appUrl} 
+                size={120} 
+                level="H" 
+                bgColor="#ffffff"
+                fgColor="#000000"
+                className="rounded-md"
+            />
+        </div>
+    </div>
+);
 
 
 export default function InstallPWAiOS() {
@@ -140,6 +159,12 @@ export default function InstallPWAiOS() {
                 </li>
             </ol>
           </div>
+
+          {/* AJOUT DU QR CODE POUR iOS */}
+          <QrCodeBlock 
+            appUrl={appUrl} 
+            title="Ou scannez pour partager le lien : " 
+          />
         </>
       )}
 
@@ -156,6 +181,12 @@ export default function InstallPWAiOS() {
             <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
               *Ou utilisez la bannière d'installation PWA si elle apparaît.
             </p>
+
+            {/* AJOUT DU QR CODE POUR Android */}
+            <QrCodeBlock 
+                appUrl={appUrl} 
+                title="Ou scannez pour partager le lien : " 
+            />
         </>
       )}
 
@@ -166,7 +197,7 @@ export default function InstallPWAiOS() {
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">
             Scannez ce QR code pour accéder à l’application sur votre téléphone :
           </p>
-          <div className="p-3 bg-white rounded-lg shadow-inner">
+          <div className="p-3 bg-white rounded-lg shadow-inner mx-auto w-fit">
             <QRCodeCanvas 
                 value={appUrl} 
                 size={120} 
