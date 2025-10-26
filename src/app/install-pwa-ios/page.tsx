@@ -1,121 +1,123 @@
 'use client';
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+// Simulation des composants Next.js/bibliothèques
+const Image = ({ src, alt, width, height, className = '' }) => (
+    <img src={src} alt={alt} style={{ width: width, height: height, maxWidth: '100%' }} className={className} />
+);
+// Simulation de QRCodeCanvas
+const QRCodeCanvas = ({ value, size, className = '' }) => (
+    <div className={`p-2 border border-gray-300 bg-gray-50 flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
+        <span className="text-xs text-gray-500">QR Code: {value.substring(0, 20)}...</span>
+    </div>
+);
 
-function InstallPWAiOS() {
-  const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
+// --- Détection iOS Améliorée (plus robuste) ---
+const isIOS = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    // 1. Détection classique (iPhone, iPad, iPod)
+    const isClassicIOS = /iPad|iPhone|iPod/.test(userAgent);
+    // 2. Détection pour iPad sur macOS (depuis iOS 13)
+    const isModernIOS = userAgent.includes("Mac") && 'ontouchend' in document;
+
+    return isClassicIOS || isModernIOS;
+};
+
+// Détection Desktop Améliorée
+const isDesktop = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    return !isMobile;
+};
+// ---------------------------------------------
+
+
+export default function InstallPWAiOS() {
+  const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('loading');
   const [isStandalone, setIsStandalone] = useState(false);
+  const appUrl = typeof window !== 'undefined' ? window.location.href : 'https://mon-appli-fictive.com';
 
   useEffect(() => {
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-
-    if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) {
-      setDeviceType('ios');
-    } else if (/Android/.test(ua)) {
-      setDeviceType('android');
+    if (isIOS()) {
+        setDeviceType('ios');
+    } else if (/Android/.test(navigator.userAgent || navigator.vendor)) {
+        setDeviceType('android');
+    } else if (isDesktop()) {
+        setDeviceType('desktop');
     } else {
-      setDeviceType('desktop');
+        setDeviceType('desktop'); // Fallback to desktop/other if neither iOS nor Android explicit
     }
 
-    // Vérifie si l'app est déjà installée en mode standalone
-    if (
-      (window.navigator as any).standalone ||
-      window.matchMedia('(display-mode: standalone)').matches
-    ) {
+    // Vérifie si la PWA est déjà ouverte en standalone
+    if (('standalone' in window.navigator && (window.navigator as any).standalone) ||
+        window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
     }
   }, []);
 
-  if (isStandalone) return null; // ne pas afficher si déjà installé
-
-  const handleGoBack = () => {
-    window.history.back();
-  };
+  if (isStandalone || deviceType === 'loading') return null; // Ne rien afficher si déjà installée ou en chargement
 
   return (
-    <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border rounded-lg shadow-md max-w-xs mx-auto">
+    <div className="flex flex-col items-center p-4 bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-600 rounded-xl shadow-lg max-w-sm mx-auto w-full">
+        
+      {/* iOS: Affichage du Guide d'installation PWA */}
       {deviceType === 'ios' && (
         <>
-          <div className="mb-3">
-            <Image
-              src="/images/app-icon.png"
-              alt="Icône de l'application"
-              width={80}
-              height={80}
-              className="rounded-lg"
-            />
-          </div>
-          <h3 className="font-bold text-center text-gray-800 dark:text-white mb-2">
-            Installer l'App sur iPhone / iPad
+          <Image src="/images/app-icon.png" alt="App Icon" width={80} height={80} className="rounded-2xl mb-4 shadow-md" />
+          <h3 className="font-bold text-xl text-indigo-700 dark:text-indigo-300 mb-2 text-center">
+            Installer sur iPhone / iPad
           </h3>
-          <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-3">
-            Pour installer, appuyez sur <strong>Partager</strong> puis <strong>Ajouter à l’écran d’accueil</strong>.
+          <p className="text-sm text-gray-700 dark:text-gray-400 mb-4 text-center">
+            Pour ajouter l’application à l’écran d’accueil sur iPhone (Safari uniquement) :
           </p>
-          <div className="relative w-full h-20 mb-2">
-            <Image
-              src="/images/pwa-ios-guide.png"
-              alt="Guide Installation PWA iOS"
-              fill
-              className="object-contain"
-            />
+          
+          <div className="bg-indigo-50 dark:bg-gray-800 p-3 rounded-lg w-full">
+            <ol className="list-decimal list-inside text-sm text-gray-800 dark:text-gray-200 space-y-2">
+                <li>
+                    Appuyez sur l'icône de <strong className="text-indigo-600 dark:text-indigo-400">Partage</strong> 
+                    {/* Icône de partage iOS */}
+                    <span className="inline-block align-middle mx-1">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500 inline-block align-middle">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                    </span> 
+                    dans la barre inférieure de Safari.
+                </li>
+                <li>
+                    Sélectionnez <strong className="text-green-600 dark:text-green-400">"Sur l'écran d'accueil"</strong> (Add to Home Screen).
+                </li>
+            </ol>
           </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">
-            Vous pourrez ensuite lancer l’application directement depuis votre écran d’accueil.
-          </span>
+          {/* Image du guide iOS non incluse car c'est un asset local, on garde les instructions textuelles */}
         </>
       )}
 
+      {/* Android: Ne rien afficher ici si l'APK est géré dans le DashboardClient */}
+      {/* On pourrait afficher un message générique PWA si nécessaire */}
       {deviceType === 'android' && (
-        <div className="text-center">
-          <h3 className="font-bold text-gray-800 dark:text-white mb-2">Installer l'App sur Android</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            Téléchargez notre application depuis le Play Store :
-          </p>
-          <a
-            href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
-          >
-            <Image src="/images/google-play-badge.png" alt="Google Play" width={120} height={36} />
-          </a>
-        </div>
-      )}
-
-      {deviceType === 'desktop' && (
-        <div className="text-center">
-          <h3 className="font-bold text-gray-800 dark:text-white mb-2">Version mobile disponible</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            Notre application est optimisée pour les téléphones. Scannez le QR code pour y accéder :
-          </p>
-          <div className="relative w-32 h-32 mx-auto mb-3">
-            <Image
-              src="/images/qrcode.png"
-              alt="QR code vers version mobile"
-              fill
-              className="object-contain"
-            />
+          <div className="text-center">
+             <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-2">PWA Android</h3>
+             <p className="text-sm text-gray-600 dark:text-gray-300">
+                Vous pouvez installer l'application via la bannière PWA (si configurée) ou par le Play Store ci-dessus.
+             </p>
           </div>
-        </div>
       )}
 
-      {/* Bouton Retour (visible partout) */}
-      <button
-        onClick={handleGoBack}
-        className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-500 transition"
-      >
-        Retour
-      </button>
-    </div>
-  );
-}
+      {/* Desktop / tablette: Affichage du QR code */}
+      {deviceType === 'desktop' && (
+        <>
+          <h3 className="font-bold text-xl text-gray-800 dark:text-white mb-3 text-center">Version mobile disponible</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">
+            Scannez ce QR code pour accéder à l’application sur votre téléphone :
+          </p>
+          <div className="p-3 bg-white rounded-lg shadow-inner">
+            <QRCodeCanvas value={appUrl} size={120} />
+          </div>
+        </>
+      )}
 
-// ✅ Export par défaut pour Next.js
-export default function InstallPwaIosPage() {
-  return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <InstallPWAiOS />
     </div>
   );
 }
