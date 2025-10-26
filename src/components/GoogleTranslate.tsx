@@ -34,7 +34,11 @@ export default function GoogleTranslate() {
       if (!window.google?.translate) return;
 
       new window.google.translate.TranslateElement(
-        { pageLanguage: 'fr' },
+        {
+          pageLanguage: 'fr',
+          includedLanguages: 'de,en,ar,zh-CN,es,it,ja,pt,ru,tr',
+          layout: window.google.translate.TranslateElement.InlineLayout.HORIZONTAL, // facultatif
+        },
         'google_translate_element'
       );
     };
@@ -48,7 +52,5 @@ export default function GoogleTranslate() {
     };
   }, [router.events]);
 
-  return (
-    <div id="google_translate_element" className="mt-2" />
-  );
+  return <div id="google_translate_element" className="mt-2" />;
 }
