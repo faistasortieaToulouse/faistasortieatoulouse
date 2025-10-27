@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { Footer } from '@/components/footer';
+import { GoogleTranslate } from '@/components/GoogleTranslate';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
@@ -20,7 +21,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger />
             
             {/* 2. Google Translate (aligné à droite) */}
-            <div className="w-48" />
+            <div className="w-48">
+              <GoogleTranslate />
+            </div>
+          
           </header>
 
           <div className="flex-grow">{children}</div>
