@@ -29,7 +29,7 @@ export function AppSidebar() {
   const ftsLogo = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
 
   return (
-    <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 shadow-2xl">
+    <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 pt-16 shadow-2xl">
       <div className="flex items-center justify-between mb-6">
         <Link href={{ pathname: "/" }} className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
