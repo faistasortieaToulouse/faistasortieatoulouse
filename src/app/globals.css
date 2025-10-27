@@ -168,3 +168,10 @@ iframe.goog-te-banner-frame {
   overflow: hidden !important;
   z-index: 9999 !important;
 }
+
+.leaflet-tooltip {
+  z-index: 1000 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+}
+
