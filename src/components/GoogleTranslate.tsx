@@ -39,7 +39,7 @@ export default function GoogleTranslateCustom() {
 
 useEffect(() => {
   const currentCookie = getCookie('googtrans');
-  if (!currentCookie || currentCookie === '/fr') {
+  if (!currentCookie || currentCookie === '/fr/fr') {
     setCookie('googtrans', '/fr/fr', 7);
     setCookie('googtrans', '/fr/fr');
   }
