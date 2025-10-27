@@ -61,7 +61,9 @@
     "react-hook-form": "^7.54.2",
     "react-leaflet": "^4.2.1",
     "react-leaflet-cluster": "^3.1.1",
+    "react-slick": "^0.31.0",
     "recharts": "^2.15.1",
+    "slick-carousel": "^1.8.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
