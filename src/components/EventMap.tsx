@@ -17,6 +17,7 @@ const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr:
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 // 🟢 Import du Tooltip
 const Tooltip = dynamic(() => import('react-leaflet').then(m => m.Tooltip), { ssr: false }); 
+const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
 // 🛠️ Fix icônes Leaflet (corrige ton erreur TypeScript)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -123,7 +124,7 @@ export default function EventMap({ events }: EventMapProps) {
             </Popup>
             
             {/* 🟢 Ajout du Tooltip (le titre) : */}
-<Tooltip permanent direction="top">
+<Tooltip permanent={isMobile} sticky={!isMobile} direction="top">
   {/* 💡 Astuce : 'sticky' maintient le Tooltip centré sur le curseur, ce qui est meilleur sur desktop.
       'permanent' forcerait l'affichage constant, ce qui est utile sur mobile.
       Le Tooltip s'affiche naturellement au survol sur desktop. */}
