@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
 const LANGS = [
+  { code: 'fr', label: 'Français' },
   { code: 'de', label: 'Allemand' },
   { code: 'en', label: 'Anglais' },
   { code: 'ar', label: 'Arabe' },
@@ -42,13 +43,14 @@ export default function GoogleTranslateCustom() {
     setSelectedLang(langCode);
   }, []);
 
-  const changeLang = (lang: string) => {
-    setSelectedLang(lang);
-    const val = `/fr/${lang}`;
-    setCookie('googtrans', val, 7);
-    setCookie('googtrans', val);
-    window.location.reload();
-  };
+const changeLang = (lang: string) => {
+  if (lang === selectedLang) return;
+  setSelectedLang(lang);
+  const val = `/fr/${lang}`;
+  setCookie('googtrans', val, 7);
+  setCookie('googtrans', val);
+  window.location.reload();
+};
 
   return (
     <>
@@ -58,16 +60,16 @@ export default function GoogleTranslateCustom() {
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
         strategy="afterInteractive"
       />
-      <Script id="google-translate-init" strategy="afterInteractive">
-        {`
-          function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-              pageLanguage: 'fr',
-              autoDisplay: false
-            }, 'google_translate_element');
-          }
-        `}
-      </Script>
+<Script id="google-translate-init" strategy="afterInteractive">
+  {`
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  `}
+</Script>
 
       {/* Langue selector */}
       <div className="google-translate-custom flex items-center space-x-2">
