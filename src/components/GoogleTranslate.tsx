@@ -71,7 +71,8 @@ export default function GoogleTranslateCustom() {
                             pageLanguage: 'fr',
                             // IMPORTANT : Limite les langues incluses au tableau LANGS
                             includedLanguages: LANGS.map(l => l.code).join(','),
-                            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+                            // NOTE: layout SIMPLE est utilisé pour limiter l'interface Google
+                            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE, 
                             autoDisplay: false,
                         },
                         'google_translate_element_hidden' // conteneur caché
@@ -112,15 +113,43 @@ export default function GoogleTranslateCustom() {
 
     return (
         <div className="google-translate-custom flex items-center space-x-2">
-            {/* Conteneur Google (caché) */}
-            {/* Je renforce le masquage en le mettant en position absolue hors écran */}
+            {/* 1. Bloc de styles pour masquer TOUS les éléments Google indésirables */}
+            {/* Ceci cible la barre supérieure et le sélecteur natif qui persiste */}
+            <style jsx global>{`
+                /* Masque la barre de bannière supérieure */
+                .goog-te-banner-frame.skiptranslate {
+                    display: none !important;
+                    visibility: hidden !important; 
+                }
+
+                /* Neutralise le décalage du corps de page causé par la barre */
+                body {
+                    top: 0 !important;
+                }
+
+                /* Masque le sélecteur de traduction natif qui est injecté par Google */
+                /* Il s'agit du sélecteur persistant qui affiche toutes les langues */
+                #google_translate_element_hidden .goog-te-gadget-simple {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+
+                /* Masque tout autre élément qui pourrait être injecté (tooltips) */
+                .goog-tooltip,
+                #goog-gt-tt {
+                    display: none !important;
+                    visibility: hidden !important;
+                }
+            `}</style>
+
+            {/* 2. Conteneur Google (caché) qui reçoit l'initialisation */}
             <div
                 id="google_translate_element_hidden"
-                // J'utilise `absolute` et `left-[-9999px]` pour le sortir complètement du flux
+                // Utilise `absolute` et `left-[-9999px]` pour le sortir complètement du flux
                 className="absolute left-[-9999px] top-[-9999px] w-[1px] h-[1px] overflow-hidden" 
             />
 
-            {/* UI custom */}
+            {/* 3. UI custom */}
             <label htmlFor="my-gg-select" className="sr-only">Langue</label>
             <select
                 id="my-gg-select"
