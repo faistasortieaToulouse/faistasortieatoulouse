@@ -40,8 +40,10 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
 
+                {/* Le composant GoogleTranslate a été retiré pour éviter les conflits lors du pré-rendu, 
+            car le widget est déjà intégré via GoogleTranslateWidget dans (main)/layout.tsx. */}
+        {/* <GoogleTranslate /> */}
         {/* ✅ Active ton composant GoogleTranslate ici */}
-        <GoogleTranslate />
 
         <Toaster />
       </body>
