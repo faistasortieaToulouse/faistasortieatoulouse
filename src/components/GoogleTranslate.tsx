@@ -111,7 +111,15 @@ export default function GoogleTranslateCustom() {
     };
 
     return (
-        <div className="google-translate-custom">
+        <div className="google-translate-custom flex items-center space-x-2">
+            {/* Conteneur Google (caché) */}
+            {/* Je renforce le masquage en le mettant en position absolue hors écran */}
+            <div
+                id="google_translate_element_hidden"
+                // J'utilise `absolute` et `left-[-9999px]` pour le sortir complètement du flux
+                className="absolute left-[-9999px] top-[-9999px] w-[1px] h-[1px] overflow-hidden" 
+            />
+
             {/* UI custom */}
             <label htmlFor="my-gg-select" className="sr-only">Langue</label>
             <select
@@ -119,7 +127,7 @@ export default function GoogleTranslateCustom() {
                 onChange={(e) => changeLang(e.target.value)}
                 value={selectedLang} // 👈 Utilise l'état local 'value'
                 aria-label="Sélectionner une langue"
-                className="px-2 py-1 rounded border"
+                className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
             >
                 <option value="" disabled>
                     Traduire en...
@@ -130,14 +138,6 @@ export default function GoogleTranslateCustom() {
                     </option>
                 ))}
             </select>
-
-            {/* Conteneur Google (caché) */}
-            <div
-                id="google_translate_element_hidden"
-                // AJOUT : Ajout des classes Tailwind 'hidden' et 'opacity-0' pour un masquage maximal
-                className="hidden opacity-0" 
-                style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}
-            />
         </div>
     );
 }
