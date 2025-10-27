@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Script from 'next/script';
 
 const LANGS = [
   { code: 'de', label: 'Allemand' },
@@ -11,9 +12,9 @@ const LANGS = [
   { code: 'it', label: 'Italien' },
   { code: 'ja', label: 'Japonais' },
   { code: 'pt', label: 'Portugais' },
-  { code: 'ru', label: 'Russe' }, 
+  { code: 'ru', label: 'Russe' },
   { code: 'tr', label: 'Turc' },
-  ];
+];
 
 function setCookie(name: string, value: string, days?: number) {
   if (typeof document === 'undefined') return;
@@ -50,20 +51,40 @@ export default function GoogleTranslateCustom() {
   };
 
   return (
-    <div className="google-translate-custom flex items-center space-x-2">
-      <label htmlFor="my-gg-select" className="sr-only">Langue</label>
-      <select
-        id="my-gg-select"
-        onChange={(e) => changeLang(e.target.value)}
-        value={selectedLang}
-        aria-label="Sélectionner une langue"
-        className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
-      >
-        <option value="" disabled>Choisis ta langue</option>
-        {LANGS.map(l => (
-          <option key={l.code} value={l.code}>{l.label}</option>
-        ))}
-      </select>
-    </div>
+    <>
+      {/* Inject Google Translate script */}
+      <div id="google_translate_element" style={{ display: 'none' }} />
+      <Script
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+        strategy="afterInteractive"
+      />
+      <Script id="google-translate-init" strategy="afterInteractive">
+        {`
+          function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+              pageLanguage: 'fr',
+              autoDisplay: false
+            }, 'google_translate_element');
+          }
+        `}
+      </Script>
+
+      {/* Langue selector */}
+      <div className="google-translate-custom flex items-center space-x-2">
+        <label htmlFor="my-gg-select" className="sr-only">Langue</label>
+        <select
+          id="my-gg-select"
+          onChange={(e) => changeLang(e.target.value)}
+          value={selectedLang}
+          aria-label="Sélectionner une langue"
+          className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
+        >
+          <option value="" disabled>Choisis ta langue</option>
+          {LANGS.map(l => (
+            <option key={l.code} value={l.code}>{l.label}</option>
+          ))}
+        </select>
+      </div>
+    </>
   );
 }
