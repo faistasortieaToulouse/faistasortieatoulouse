@@ -59,7 +59,7 @@ export default function GoogleTranslateCustom() {
         aria-label="Sélectionner une langue"
         className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
       >
-        <option value="" disabled>Traduis en langue</option>
+        <option value="" disabled>Choisis ta langue</option>
         {LANGS.map(l => (
           <option key={l.code} value={l.code}>{l.label}</option>
         ))}
