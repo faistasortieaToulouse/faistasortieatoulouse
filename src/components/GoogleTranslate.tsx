@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react';
 
 const LANGS = [
+  { code: 'de', label: 'Allemand' },
   { code: 'en', label: 'Anglais' },
+  { code: 'ar', label: 'Arabe' },
+  { code: 'zh-CN', label: 'Chinois (simpl.)' },
   { code: 'es', label: 'Espagnol' },
   { code: 'it', label: 'Italien' },
-  { code: 'de', label: 'Allemand' },
-  { code: 'pt', label: 'Portugais' },
-  { code: 'ru', label: 'Russe' },
-  { code: 'zh-CN', label: 'Chinois (simpl.)' },
   { code: 'ja', label: 'Japonais' },
+  { code: 'pt', label: 'Portugais' },
+  { code: 'ru', label: 'Russe' }, 
   { code: 'tr', label: 'Turc' },
-  { code: 'ar', label: 'Arabe' },
+  
 ];
 
 function setCookie(name: string, value: string, days?: number) {
@@ -59,7 +60,7 @@ export default function GoogleTranslateCustom() {
         aria-label="Sélectionner une langue"
         className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
       >
-        <option value="" disabled>Traduire en...</option>
+        <option value="" disabled>Traduis en langue</option>
         {LANGS.map(l => (
           <option key={l.code} value={l.code}>{l.label}</option>
         ))}
