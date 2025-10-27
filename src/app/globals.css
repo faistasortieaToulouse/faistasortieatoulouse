@@ -177,9 +177,11 @@ body {
 }
 
 iframe.goog-te-banner-frame {
-  display: none !important;
-  height: 0 !important;
-  visibility: hidden !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  top: auto !important;
+  height: 20px !important;
+  z-index: 9999 !important;
 }
 
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
