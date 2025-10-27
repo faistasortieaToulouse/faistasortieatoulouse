@@ -42,7 +42,8 @@ export default function GoogleTranslateCustom() {
     const cookie = getCookie('googtrans');
     const currentLang = cookie?.split('/')[2];
 
-    if (!cookie || currentLang === 'es') {
+    // Forcer le français si aucune langue ou langue incorrecte
+    if (!cookie || currentLang === 'es' || currentLang === undefined) {
       setCookie('googtrans', '/fr/fr', 7);
       setCookie('googtrans', '/fr/fr');
     }
@@ -80,8 +81,10 @@ export default function GoogleTranslateCustom() {
         }
       `}</style>
 
-      {/* Injecter le script uniquement après le cookie */}
+      {/* Zone invisible pour le widget */}
       <div id="google_translate_element" style={{ display: 'none' }} />
+
+      {/* Injecter le script après que le cookie soit prêt */}
       {scriptReady && (
         <>
           <Script
@@ -101,7 +104,7 @@ export default function GoogleTranslateCustom() {
         </>
       )}
 
-      {/* Sélecteur de langue */}
+      {/* Sélecteur de langue personnalisé */}
       <div className="google-translate-custom flex items-center space-x-2">
         <label htmlFor="my-gg-select" className="sr-only">Langue</label>
         <select
@@ -112,8 +115,10 @@ export default function GoogleTranslateCustom() {
           className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
         >
           <option value="" disabled>Choisis ta langue</option>
-          {LANGS.map(l => (
-            <option key={l.code} value={l.code}>{l.label}</option>
+          {LANGS.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
           ))}
         </select>
       </div>
