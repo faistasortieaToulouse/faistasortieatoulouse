@@ -35,23 +35,24 @@ function getCookie(name: string) {
 }
 
 export default function GoogleTranslateCustom() {
-  const [selectedLang, setSelectedLang] = useState('');
+  const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
 
   useEffect(() => {
-    const currentCookie = getCookie('googtrans');
-    if (!currentCookie || currentCookie === '/fr/es') {
+    const cookie = getCookie('googtrans');
+    const currentLang = cookie?.split('/')[2];
+
+    if (!cookie || currentLang === 'es') {
       setCookie('googtrans', '/fr/fr', 7);
       setCookie('googtrans', '/fr/fr');
     }
-    const langCode = getCookie('googtrans')?.split('/')[2] || 'fr';
-    setSelectedLang(langCode);
-    setScriptReady(true); // autorise le chargement du script
+
+    setSelectedLang(currentLang || 'fr');
+    setScriptReady(true);
   }, []);
 
   const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
-    setSelectedLang(lang);
     const val = `/fr/${lang}`;
     setCookie('googtrans', val, 7);
     setCookie('googtrans', val);
@@ -60,8 +61,27 @@ export default function GoogleTranslateCustom() {
 
   return (
     <>
-      <div id="google_translate_element" style={{ display: 'none' }} />
+      {/* Masquer la barre Google Translate */}
+      <style jsx global>{`
+        .goog-te-banner-frame.skiptranslate {
+          display: none !important;
+        }
+        body {
+          top: 0px !important;
+        }
+        .goog-te-overlay {
+          display: none !important;
+        }
+        .goog-logo-link {
+          display: none !important;
+        }
+        .goog-te-gadget {
+          font-size: 0 !important;
+        }
+      `}</style>
 
+      {/* Injecter le script uniquement après le cookie */}
+      <div id="google_translate_element" style={{ display: 'none' }} />
       {scriptReady && (
         <>
           <Script
@@ -81,6 +101,7 @@ export default function GoogleTranslateCustom() {
         </>
       )}
 
+      {/* Sélecteur de langue */}
       <div className="google-translate-custom flex items-center space-x-2">
         <label htmlFor="my-gg-select" className="sr-only">Langue</label>
         <select
