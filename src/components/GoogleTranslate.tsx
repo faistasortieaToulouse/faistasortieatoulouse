@@ -37,11 +37,15 @@ function getCookie(name: string) {
 export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('');
 
-  useEffect(() => {
-    const currentCookie = getCookie('googtrans');
-    const langCode = currentCookie?.split('/')[2] || '';
-    setSelectedLang(langCode);
-  }, []);
+useEffect(() => {
+  const currentCookie = getCookie('googtrans');
+  if (!currentCookie) {
+    // Définit la langue par défaut sur français
+    setCookie('googtrans', '/fr/fr', 7);
+  }
+  const langCode = currentCookie?.split('/')[2] || 'fr';
+  setSelectedLang(langCode);
+}, []);
 
 const changeLang = (lang: string) => {
   if (lang === selectedLang) return;
