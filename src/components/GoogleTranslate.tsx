@@ -12,7 +12,7 @@ const LANGS: { code: string; label: string }[] = [
   { code: 'zh-CN', label: 'Chinois (simpl.)' },
   { code: 'ja', label: 'Japonais' },
   { code: 'tr', label: 'Turc' },
-  { code: 'ar', label: 'Arabe' }, // si tu veux l'arabe aussi
+  { code: 'ar', label: 'Arabe' },
 ];
 
 function setCookie(name: string, value: string, days?: number) {
@@ -51,7 +51,7 @@ export default function GoogleTranslateCustom() {
           new (window as any).google.translate.TranslateElement(
             {
               pageLanguage: 'fr',
-              includedLanguages: LANGS.map(l => l.code).join(','), // on fournit quand même la liste
+              includedLanguages: LANGS.map(l => l.code).join(','), 
               layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
               autoDisplay: false,
             },
@@ -84,21 +84,21 @@ export default function GoogleTranslateCustom() {
     // valeur du cookie attendue par Google : "/<lang_src>/<lang_target>"
     // ici page source = 'fr'
     const val = `/fr/${lang}`;
-    // on met cookie pour durée courte (7 jours)
-    setCookie('googtrans', val, 7);
-    setCookie('googtrans', val); // certains navigateurs/anciennes impls doubleset
+    // Mettre le cookie (certains navigateurs/anciennes impls doubleset)
+    setCookie('googtrans', val, 7); 
+    setCookie('googtrans', val); 
     // reload pour que le script Google lise le cookie et traduise
     window.location.reload();
   };
 
   return (
     <div className="google-translate-custom">
-      {/* UI custom : simple select — adapte le style à ton sidebar */}
+      {/* UI custom */}
       <label htmlFor="my-gg-select" className="sr-only">Langue</label>
       <select
         id="my-gg-select"
         onChange={(e) => changeLang(e.target.value)}
-        defaultValue=""
+        defaultValue={getCookie('googtrans')?.split('/')[2] || ''} // Affiche la langue sélectionnée
         aria-label="Sélectionner une langue"
         className="px-2 py-1 rounded border"
       >
@@ -112,8 +112,7 @@ export default function GoogleTranslateCustom() {
         ))}
       </select>
 
-      {/* Conteneur Google (caché) — nécessaire pour que le script crée son moteur,
-          mais on le masque pour ne pas afficher l'UI native qui liste tout. */}
+      {/* Conteneur Google (caché) — NECESSAIRE. La barre native ne doit pas s'afficher. */}
       <div
         id="google_translate_element_hidden"
         style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}
