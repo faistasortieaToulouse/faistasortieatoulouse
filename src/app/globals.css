@@ -149,8 +149,10 @@ button.group:hover span {
 .goog-te-banner-frame.skiptranslate {
   display: none !important;
 }
+
 body {
   top: 0px !important;
+  position: relative !important;
 }
 
 /* Supprime aussi l'overlay semi-transparent */
@@ -164,6 +166,20 @@ body {
 }
 .goog-te-gadget {
   font-size: 0 !important;
+}
+
+.goog-te-menu-value {
+  display: none !important;
+}
+
+.goog-te-gadget-icon {
+  display: none !important;
+}
+
+iframe.goog-te-banner-frame {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
