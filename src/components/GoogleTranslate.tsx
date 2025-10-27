@@ -38,15 +38,24 @@ export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
 
-  useEffect(() => {
-    const cookie = getCookie('googtrans');
-    const currentLang = cookie?.split('/')[2];
-
-    // Forcer le français si aucune langue ou langue incorrecte
-    if (!cookie || currentLang === 'es' || currentLang === undefined) {
-      setCookie('googtrans', '/fr/fr', 7);
-      setCookie('googtrans', '/fr/fr');
+useEffect(() => {
+  const interval = setInterval(() => {
+    const bannerFrame = document.querySelector('iframe.goog-te-banner-frame');
+    if (bannerFrame) {
+      bannerFrame.style.height = '20px';
+      bannerFrame.style.minHeight = '20px';
+      bannerFrame.style.maxHeight = '20px';
+      bannerFrame.style.overflow = 'hidden';
+      bannerFrame.style.position = 'fixed';
+      bannerFrame.style.bottom = '0';
+      bannerFrame.style.top = 'auto';
+      bannerFrame.style.zIndex = '9999';
     }
+  }, 500);
+
+  setTimeout(() => clearInterval(interval), 10000);
+}, []);
+
 
     setSelectedLang(currentLang || 'fr');
     setScriptReady(true);
