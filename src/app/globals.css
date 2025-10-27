@@ -143,6 +143,8 @@ button.group:hover span {
 .goog-tooltip,
 #goog-gt-tt {
   display: none !important;
+  /* J'ai ajouté visibility: hidden pour forcer le masquage des éléments */
+  visibility: hidden !important; 
 }
 
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
