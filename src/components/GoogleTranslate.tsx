@@ -39,11 +39,11 @@ export default function GoogleTranslateCustom() {
 
 useEffect(() => {
   const currentCookie = getCookie('googtrans');
-  if (!currentCookie) {
-    // Définit la langue par défaut sur français
+  if (!currentCookie || currentCookie === '/fr/es') {
     setCookie('googtrans', '/fr/fr', 7);
+    setCookie('googtrans', '/fr/fr');
   }
-  const langCode = currentCookie?.split('/')[2] || 'fr';
+  const langCode = getCookie('googtrans')?.split('/')[2] || 'fr';
   setSelectedLang(langCode);
 }, []);
 
