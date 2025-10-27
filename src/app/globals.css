@@ -139,17 +139,17 @@ button.group:hover span {
 
 /* 🚀 CORRECTION : MASQUAGE DU WIDGET GOOGLE TRANSLATE NATIF */
 /* Ces règles sont essentielles pour supprimer la double barre et l'UI complète de Google. */
-.goog-te-banner-frame.skiptranslate,
-.goog-tooltip,
-#goog-gt-tt {
-  display: none !important;
-  /* J'ai ajouté visibility: hidden pour forcer le masquage des éléments */
-  visibility: hidden !important; 
-}
 
 .goog-te-combo {
   display: none !important;
   visibility: hidden !important;
+}
+
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0px !important;
 }
 
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
