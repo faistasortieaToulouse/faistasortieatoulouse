@@ -123,14 +123,12 @@ export default function EventMap({ events }: EventMapProps) {
             </Popup>
             
             {/* 🟢 Ajout du Tooltip (le titre) : */}
-            <Tooltip
-                // 💡 Astuce : 'sticky' maintient le Tooltip centré sur le curseur, ce qui est meilleur sur desktop.
-                // 'permanent' forcerait l'affichage constant, ce qui n'est pas ce que vous voulez.
-                // Le Tooltip s'affiche naturellement au survol sur desktop.
-                sticky
-            >
-              {ev.name}
-            </Tooltip>
+<Tooltip permanent direction="top">
+  {/* 💡 Astuce : 'sticky' maintient le Tooltip centré sur le curseur, ce qui est meilleur sur desktop.
+      'permanent' forcerait l'affichage constant, ce qui est utile sur mobile.
+      Le Tooltip s'affiche naturellement au survol sur desktop. */}
+  {ev.name}
+</Tooltip>
 
           </Marker>
         ))}
