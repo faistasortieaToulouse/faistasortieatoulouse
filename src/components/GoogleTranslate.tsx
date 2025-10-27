@@ -134,6 +134,8 @@ export default function GoogleTranslateCustom() {
             {/* Conteneur Google (caché) */}
             <div
                 id="google_translate_element_hidden"
+                // AJOUT : Ajout des classes Tailwind 'hidden' et 'opacity-0' pour un masquage maximal
+                className="hidden opacity-0" 
                 style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}
             />
         </div>
