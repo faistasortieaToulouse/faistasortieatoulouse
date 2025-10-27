@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import GoogleTranslate from '@/components/GoogleTranslate'; // <-- import du composant
 
 export const metadata: Metadata = {
   title: 'Toulouse Outings',
@@ -37,7 +38,12 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="font-body antialiased">
+        {/* Google Translate : chargé une seule fois pour toute l'application */}
+        <GoogleTranslate />
+
+        {/* Le reste de ton app */}
         {children}
+
         <Toaster />
       </body>
     </html>
