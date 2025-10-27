@@ -36,46 +36,51 @@ function getCookie(name: string) {
 
 export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('');
+  const [scriptReady, setScriptReady] = useState(false);
 
-useEffect(() => {
-  const currentCookie = getCookie('googtrans');
-  if (!currentCookie || currentCookie === '/fr/fr') {
-    setCookie('googtrans', '/fr/fr', 7);
-    setCookie('googtrans', '/fr/fr');
-  }
-  const langCode = getCookie('googtrans')?.split('/')[2] || 'fr';
-  setSelectedLang(langCode);
-}, []);
+  useEffect(() => {
+    const currentCookie = getCookie('googtrans');
+    if (!currentCookie || currentCookie === '/fr/es') {
+      setCookie('googtrans', '/fr/fr', 7);
+      setCookie('googtrans', '/fr/fr');
+    }
+    const langCode = getCookie('googtrans')?.split('/')[2] || 'fr';
+    setSelectedLang(langCode);
+    setScriptReady(true); // autorise le chargement du script
+  }, []);
 
-const changeLang = (lang: string) => {
-  if (lang === selectedLang) return;
-  setSelectedLang(lang);
-  const val = `/fr/${lang}`;
-  setCookie('googtrans', val, 7);
-  setCookie('googtrans', val);
-  window.location.reload();
-};
+  const changeLang = (lang: string) => {
+    if (lang === selectedLang) return;
+    setSelectedLang(lang);
+    const val = `/fr/${lang}`;
+    setCookie('googtrans', val, 7);
+    setCookie('googtrans', val);
+    window.location.reload();
+  };
 
   return (
     <>
-      {/* Inject Google Translate script */}
       <div id="google_translate_element" style={{ display: 'none' }} />
-      <Script
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        strategy="afterInteractive"
-      />
-<Script id="google-translate-init" strategy="afterInteractive">
-  {`
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'fr',
-        autoDisplay: false
-      }, 'google_translate_element');
-    }
-  `}
-</Script>
 
-      {/* Langue selector */}
+      {scriptReady && (
+        <>
+          <Script
+            src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+            strategy="afterInteractive"
+          />
+          <Script id="google-translate-init" strategy="afterInteractive">
+            {`
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'fr',
+                  autoDisplay: false
+                }, 'google_translate_element');
+              }
+            `}
+          </Script>
+        </>
+      )}
+
       <div className="google-translate-custom flex items-center space-x-2">
         <label htmlFor="my-gg-select" className="sr-only">Langue</label>
         <select
