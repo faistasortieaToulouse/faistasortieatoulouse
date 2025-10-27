@@ -145,11 +145,25 @@ button.group:hover span {
   visibility: hidden !important;
 }
 
+/* Supprime la barre Google Translate */
 .goog-te-banner-frame.skiptranslate {
   display: none !important;
 }
 body {
   top: 0px !important;
+}
+
+/* Supprime aussi l'overlay semi-transparent */
+.goog-te-overlay {
+  display: none !important;
+}
+
+/* Supprime le petit logo Google en bas à droite */
+.goog-logo-link {
+  display: none !important;
+}
+.goog-te-gadget {
+  font-size: 0 !important;
 }
 
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
