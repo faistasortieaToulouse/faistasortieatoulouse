@@ -1,7 +1,3 @@
-// Ignorer et passer au contenu
-// Historique de chat
-// Vous avez dit :
-// La barre de Google Translate m'affiche toutes les langues alors que je ne veux que l'anglais, espagnol, italien, allemand, portugais, russe, chinois, japonais et turc, voici mon code, peux-tu le corriger ? 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
