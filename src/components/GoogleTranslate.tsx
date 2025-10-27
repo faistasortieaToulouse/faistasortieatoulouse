@@ -51,17 +51,17 @@ export default function GoogleTranslateCustom() {
     setScriptReady(true);
 
     const interval = setInterval(() => {
-      const bannerFrame = document.querySelector('iframe.goog-te-banner-frame');
-      if (bannerFrame) {
-        bannerFrame.style.height = '20px';
-        bannerFrame.style.minHeight = '20px';
-        bannerFrame.style.maxHeight = '20px';
-        bannerFrame.style.overflow = 'hidden';
-        bannerFrame.style.position = 'fixed';
-        bannerFrame.style.bottom = '0';
-        bannerFrame.style.top = 'auto';
-        bannerFrame.style.zIndex = '9999';
-      }
+const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+if (bannerFrame) {
+  bannerFrame.style.height = '20px';
+  bannerFrame.style.minHeight = '20px';
+  bannerFrame.style.maxHeight = '20px';
+  bannerFrame.style.overflow = 'hidden';
+  bannerFrame.style.position = 'fixed';
+  bannerFrame.style.bottom = '0';
+  bannerFrame.style.top = 'auto';
+  bannerFrame.style.zIndex = '9999';
+}
     }, 500);
 
     return () => clearInterval(interval);
