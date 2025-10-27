@@ -13,8 +13,7 @@ const LANGS = [
   { code: 'pt', label: 'Portugais' },
   { code: 'ru', label: 'Russe' }, 
   { code: 'tr', label: 'Turc' },
-  
-];
+  ];
 
 function setCookie(name: string, value: string, days?: number) {
   if (typeof document === 'undefined') return;
