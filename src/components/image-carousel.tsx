@@ -42,8 +42,8 @@ export function ImageCarousel({ images }: Props) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="hidden sm:flex" />
-      <CarouselNext className="hidden sm:flex" />
+<CarouselPrevious className="flex" />
+<CarouselNext className="flex" />
     </Carousel>
   );
 }
