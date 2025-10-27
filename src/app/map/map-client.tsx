@@ -123,12 +123,15 @@ mappedEvents.forEach(ev => {
   const marker = new google.maps.Marker({
     position: pos,
     map: map,
+    title: ev.name, // ✅ Affiche le titre au survol sur desktop
   });
 
+  // ✅ Crée une InfoWindow pour le clic (mobile)
   const infoWindow = new google.maps.InfoWindow({
     content: `<strong>${ev.name}</strong>`,
   });
 
+  // ✅ Ouvre la InfoWindow au clic
   marker.addListener('click', () => {
     infoWindow.open(map, marker);
   });
