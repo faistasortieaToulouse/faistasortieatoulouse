@@ -2,118 +2,122 @@
 
 import { useEffect } from 'react';
 
-type Win = Window & {
-  google?: any;
-  googleTranslateElementInit?: () => void;
-  _googleTranslateInitialized?: boolean;
-};
+const LANGS: { code: string; label: string }[] = [
+  { code: 'en', label: 'Anglais' },
+  { code: 'es', label: 'Espagnol' },
+  { code: 'it', label: 'Italien' },
+  { code: 'de', label: 'Allemand' },
+  { code: 'pt', label: 'Portugais' },
+  { code: 'ru', label: 'Russe' },
+  { code: 'zh-CN', label: 'Chinois (simpl.)' },
+  { code: 'ja', label: 'Japonais' },
+  { code: 'tr', label: 'Turc' },
+  { code: 'ar', label: 'Arabe' }, // si tu veux l'arabe aussi
+];
 
-const ALLOWED_LANGS = ['en','es','it','de','pt','ru','ar','tr','zh-CN','ja']; 
-// ordre / contenu exact que tu veux afficher
+function setCookie(name: string, value: string, days?: number) {
+  let cookie = `${name}=${value};path=/;`;
+  // sur localhost ne pas définir domain (évite erreurs)
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host.indexOf('.') !== -1) {
+      // essayer .domain.tld pour couvrir sous-domaines
+      const parts = host.split('.');
+      const domain = '.' + parts.slice(-2).join('.');
+      cookie += `domain=${domain};`;
+    }
+  }
+  if (days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    cookie += `expires=${d.toUTCString()};`;
+  }
+  document.cookie = cookie;
+}
 
-export default function GoogleTranslate() {
+function getCookie(name: string) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+export default function GoogleTranslateCustom() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const w = window as Win;
-    const SCRIPT_ID = 'google-translate-script';
-    const CONTAINER_ID = 'google_translate_element';
 
-    // callback global défini avant le chargement du script
-    if (!w.googleTranslateElementInit) {
-      w.googleTranslateElementInit = () => {
+    // 1) Définit callback global AVANT le chargement du script
+    if (!(window as any).googleTranslateElementInit) {
+      (window as any).googleTranslateElementInit = function () {
         try {
-          new w.google.translate.TranslateElement(
+          new (window as any).google.translate.TranslateElement(
             {
               pageLanguage: 'fr',
-              includedLanguages: ALLOWED_LANGS.join(','), // on fournit quand même
-              layout: w.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              includedLanguages: LANGS.map(l => l.code).join(','), // on fournit quand même la liste
+              layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
               autoDisplay: false,
             },
-            CONTAINER_ID
+            'google_translate_element_hidden' // conteneur caché
           );
-          w._googleTranslateInitialized = true;
         } catch (e) {
-          console.error('Erreur init Google Translate:', e);
+          // ignore — le script peut échouer dans certains environnements
+          // console.error('init google translate failed', e);
         }
       };
     }
 
-    // charge le script une seule fois
-    const addScript = () => {
-      if (document.getElementById(SCRIPT_ID)) return;
-      const script = document.createElement('script');
-      script.id = SCRIPT_ID;
-      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      script.async = true;
-      document.body.appendChild(script);
-    };
-
-    addScript();
-
-    // --- Fonctions pour "nettoyer" le select des langues ---
-    const cleanSelectOptions = () => {
-      // le select du widget a généralement la classe 'goog-te-combo'
-      const select = document.querySelector<HTMLSelectElement>('#google_translate_element select.goog-te-combo');
-      if (!select) return false;
-      // build set of allowed values — attention à zh-CN qui peut apparaître en 'zh-CN' ou 'zh_TW' etc.
-      const allowedSet = new Set(ALLOWED_LANGS);
-
-      // on itère à l'envers car on peut supprimer des options
-      for (let i = select.options.length - 1; i >= 0; i--) {
-        const opt = select.options[i];
-        const value = opt.value?.trim();
-        // Certains libellés/value peuvent utiliser "_" ou "-" ; on normalise pour la comparaison
-        const normalized = value ? value.replace('_', '-').toLowerCase() : '';
-        // Map normalization for Chinese: widget may use 'zh-CN' or 'zh-CN' consistently; keep both checks simple
-        const matches = ALLOWED_LANGS.some(a => a.toLowerCase() === normalized);
-        if (!matches) {
-          select.remove(i);
-        }
-      }
-      return true;
-    };
-
-    // Essaie de nettoyer immédiatement si l'élément est déjà présent
-    const tryCleanOnce = () => {
-      // retry quelques fois sur une courte durée car widget peut être lent
-      let attempts = 0;
-      const maxAttempts = 10;
-      const interval = setInterval(() => {
-        attempts++;
-        const ok = cleanSelectOptions();
-        if (ok || attempts >= maxAttempts) {
-          clearInterval(interval);
-        }
-      }, 300); // toutes les 300ms, jusqu'à maxAttempts
-    };
-
-    // Observer pour ré-appliquer le nettoyage si le widget recrée le select plus tard
-    const observer = new MutationObserver(() => {
-      cleanSelectOptions();
-    });
-    const container = document.getElementById(CONTAINER_ID);
-    if (container) {
-      observer.observe(container, { childList: true, subtree: true });
-    } else {
-      // si container pas encore présent, on surveille body pour sa création
-      const bodyObserver = new MutationObserver(() => {
-        const c = document.getElementById(CONTAINER_ID);
-        if (c) {
-          observer.observe(c, { childList: true, subtree: true });
-          bodyObserver.disconnect();
-        }
-      });
-      bodyObserver.observe(document.body, { childList: true, subtree: true });
+    // 2) Charger le script une seule fois si nécessaire
+    const SCRIPT_ID = 'google-translate-script';
+    if (!document.getElementById(SCRIPT_ID)) {
+      const s = document.createElement('script');
+      s.id = SCRIPT_ID;
+      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.async = true;
+      document.body.appendChild(s);
     }
 
-    // démarre les essais de nettoyage
-    tryCleanOnce();
-
-    // cleanup à l'unmount : on ne supprime pas le script (préserve stabilité)
-    return () => {
-      observer.disconnect();
-    };
+    // 3) Si un cookie googtrans existait (par ex. utilisateur déjà choisi), garder la sélection UI en sync
+    const cur = getCookie('googtrans');
+    // (on ne force rien ici; c'est juste indicatif)
   }, []);
 
-  return <div id="google_translate_element" className="mt-2" />;
+  // Lorsque l'utilisateur choisit une langue :
+  const changeLang = (lang: string) => {
+    // valeur du cookie attendue par Google : "/<lang_src>/<lang_target>"
+    // ici page source = 'fr'
+    const val = `/fr/${lang}`;
+    // on met cookie pour durée courte (7 jours)
+    setCookie('googtrans', val, 7);
+    setCookie('googtrans', val); // certains navigateurs/anciennes impls doubleset
+    // reload pour que le script Google lise le cookie et traduise
+    window.location.reload();
+  };
+
+  return (
+    <div className="google-translate-custom">
+      {/* UI custom : simple select — adapte le style à ton sidebar */}
+      <label htmlFor="my-gg-select" className="sr-only">Langue</label>
+      <select
+        id="my-gg-select"
+        onChange={(e) => changeLang(e.target.value)}
+        defaultValue=""
+        aria-label="Sélectionner une langue"
+        className="px-2 py-1 rounded border"
+      >
+        <option value="" disabled>
+          Traduire en...
+        </option>
+        {LANGS.map(l => (
+          <option key={l.code} value={l.code}>
+            {l.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Conteneur Google (caché) — nécessaire pour que le script crée son moteur,
+          mais on le masque pour ne pas afficher l'UI native qui liste tout. */}
+      <div
+        id="google_translate_element_hidden"
+        style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}
+      />
+    </div>
+  );
 }
