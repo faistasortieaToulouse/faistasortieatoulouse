@@ -38,27 +38,33 @@ export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
 
-useEffect(() => {
-  const interval = setInterval(() => {
-    const bannerFrame = document.querySelector('iframe.goog-te-banner-frame');
-    if (bannerFrame) {
-      bannerFrame.style.height = '20px';
-      bannerFrame.style.minHeight = '20px';
-      bannerFrame.style.maxHeight = '20px';
-      bannerFrame.style.overflow = 'hidden';
-      bannerFrame.style.position = 'fixed';
-      bannerFrame.style.bottom = '0';
-      bannerFrame.style.top = 'auto';
-      bannerFrame.style.zIndex = '9999';
+  useEffect(() => {
+    const cookie = getCookie('googtrans');
+    const currentLang = cookie?.split('/')[2];
+
+    if (!cookie || currentLang === 'es' || currentLang === undefined) {
+      setCookie('googtrans', '/fr/fr', 7);
+      setCookie('googtrans', '/fr/fr');
     }
-  }, 500);
-
-  setTimeout(() => clearInterval(interval), 10000);
-}, []);
-
 
     setSelectedLang(currentLang || 'fr');
     setScriptReady(true);
+
+    const interval = setInterval(() => {
+      const bannerFrame = document.querySelector('iframe.goog-te-banner-frame');
+      if (bannerFrame) {
+        bannerFrame.style.height = '20px';
+        bannerFrame.style.minHeight = '20px';
+        bannerFrame.style.maxHeight = '20px';
+        bannerFrame.style.overflow = 'hidden';
+        bannerFrame.style.position = 'fixed';
+        bannerFrame.style.bottom = '0';
+        bannerFrame.style.top = 'auto';
+        bannerFrame.style.zIndex = '9999';
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
   }, []);
 
   const changeLang = (lang: string) => {
@@ -71,29 +77,40 @@ useEffect(() => {
 
   return (
     <>
-      {/* Masquer la barre Google Translate */}
       <style jsx global>{`
         .goog-te-banner-frame.skiptranslate {
           display: none !important;
         }
         body {
           top: 0px !important;
+          position: relative !important;
+          margin-bottom: 20px !important;
         }
-        .goog-te-overlay {
+        .goog-te-overlay,
+        .goog-logo-link,
+        .goog-te-gadget-icon,
+        .goog-te-menu-value,
+        .goog-te-combo {
           display: none !important;
-        }
-        .goog-logo-link {
-          display: none !important;
+          visibility: hidden !important;
         }
         .goog-te-gadget {
           font-size: 0 !important;
         }
+        iframe.goog-te-banner-frame {
+          position: fixed !important;
+          bottom: 0 !important;
+          top: auto !important;
+          height: 20px !important;
+          min-height: 20px !important;
+          max-height: 20px !important;
+          overflow: hidden !important;
+          z-index: 9999 !important;
+        }
       `}</style>
 
-      {/* Zone invisible pour le widget */}
       <div id="google_translate_element" style={{ display: 'none' }} />
 
-      {/* Injecter le script après que le cookie soit prêt */}
       {scriptReady && (
         <>
           <Script
@@ -113,7 +130,6 @@ useEffect(() => {
         </>
       )}
 
-      {/* Sélecteur de langue personnalisé */}
       <div className="google-translate-custom flex items-center space-x-2">
         <label htmlFor="my-gg-select" className="sr-only">Langue</label>
         <select
