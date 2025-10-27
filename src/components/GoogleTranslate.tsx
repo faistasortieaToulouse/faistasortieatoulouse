@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 
-export function GoogleTranslate() {
+export default function GoogleTranslate() {
+
   useEffect(() => {
     const addScript = () => {
       const script = document.createElement('script');
