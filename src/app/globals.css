@@ -147,6 +147,11 @@ button.group:hover span {
   visibility: hidden !important; 
 }
 
+.goog-te-combo {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 /* Supprime l'espace blanc réservé en haut de page par la barre Google cachée */
 body {
   top: 0 !important;
