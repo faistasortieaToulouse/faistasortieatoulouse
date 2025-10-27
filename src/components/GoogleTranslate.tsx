@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'; // 👈 Import de useState
 
 const LANGS: { code: string; label: string }[] = [
     { code: 'en', label: 'Anglais' },
@@ -15,11 +15,9 @@ const LANGS: { code: string; label: string }[] = [
     { code: 'ar', label: 'Arabe' },
 ];
 
-// -----------------------------------------------------------------
-// MODIFICATION CLÉ : Ajout de la vérification typeof document === 'undefined'
-// -----------------------------------------------------------------
+// Fonctions utilitaires protégées contre le SSR
 function setCookie(name: string, value: string, days?: number) {
-    if (typeof document === 'undefined') return; // 👈 Correction pour le SSR/Prerendering
+    if (typeof document === 'undefined') return;
 
     let cookie = `${name}=${value};path=/;`;
     
@@ -42,17 +40,27 @@ function setCookie(name: string, value: string, days?: number) {
 }
 
 function getCookie(name: string) {
-    if (typeof document === 'undefined') return null; // 👈 Correction pour le SSR/Prerendering
+    if (typeof document === 'undefined') return null;
 
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? decodeURIComponent(match[2]) : null;
 }
-// -----------------------------------------------------------------
 
 
 export default function GoogleTranslateCustom() {
+    // -----------------------------------------------------------------
+    // AMÉLIORATION : Utilisation de l'état pour contrôler le sélecteur
+    // -----------------------------------------------------------------
+    // Extrait la langue cible actuelle du cookie, ou vide si non trouvé
+    const [selectedLang, setSelectedLang] = useState('');
+
     useEffect(() => {
         if (typeof window === 'undefined') return;
+
+        // Lis le cookie au montage initial et met à jour l'état
+        const currentCookie = getCookie('googtrans');
+        const langCode = currentCookie?.split('/')[2] || '';
+        setSelectedLang(langCode);
 
         // 1) Définit callback global AVANT le chargement du script
         if (!(window as any).googleTranslateElementInit) {
@@ -61,6 +69,7 @@ export default function GoogleTranslateCustom() {
                     new (window as any).google.translate.TranslateElement(
                         {
                             pageLanguage: 'fr',
+                            // IMPORTANT : Limite les langues incluses au tableau LANGS
                             includedLanguages: LANGS.map(l => l.code).join(','),
                             layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
                             autoDisplay: false,
@@ -68,7 +77,7 @@ export default function GoogleTranslateCustom() {
                         'google_translate_element_hidden' // conteneur caché
                     );
                 } catch (e) {
-                    // ignore — le script peut échouer dans certains environnements
+                    // ignore
                 }
             };
         }
@@ -82,23 +91,22 @@ export default function GoogleTranslateCustom() {
             s.async = true;
             document.body.appendChild(s);
         }
-
-        // 3) Si un cookie googtrans existait (par ex. utilisateur déjà choisi), garder la sélection UI en sync
-        const cur = getCookie('googtrans');
-        // (on ne force rien ici; c'est juste indicatif)
+        
     }, []);
 
     // Lorsque l'utilisateur choisit une langue :
     const changeLang = (lang: string) => {
-        // AJOUTÉ : Protection additionnelle au cas où, bien que window.location.reload() ne soit côté client
         if (typeof window === 'undefined') return;
+        
+        // 1. Mise à jour de l'état local avant le rechargement
+        setSelectedLang(lang); // Maintient l'UI synchro pendant le micro-délai
 
-        // valeur du cookie attendue par Google : "/<lang_src>/<lang_target>"
+        // 2. Configuration du cookie
         const val = `/fr/${lang}`;
-        // Mettre le cookie
         setCookie('googtrans', val, 7);
         setCookie('googtrans', val);
-        // reload pour que le script Google lise le cookie et traduise
+        
+        // 3. Rechargement de la page pour activer la traduction Google
         window.location.reload();
     };
 
@@ -109,7 +117,7 @@ export default function GoogleTranslateCustom() {
             <select
                 id="my-gg-select"
                 onChange={(e) => changeLang(e.target.value)}
-                defaultValue={getCookie('googtrans')?.split('/')[2] || ''} // Affiche la langue sélectionnée
+                value={selectedLang} // 👈 Utilise l'état local 'value'
                 aria-label="Sélectionner une langue"
                 className="px-2 py-1 rounded border"
             >
