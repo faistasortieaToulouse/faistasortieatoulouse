@@ -12,111 +12,109 @@ const LANGS: { code: string; label: string }[] = [
   { code: 'zh-CN', label: 'Chinois (simpl.)' },
   { code: 'ja', label: 'Japonais' },
   { code: 'tr', label: 'Turc' },
-  { code: 'ar', label: 'Arabe' }, // si tu veux l'arabe aussi
+  { code: 'ar', label: 'Arabe' }, // optionnel
 ];
 
-function setCookie(name: string, value: string, days?: number) {
-  let cookie = `${name}=${value};path=/;`;
-  // sur localhost ne pas définir domain (évite erreurs)
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host !== 'localhost' && host.indexOf('.') !== -1) {
-      // essayer .domain.tld pour couvrir sous-domaines
-      const parts = host.split('.');
-      const domain = '.' + parts.slice(-2).join('.');
-      cookie += `domain=${domain};`;
-    }
-  }
-  if (days) {
-    const d = new Date();
-    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    cookie += `expires=${d.toUTCString()};`;
-  }
-  document.cookie = cookie;
+function setCookie(name: string, value: string, days = 7) {
+  const d = new Date();
+  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = 'expires=' + d.toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)};path=/;${expires};SameSite=Lax`;
 }
 
-function getCookie(name: string) {
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-export default function GoogleTranslateCustom() {
+export default function GoogleTranslate() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const w = window as any;
+    const SCRIPT_SRC = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    const SCRIPT_ID = 'google-translate-script';
 
-    // 1) Définit callback global AVANT le chargement du script
-    if (!(window as any).googleTranslateElementInit) {
-      (window as any).googleTranslateElementInit = function () {
+    // Eviter doublons de script
+    const existing = Array.from(document.querySelectorAll(`script[src*="translate.google.com/translate_a/element.js"]`));
+    if (existing.length > 1) {
+      existing.slice(1).forEach((s) => s.remove());
+    }
+
+    if (!w.googleTranslateElementInit) {
+      w.googleTranslateElementInit = function () {
         try {
-          new (window as any).google.translate.TranslateElement(
+          new w.google.translate.TranslateElement(
             {
               pageLanguage: 'fr',
-              includedLanguages: LANGS.map(l => l.code).join(','), // on fournit quand même la liste
-              layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+              includedLanguages: LANGS.map((l) => l.code).join(','),
+              layout: w.google.translate.TranslateElement.InlineLayout.SIMPLE,
               autoDisplay: false,
             },
-            'google_translate_element_hidden' // conteneur caché
+            'google_translate_element_hidden'
           );
+          w._googleTranslateInitialized = true;
         } catch (e) {
-          // ignore — le script peut échouer dans certains environnements
-          // console.error('init google translate failed', e);
+          console.warn('Erreur googleTranslateElementInit', e);
         }
       };
     }
 
-    // 2) Charger le script une seule fois si nécessaire
-    const SCRIPT_ID = 'google-translate-script';
-    if (!document.getElementById(SCRIPT_ID)) {
+    if (!document.getElementById(SCRIPT_ID) && existing.length === 0) {
       const s = document.createElement('script');
       s.id = SCRIPT_ID;
-      s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.src = SCRIPT_SRC;
       s.async = true;
       document.body.appendChild(s);
+    } else if (!document.getElementById(SCRIPT_ID) && existing.length === 1) {
+      existing[0].id = SCRIPT_ID;
     }
 
-    // 3) Si un cookie googtrans existait (par ex. utilisateur déjà choisi), garder la sélection UI en sync
-    const cur = getCookie('googtrans');
-    // (on ne force rien ici; c'est juste indicatif)
+    // CSS pour masquer l'UI native et éviter overlay
+    const styleId = 'google-translate-hide-style';
+    if (!document.getElementById(styleId)) {
+      const st = document.createElement('style');
+      st.id = styleId;
+      st.innerHTML = `
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+        .goog-te-gadget { display: none !important; }
+        select.goog-te-combo { display: none !important; }
+        iframe.goog-te-menu-frame { visibility: hidden !important; height: 0 !important; overflow: hidden !important; }
+        html, body { margin-top: 0 !important; }
+        #__next, main, #root { position: relative; z-index: 1; }
+        #google_translate_element_hidden { position: absolute !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+      `;
+      document.head.appendChild(st);
+    }
+
+    // leave script in place (no cleanup)
   }, []);
 
-  // Lorsque l'utilisateur choisit une langue :
   const changeLang = (lang: string) => {
-    // valeur du cookie attendue par Google : "/<lang_src>/<lang_target>"
-    // ici page source = 'fr'
     const val = `/fr/${lang}`;
-    // on met cookie pour durée courte (7 jours)
     setCookie('googtrans', val, 7);
-    setCookie('googtrans', val); // certains navigateurs/anciennes impls doubleset
-    // reload pour que le script Google lise le cookie et traduise
+    document.cookie = `googtrans=${encodeURIComponent(val)};path=/;`;
     window.location.reload();
   };
 
   return (
-    <div className="google-translate-custom">
-      {/* UI custom : simple select — adapte le style à ton sidebar */}
+    <div style={{ position: 'relative', zIndex: 9999 }}>
       <label htmlFor="my-gg-select" className="sr-only">Langue</label>
       <select
         id="my-gg-select"
         onChange={(e) => changeLang(e.target.value)}
         defaultValue=""
         aria-label="Sélectionner une langue"
-        className="px-2 py-1 rounded border"
+        className="px-2 py-1 rounded border bg-white"
       >
         <option value="" disabled>
           Traduire en...
         </option>
-        {LANGS.map(l => (
+        {LANGS.map((l) => (
           <option key={l.code} value={l.code}>
             {l.label}
           </option>
         ))}
       </select>
 
-      {/* Conteneur Google (caché) — nécessaire pour que le script crée son moteur,
-          mais on le masque pour ne pas afficher l'UI native qui liste tout. */}
       <div
         id="google_translate_element_hidden"
-        style={{ display: 'none', visibility: 'hidden', height: 0, width: 0, overflow: 'hidden' }}
+        style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}
+        aria-hidden
       />
     </div>
   );
