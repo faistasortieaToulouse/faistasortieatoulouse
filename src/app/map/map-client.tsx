@@ -116,15 +116,23 @@ export default function MapClient({ initialEvents }: MapClientProps) {
     const map = mapInstanceRef.current;
     const bounds = new google.maps.LatLngBounds();
 
-    mappedEvents.forEach(ev => {
-      const pos = new google.maps.LatLng(ev.position.lat, ev.position.lng);
-      bounds.extend(pos);
-      new google.maps.Marker({
-        position: pos,
-        map,
-        title: ev.name,
-      });
-    });
+mappedEvents.forEach(ev => {
+  const pos = new google.maps.LatLng(ev.position.lat, ev.position.lng);
+  bounds.extend(pos);
+
+  const marker = new google.maps.Marker({
+    position: pos,
+    map: map,
+  });
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: `<strong>${ev.name}</strong>`,
+  });
+
+  marker.addListener('click', () => {
+    infoWindow.open(map, marker);
+  });
+});
 
     map.fitBounds(bounds);
   }, [mapsLoaded, loading, mappedEvents]);
