@@ -127,9 +127,21 @@ mappedEvents.forEach(ev => {
   });
 
   // ✅ Crée une InfoWindow pour le clic (mobile)
-  const infoWindow = new google.maps.InfoWindow({
-    content: `<strong>${ev.name}</strong>`,
-  });
+// ✅ Formatage de la date et de l'heure avec date-fns
+const startDate = new Date(ev.scheduled_start_time);
+const dateStr = format(startDate, "EEEE d MMMM yyyy", { locale: fr });
+const timeStr = format(startDate, "HH'h'mm", { locale: fr });
+
+// ✅ Contenu HTML de la popup : titre + date + heure sur la même ligne
+const infoWindow = new google.maps.InfoWindow({
+  content: `
+    <div style="font-size: 0.9rem;">
+      <strong>${ev.name}</strong><br/>
+      <span style="color:#555;">${dateStr} • ${timeStr}</span>
+    </div>
+  `,
+});
+
 
   // ✅ Ouvre la InfoWindow au clic
   marker.addListener('click', () => {
