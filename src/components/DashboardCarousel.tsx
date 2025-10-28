@@ -17,27 +17,27 @@ const BASE_URL =
 
 // --- Liste complète des images du carrousel ---
 const IMAGE_NAMES = [
-  'bar600.jpg',
-  'baton600.jpg',
-  'cinema600.jpg',
-  'concert600.jpg',
-  'covoiturage600.jpg',
-  'danse600.jpg',
-  'emploi600.jpg',
-  'jeu600.jpg',
-  'lecture600.jpg',
-  'logement600.jpg',
-  'musee600.jpg',
-  'peinture600.jpg',
-  'photo600.jpg',
-  'piquenique600.jpg',
-  'plage600.jpg',
-  'rando600.jpg',
-  'restaurant600.jpg',
-  'salondethe600.jpg',
-  'theatre600.jpg', // correction probable de "tehatre600.jpg"
-  'yoga600.jpg',
-  'zumba600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/bar600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/baton600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/cinema600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/concert600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/covoiturage600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/danse600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/emploi600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/jeu600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/lecture600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/logement600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/musee600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/peinture600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/photo600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/piquenique600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/plage600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/rando600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/restaurant600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/salondethe600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/theatre600.jpg', // correction probable de "tehatre600.jpg"
+  'https://faistasortieatoulouse.vercel.app/images/yoga600.jpg',
+  'https://faistasortieatoulouse.vercel.app/images/zumba600.jpg',
 ];
 
 // --- Composant principal ---
