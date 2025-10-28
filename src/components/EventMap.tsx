@@ -32,6 +32,8 @@ interface Event {
   id: string;
   name: string;
   location: string;
+  date?: string; // format "28 octobre 2025"
+  time?: string; // format "16h30"
 }
 
 interface EventMapProps {
@@ -117,11 +119,23 @@ export default function EventMap({ events }: EventMapProps) {
             }}
           >
             {/* Le Popup s'ouvre au clic/tap et affiche le détail */}
-            <Popup>
-              <strong>{ev.name}</strong>
-              <br />
-              {ev.location}
-            </Popup>
+<Popup>
+  <strong>{ev.name}</strong>
+  <br />
+  {ev.location}
+  {ev.date && (
+    <>
+      <br />
+      📅 {ev.date}
+    </>
+  )}
+  {ev.time && (
+    <>
+      <br />
+      🕒 {ev.time}
+    </>
+  )}
+</Popup>
             
             {/* 🟢 Ajout du Tooltip (le titre) : */}
 {isMobile ? (
