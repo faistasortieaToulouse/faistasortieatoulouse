@@ -18,29 +18,19 @@ const LANGS = [
 ];
 
 const EXTENDED_LANGS = [
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Allemand' },
-  { code: 'en', label: 'Anglais' },
-  { code: 'ar', label: 'Arabe' },
+  ...LANGS,
   { code: 'eu', label: 'Basque' },
-  { code: 'zh-CN', label: 'Chinois' },
   { code: 'ko', label: 'Coréen' },
-  { code: 'es', label: 'Espagnol' },
   { code: 'fa', label: 'Farci' },
   { code: 'el', label: 'Grec' },
   { code: 'hi', label: 'Hindi' },
   { code: 'id', label: 'Indonésien' },
-  { code: 'it', label: 'Italien' },
-  { code: 'ja', label: 'Japonais' },
   { code: 'nl', label: 'Néerlandais' },
   { code: 'oc', label: 'Occitan' },
   { code: 'pl', label: 'Polonais' },
-  { code: 'pt', label: 'Portugais' },
   { code: 'ro', label: 'Roumain' },
-  { code: 'ru', label: 'Russe' },
   { code: 'sv', label: 'Suédois' },
   { code: 'th', label: 'Thaïlandais' },
-  { code: 'tr', label: 'Turc' },
   { code: 'vi', label: 'Vietnamien' },
 ];
 
@@ -48,16 +38,16 @@ function setCookie(name: string, value: string, days?: number) {
   if (typeof document === 'undefined') return;
   let cookie = `${name}=${value};path=/;`;
   if (days) {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    cookie += `expires=${expires.toUTCString()};`;
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    cookie += `expires=${d.toUTCString()};`;
   }
   document.cookie = cookie;
 }
 
 function getCookie(name: string) {
   if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
   return match ? decodeURIComponent(match[2]) : null;
 }
 
@@ -151,44 +141,41 @@ export default function GoogleTranslateCustom() {
         </>
       )}
 
-      <div className="google-translate-custom fixed bottom-0 left-0 w-full bg-muted text-sm p-2 flex flex-wrap items-center justify-between z-[9999]">
-        <div className="flex items-center space-x-2">
-          <label htmlFor="my-gg-select" className="sr-only">Langue</label>
-          <select
-            id="my-gg-select"
-            onChange={(e) => changeLang(e.target.value)}
-            value={selectedLang}
-            aria-label="Sélectionner une langue"
-            className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
-          >
-            <option value="" disabled>Choisis ta langue</option>
-            {LANGS.map(lang => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
-              </option>
-            ))}
-          </select>
+      <div className="google-translate-custom flex flex-wrap items-center gap-2 mt-4">
+        <select
+          id="my-gg-select"
+          onChange={(e) => changeLang(e.target.value)}
+          value={selectedLang}
+          aria-label="Sélectionner une langue"
+          className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
+        >
+          <option value="" disabled>Choisis ta langue</option>
+          {LANGS.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
+        </select>
 
-          {selectedLang !== 'fr' && (
-            <button
-              onClick={() => changeLang('fr')}
-              className="px-2 py-1 text-sm rounded bg-card hover:bg-muted/70 transition-colors"
-            >
-              Revenir au français
-            </button>
-          )}
-        </div>
+        {selectedLang !== 'fr' && (
+          <button
+            onClick={() => changeLang('fr')}
+            className="px-2 py-1 text-sm rounded bg-muted hover:bg-muted/80 transition-colors"
+          >
+            Revenir au français
+          </button>
+        )}
 
         <button
           onClick={() => setShowAll(!showAll)}
-          className="text-primary underline text-sm"
+          className="text-sm underline text-primary"
         >
-          {showAll ? 'Masquer les langues' : 'Afficher toutes les langues'}
+          {showAll ? 'Masquer toutes les langues' : 'Afficher toutes les langues'}
         </button>
       </div>
 
       {showAll && (
-        <div className="fixed bottom-12 left-0 w-full max-h-64 overflow-y-auto bg-background border-t shadow-lg p-4 z-[9998]">
+        <div className="mt-2 max-h-64 overflow-y-auto border rounded p-2 bg-background shadow">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {EXTENDED_LANGS.map(lang => (
               <button
