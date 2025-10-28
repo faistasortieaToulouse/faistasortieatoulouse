@@ -17,11 +17,6 @@ useEffect(() => {
       description: `Image ${index + 1}`
     }));
 
-  const shuffled = [...imagesArray].sort(() => 0.5 - Math.random());
-  setCarouselImages(shuffled.slice(0, 3));
-}, []);
-
-
     // Mélange et garde les 3 premières
     const shuffled = [...imagesArray].sort(() => 0.5 - Math.random());
     setCarouselImages(shuffled.slice(0, 3));
