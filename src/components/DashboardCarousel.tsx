@@ -9,57 +9,61 @@ const GUILD_ID = '1422806103267344416';
 const FTS_LOGO_URL =
   'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c';
 
-// --- Liste complète des images du carrousel ---
-const CAROUSEL_IMAGES: string[] = [
-  '/images/ftsbar600.jpg',
-  '/images/ftsbaton600.jpg',
-  '/images/ftscinema600.jpg',
-  '/images/ftsconcert600.jpg',
-  '/images/ftscovoiturage600.jpg',
-  '/images/ftsdanse600.jpg',
-  '/images/ftsemploi600.jpg',
-  '/images/ftsjeu600.jpg',
-  '/images/ftslecture600.jpg',
-  '/images/ftslogement600.jpg',
-  '/images/ftsmusee600.jpg',
-  '/images/ftspeinture600.jpg',
-  '/images/ftsphoto600.jpg',
-  '/images/ftspiquenique600.jpg',
-  '/images/ftsplage600.jpg',
-  '/images/ftsrando600.jpg',
-  '/images/ftsrestaurant600.jpg',
-  '/images/ftssalondethe600.jpg',
-  '/images/ftstehatre600.jpg',
-  '/images/ftsyoga600.jpg',
-  '/images/ftszumba600.jpg',
-];
+// --- Détection de l’origine actuelle (utile pour mobile ou build static) ---
+const BASE_URL =
+  typeof window !== 'undefined'
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_BASE_URL || ''; // Optionnel pour build SSR
 
+// --- Liste complète des images du carrousel ---
+const IMAGE_NAMES = [
+  'bar600.jpg',
+  'baton600.jpg',
+  'cinema600.jpg',
+  'concert600.jpg',
+  'covoiturage600.jpg',
+  'danse600.jpg',
+  'emploi600.jpg',
+  'jeu600.jpg',
+  'lecture600.jpg',
+  'logement600.jpg',
+  'musee600.jpg',
+  'peinture600.jpg',
+  'photo600.jpg',
+  'piquenique600.jpg',
+  'plage600.jpg',
+  'rando600.jpg',
+  'restaurant600.jpg',
+  'salondethe600.jpg',
+  'theatre600.jpg', // correction probable de "tehatre600.jpg"
+  'yoga600.jpg',
+  'zumba600.jpg',
+];
 
 // --- Composant principal ---
 export default function DashboardCarousel() {
-  // Conversion des URLs en CarouselImage
-  const images: CarouselImage[] = CAROUSEL_IMAGES.map((url, index) => ({
+  // URLs absolues vers le dossier public/images/
+  const images: CarouselImage[] = IMAGE_NAMES.map((name, index) => ({
     id: `img-${index}`,
-    imageUrl: url,
-    description: '', // Description vide par défaut
+    imageUrl: `${BASE_URL}/images/${name}`,
+    description: `Image ${index + 1}`,
   }));
 
-  // --- Création d'un objet DiscordWidgetData complet ---
   const widgetData: DiscordWidgetData & { presence_count?: number } = {
-    channels: [] as DiscordChannel[], // vide pour le carrousel
-    events: [] as DiscordEvent[],     // vide pour le carrousel
+    channels: [] as DiscordChannel[],
+    events: [] as DiscordEvent[],
     images,
     guildId: GUILD_ID,
-    presence_count: 0,                // optionnel
+    presence_count: 0,
   };
 
   return (
     <DashboardClient
-      discordData={widgetData}    // ✅ passe l'objet complet
+      discordData={widgetData}
       eventsData={widgetData.events}
-      discordPolls={[]}            // vide si aucun sondage
-      totalMembers={0}             // nombre fictif ou réel si disponible
-      ftsLogoUrl={FTS_LOGO_URL}    // logo FTS
+      discordPolls={[]}
+      totalMembers={0}
+      ftsLogoUrl={FTS_LOGO_URL}
     />
   );
 }
