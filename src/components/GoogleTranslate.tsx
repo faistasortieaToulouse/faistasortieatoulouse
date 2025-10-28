@@ -189,6 +189,17 @@ export default function GoogleTranslateCustom() {
           ))}
         </select>
       )}
+
+            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+        <img
+          src="https://www.gstatic.com/images/branding/product/1x/translate_24dp.png"
+          alt="Google Translate"
+          width={16}
+          height={16}
+        />
+        <span>Traduction fournie par Google Translate</span>
+      </div>
+      
     </>
   );
 }
