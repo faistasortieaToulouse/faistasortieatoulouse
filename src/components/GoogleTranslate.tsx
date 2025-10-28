@@ -17,8 +17,7 @@ const LANGS = [
   { code: 'tr', label: 'Turc' },
 ];
 
-const EXTENDED_LANGS = [
-  ...LANGS,
+const EXTRA_LANGS = [
   { code: 'eu', label: 'Basque' },
   { code: 'ko', label: 'Coréen' },
   { code: 'fa', label: 'Farci' },
@@ -175,19 +174,30 @@ export default function GoogleTranslateCustom() {
       </div>
 
       {showAll && (
-        <div className="mt-2 max-h-64 overflow-y-auto border rounded p-2 bg-background shadow">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {EXTENDED_LANGS.map(lang => (
-              <button
-                key={lang.code}
-                onClick={() => changeLang(lang.code)}
-                className="text-left px-2 py-1 rounded hover:bg-muted/50 transition-colors"
-              >
+        <select
+          onChange={(e) => changeLang(e.target.value)}
+          value={selectedLang}
+          aria-label="Sélectionner une langue étendue"
+          className="mt-2 px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
+        >
+          <option value="" disabled>Choisis ta langue</option>
+
+          <optgroup label="Langues principales">
+            {LANGS.map(lang => (
+              <option key={lang.code} value={lang.code}>
                 {lang.label}
-              </button>
+              </option>
             ))}
-          </div>
-        </div>
+          </optgroup>
+
+          <optgroup label="Autres langues">
+            {EXTRA_LANGS.map(lang => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </optgroup>
+        </select>
       )}
     </>
   );
