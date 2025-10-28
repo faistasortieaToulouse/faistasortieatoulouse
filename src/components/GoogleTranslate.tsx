@@ -17,6 +17,7 @@ const LANGS = [
   { code: 'tr', label: 'Turc' },
 ];
 
+// Langues supplémentaires uniquement (exclues de LANGS)
 const EXTRA_LANGS = [
   { code: 'eu', label: 'Basque' },
   { code: 'ko', label: 'Coréen' },
@@ -53,7 +54,7 @@ function getCookie(name: string) {
 export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
-  const [showAll, setShowAll] = useState(false);
+  const [showExtra, setShowExtra] = useState(false);
 
   useEffect(() => {
     const cookie = getCookie('googtrans');
@@ -166,37 +167,26 @@ export default function GoogleTranslateCustom() {
         )}
 
         <button
-          onClick={() => setShowAll(!showAll)}
+          onClick={() => setShowExtra(!showExtra)}
           className="text-sm underline text-primary"
         >
-          {showAll ? 'Masquer toutes les langues' : 'Afficher toutes les langues'}
+          {showExtra ? 'Masquer les autres langues' : 'Afficher d’autres langues'}
         </button>
       </div>
 
-      {showAll && (
+      {showExtra && (
         <select
           onChange={(e) => changeLang(e.target.value)}
           value={selectedLang}
-          aria-label="Sélectionner une langue étendue"
+          aria-label="Sélectionner une langue supplémentaire"
           className="mt-2 px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
         >
-          <option value="" disabled>Choisis ta langue</option>
-
-          <optgroup label="Langues principales">
-            {LANGS.map(lang => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
-              </option>
-            ))}
-          </optgroup>
-
-          <optgroup label="Autres langues">
-            {EXTRA_LANGS.map(lang => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
-              </option>
-            ))}
-          </optgroup>
+          <option value="" disabled>Choisis une langue supplémentaire</option>
+          {EXTRA_LANGS.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
         </select>
       )}
     </>
