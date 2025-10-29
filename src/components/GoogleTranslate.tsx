@@ -227,21 +227,34 @@ const changeLang = (lang: string) => {
       {/* Div où Google insère le widget masqué */}
       <div id="google_translate_element" style={{ display: 'none' }} />
 
-      {scriptReady && (
+{scriptReady && (
         <>
           {/* Script de l'API Google Translate */}
           <Script
             src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
             strategy="afterInteractive"
           />
-          {/* Script d'initialisation */}
+          {/* 🛑 SCRIPT D'INITIALISATION CORRIGÉ 🛑 */}
           <Script id="google-translate-init" strategy="afterInteractive">
             {`
               function googleTranslateElementInit() {
-                new google.translate.TranslateElement({
-                  pageLanguage: 'fr',
-                  autoDisplay: false
-                }, 'google_translate_element');
+                  const checkExist = setInterval(function() {
+                      const element = document.getElementById('google_translate_element');
+                      
+                      if (element) {
+                          clearInterval(checkExist);
+                          
+                          // Initialisation classique de Google Translate
+                          new google.translate.TranslateElement({
+                              pageLanguage: 'fr',
+                              autoDisplay: false
+                          }, 'google_translate_element');
+                          
+                          // 🚨 Exécutez immédiatement la logique de persistance si besoin
+                          // window.dispatchEvent(new Event('domreadyforinitialtranslate')); 
+                          // NOTE : Ce trigger peut être géré dans votre useEffect du composant React
+                      }
+                  }, 100); // Vérifie toutes les 100ms
               }
             `}
           </Script>
