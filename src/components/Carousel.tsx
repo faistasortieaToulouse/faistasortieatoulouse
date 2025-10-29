@@ -19,7 +19,7 @@ interface CarouselProps {
 const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
 
     // 3. LOGIQUE POUR CRÉER L'OBJET LOGO À PARTIR DE LA PROP (à l'intérieur du composant)
-    const logoImage: ImagePlaceholder | undefined = useMemo(() => {
+    const logoImage: CarouselImage | undefined = useMemo(() => {
         if (!logoUrl) return undefined;
         return {
             id: 'fts-logo',
