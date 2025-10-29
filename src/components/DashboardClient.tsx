@@ -21,6 +21,8 @@ import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
 import InstallPWAiOS from "@/components/InstallPWAiOS";
 import APKDownloadModal from "@/components/APKDownloadModal"; // Assurez-vous que le chemin est correct
+import React from 'react';
+import Carousel from '../components/Carousel';
 
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
@@ -98,7 +100,7 @@ export default function DashboardClient({
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
-        <ClientCarousel />
+        <Carousel />
       </section>
 
       {/* Stats rapides */}
