@@ -5,12 +5,13 @@ import React, { useMemo } from 'react';
 import { ImagePlaceholder } from '../lib/placeholder-images'; 
 // Retire l'import des données brutes, elles doivent venir des props
 // import { carouselImages } from '../lib/placeholder-images'; 
+import { CarouselImage } from '@/types/types'; // Importez le type CarouselImage
 
 const FALLBACK_IMAGE = '/images/fallback.png';
 
 // 1. DÉFINITION DE L'INTERFACE DE PROPS
 interface CarouselProps {
-    images: ImagePlaceholder[];      // Les images d'activités
+    images: CarouselImage[];      // Les images d'activités
     logoUrl: string | undefined;     // L'URL du logo (peut être undefined)
 }
 
