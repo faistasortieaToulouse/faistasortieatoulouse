@@ -1,53 +1,33 @@
-import React from 'react';
-import { carouselImages, ImagePlaceholder } from '../lib/placeholder-images';
-
-const Carousel: React.FC = () => {
-  return (
-    <div style={{ display: 'flex', overflowX: 'auto', gap: '16px', padding: '16px' }}>
-      {carouselImages.map((image: ImagePlaceholder) => (
-        <div
-          key={image.id}
-          style={{
-            minWidth: '200px',
-            flex: '0 0 auto',
-            textAlign: 'center',
-          }}
-        >
-          {image.imageUrl ? (
-            <img
-              src={image.imageUrl}
-              alt={image.description}
-              style={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: '8px',
-                objectFit: 'cover',
-              }}
-              onError={(e) => {
-                // fallback si l'image ne se charge pas
-                (e.currentTarget as HTMLImageElement).src = '/images/fallback.png';
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '150px',
-                backgroundColor: '#ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '8px',
-              }}
-            >
-              Image manquante
-            </div>
-          )}
-          <p style={{ marginTop: '8px', fontSize: '14px' }}>{image.description}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-export default Carousel;
+{
+  "placeholderImages": [
+    {
+      "id": "fts-logo",
+      "description": "Fais Ta Sortie Toulouse Logo",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2",
+      "imageHint": "logo"
+    }
+  ],
+  "carouselImages": [
+    "/images/ftsbar600.jpg",
+    "/images/ftsbaton600.jpg",
+    "/images/ftscinema600.jpg",
+    "/images/ftsconcert600.jpg",
+    "/images/ftscovoiturage600.jpg",
+    "/images/ftsdanse600.jpg",
+    "/images/ftsemploi600.jpg",
+    "/images/ftsjeu600.jpg",
+    "/images/ftslecture600.jpg",
+    "/images/ftslogement600.jpg",
+    "/images/ftsmusee600.jpg",
+    "/images/ftspeinture600.jpg",
+    "/images/ftsphoto600.jpg",
+    "/images/ftspiquenique600.jpg",
+    "/images/ftsplage600.jpg",
+    "/images/ftsrando600.jpg",
+    "/images/ftsrestaurant600.jpg",
+    "/images/ftssalondethe600.jpg",
+    "/images/ftstehatre600.jpg",
+    "/images/ftsyoga600.jpg",
+    "/images/ftszumba600.jpg"
+  ]
+}
