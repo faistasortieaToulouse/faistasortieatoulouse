@@ -1,33 +1,9 @@
-// src/components/GoogleTranslate.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
-import { usePathname } from 'next/navigation'; // Import pour le routage côté client
 
-// ⭐️ DÉCLARATION DE TYPE GLOBAL POUR GOOGLE TRANSLATE ⭐️
-// Corrige l'erreur: Property 'translate' does not exist on type 'typeof google'
-declare global {
-  interface Window {
-    google: {
-      translate: {
-        TranslateElement: new (config: any, elementId: string) => void;
-      };
-    };
-    googleTranslateElementInit: () => void;
-  }
-}
-// ----------------------------------------------------
-
-// ⭐️ INTERFACE POUR LE TYPAGE DES LANGUES ⭐️
-// Corrige l'erreur: Variable 'LANGS' implicitly has type 'any[]'
-interface Language {
-  code: string;
-  label: string;
-}
-
-// --- Constantes typées ---
-const LANGS: Language[] = [
+const LANGS = [
   { code: 'fr', label: 'Français' },
   { code: 'de', label: 'Allemand' },
   { code: 'en', label: 'Anglais' },
@@ -41,7 +17,8 @@ const LANGS: Language[] = [
   { code: 'tr', label: 'Turc' },
 ];
 
-const EXTRA_LANGS: Language[] = [
+// Langues supplémentaires uniquement (exclues de LANGS)
+const EXTRA_LANGS = [
   { code: 'eu', label: 'Basque' },
   { code: 'ko', label: 'Coréen' },
   { code: 'fa', label: 'Farci' },
@@ -57,7 +34,6 @@ const EXTRA_LANGS: Language[] = [
   { code: 'vi', label: 'Vietnamien' },
 ];
 
-// --- Fonctions utilitaires (inchangées) ---
 function setCookie(name: string, value: string, days?: number) {
   if (typeof document === 'undefined') return;
   let cookie = `${name}=${value};path=/;`;
@@ -75,98 +51,22 @@ function getCookie(name: string) {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-// Remplacer l'ancienne fonction triggerGoogleTranslate (lignes ~80-92)
-// et ajouter la fonction initializeGoogleTranslate avant l'export par défaut.
-
-// 💡 Fonction pour initialiser/réinitialiser le widget Google 
-const initializeGoogleTranslate = (targetLang: string) => {
-    if (typeof window.google?.translate?.TranslateElement === 'undefined') {
-        return; // Le script n'est pas encore chargé
-    }
-    
-    // Étape 1: Vider l'élément pour forcer la réinitialisation par l'API de Google
-    const existingElement = document.getElementById('google_translate_element');
-    if (existingElement) {
-        existingElement.innerHTML = '';
-    }
-
-    // Étape 2: Créer le nouvel objet Google Translate
-    new window.google.translate.TranslateElement({
-        pageLanguage: 'fr',
-        // Utiliser includedLanguages est une astuce pour forcer la traduction immédiate
-        includedLanguages: `fr,${targetLang}`, 
-        autoDisplay: false
-    }, 'google_translate_element');
-    
-    // Étape 3: Déclencher manuellement l'événement 'change'
-    setTimeout(() => {
-        const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-        if (combo && combo.value !== targetLang) {
-            combo.value = targetLang;
-            combo.dispatchEvent(new Event('change'));
-        }
-    }, 100);
-};
-
-
-// 💡 Nouvelle Fonction principale de déclenchement (utilise la réinitialisation)
-const triggerGoogleTranslate = (targetLang: string) => {
-    // Si la langue est français, on doit recharger la page pour supprimer les marques de traduction
-    if (targetLang === 'fr') {
-        setCookie('googtrans', '/fr/fr', 7);
-        window.location.reload(); 
-        return;
-    }
-    
-    // Sinon, on recrée le widget
-    initializeGoogleTranslate(targetLang);
-};
-
 export default function GoogleTranslateCustom() {
-  // L'import de usePathname est maintenu mais n'est plus utilisé dans un useEffect ici.
-  // const pathname = usePathname(); 
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
 
-  // 1. useEffect d'initialisation (Ce code s'exécute à chaque montage du composant)
-// 1. useEffect d'initialisation (Ce code s'exécute à chaque montage du composant)
   useEffect(() => {
     const cookie = getCookie('googtrans');
     const currentLang = cookie?.split('/')[2];
-    const initialLang = currentLang || 'fr';
 
     if (!cookie || !currentLang) {
       setCookie('googtrans', '/fr/fr', 7);
     }
 
-    setSelectedLang(initialLang);
+    setSelectedLang(currentLang || 'fr');
     setScriptReady(true);
 
-    // ⭐️ LOGIQUE DE FORÇAGE DE LA TRADUCTION INITIALE (REMPLACÉE) ⭐️
-    // Fonction qui vérifie si le script est chargé et applique la traduction
-    const applyTranslationOnLoad = () => {
-        if (initialLang !== 'fr') {
-            // Utiliser une vérification périodique pour être sûr que l'API est là
-            const checkReady = setInterval(() => {
-                // Vérifie si l'API est chargée ET si le combo box (le widget masqué) est créé
-                if (typeof window.google?.translate?.TranslateElement !== 'undefined' && document.querySelector('.goog-te-combo')) {
-                    clearInterval(checkReady);
-                    
-                    // Applique la traduction en recréant le widget
-                    triggerGoogleTranslate(initialLang);
-                }
-            }, 100);
-            
-            // Sécurité : arrêter après 5 secondes si quelque chose échoue (pour ne pas boucler indéfiniment)
-            setTimeout(() => clearInterval(checkReady), 5000); 
-        }
-    };
-    
-    // Lance la vérification au montage
-    applyTranslationOnLoad();
-
-    // ... (Logique de l'intervalle de masquage de la bannière inchangée)
     const interval = setInterval(() => {
       const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
       if (bannerFrame) {
@@ -181,39 +81,18 @@ export default function GoogleTranslateCustom() {
       }
     }, 500);
 
-    // La fonction de cleanup est cruciale
     return () => clearInterval(interval);
-  }, []); // [] : S'exécute au montage/démontage
+  }, []);
 
-  // ⭐️ 2. useEffect de surveillance des changements de route ⭐️
-  // CE USEEFFECT EST MAINTENANT OBSOLÈTE ET DOIT ÊTRE SUPPRIMÉ OU COMMENTÉ
-  /*
-  useEffect(() => {
-      if (scriptReady) {
-          // Un délai est nécessaire pour que le DOM de la nouvelle page soit prêt
-          setTimeout(triggerGoogleTranslate, 50); 
-      }
-  }, [pathname, scriptReady]);
-  */
-
-// 3. Fonction changeLang (CORRIGÉE : Utilise uniquement le nouveau trigger)
-const changeLang = (lang: string) => {
+  const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
-    
-    // setCookie est maintenant géré à l'intérieur de triggerGoogleTranslate pour le 'fr'
-    if (lang !== 'fr') {
-        const val = `/fr/${lang}`;
-        setCookie('googtrans', val, 7);
-    }
-
-    setSelectedLang(lang);
-    // Le nouveau trigger gère soit le reload (pour 'fr') soit la recréation du widget
-    triggerGoogleTranslate(lang);
-};
+    const val = `/fr/${lang}`;
+    setCookie('googtrans', val, 7);
+    window.location.reload();
+  };
 
   return (
     <>
-      {/* --- Styles globaux (inchangés) --- */}
       <style jsx global>{`
         .goog-te-banner-frame.skiptranslate,
         body > .skiptranslate,
@@ -241,22 +120,17 @@ const changeLang = (lang: string) => {
         }
       `}</style>
 
-      {/* Div où Google insère le widget masqué */}
       <div id="google_translate_element" style={{ display: 'none' }} />
 
-{scriptReady && (
+      {scriptReady && (
         <>
-          {/* Script de l'API Google Translate */}
           <Script
             src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
             strategy="afterInteractive"
           />
-          {/* 🛑 SCRIPT D'INITIALISATION CORRIGÉ 🛑 */}
-{/* Script d'initialisation CORRIGÉ */}
           <Script id="google-translate-init" strategy="afterInteractive">
             {`
               function googleTranslateElementInit() {
-                  // Cette fonction ne fait plus que l'initialisation de base.
                 new google.translate.TranslateElement({
                   pageLanguage: 'fr',
                   autoDisplay: false
@@ -267,7 +141,6 @@ const changeLang = (lang: string) => {
         </>
       )}
 
-      {/* --- Votre UI personnalisée --- */}
       <div className="google-translate-custom flex flex-wrap items-center gap-2 mt-4">
         <select
           id="my-gg-select"
@@ -317,7 +190,7 @@ const changeLang = (lang: string) => {
         </select>
       )}
 
-      <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
         <img
           src="https://www.gstatic.com/images/branding/product/1x/translate_24dp.png"
           alt="Google Translate"
@@ -326,6 +199,7 @@ const changeLang = (lang: string) => {
         />
         <span>Traduction fournie par Google Translate</span>
       </div>
+      
     </>
   );
 }
