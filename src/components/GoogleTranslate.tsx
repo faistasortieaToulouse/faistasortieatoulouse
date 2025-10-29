@@ -130,10 +130,11 @@ export default function GoogleTranslateCustom() {
   const [showExtra, setShowExtra] = useState(false);
 
   // 1. useEffect d'initialisation (Ce code s'exécute à chaque montage du composant)
+// 1. useEffect d'initialisation (Ce code s'exécute à chaque montage du composant)
   useEffect(() => {
     const cookie = getCookie('googtrans');
     const currentLang = cookie?.split('/')[2];
-    const initialLang = currentLang || 'fr'; // Nouveau: on garde la langue initiale
+    const initialLang = currentLang || 'fr';
 
     if (!cookie || !currentLang) {
       setCookie('googtrans', '/fr/fr', 7);
@@ -142,34 +143,32 @@ export default function GoogleTranslateCustom() {
     setSelectedLang(initialLang);
     setScriptReady(true);
 
-// ⭐️ LOGIQUE DE FORÇAGE DE LA TRADUCTION INITIALE ⭐️
-    // On lance la fonction pour appliquer la traduction après un court délai
-    const forceInitialTranslation = () => {
+    // ⭐️ LOGIQUE DE FORÇAGE DE LA TRADUCTION INITIALE (REMPLACÉE) ⭐️
+    // Fonction qui vérifie si le script est chargé et applique la traduction
+    const applyTranslationOnLoad = () => {
         if (initialLang !== 'fr') {
-            // Utiliser un délai pour laisser le temps au script de Google de s'initialiser
-            setTimeout(() => {
-                triggerGoogleTranslate(initialLang);
-            }, 500); // Délai augmenté à 500ms
+            // Utiliser une vérification périodique pour être sûr que l'API est là
+            const checkReady = setInterval(() => {
+                // Vérifie si l'API est chargée ET si le combo box (le widget masqué) est créé
+                if (typeof window.google?.translate?.TranslateElement !== 'undefined' && document.querySelector('.goog-te-combo')) {
+                    clearInterval(checkReady);
+                    
+                    // Applique la traduction en recréant le widget
+                    triggerGoogleTranslate(initialLang);
+                }
+            }, 100);
+            
+            // Sécurité : arrêter après 5 secondes si quelque chose échoue (pour ne pas boucler indéfiniment)
+            setTimeout(() => clearInterval(checkReady), 5000); 
         }
     };
-
-    // 1. Si le script Google est déjà chargé (cas de navigation interne ou d'un montage tardif)
-    if (typeof window.google?.translate?.TranslateElement !== 'undefined') {
-        forceInitialTranslation();
-    } else {
-        // 2. Si le script n'est pas encore chargé (cas de F5), on écoute l'événement de script
-        // ATTENTION : Cette logique dépend du fait que le script utilise la fonction globale cb=googleTranslateElementInit
-        // Le code de googleTranslateElementInit va appeler notre logique une fois le script chargé.
-        window.googleTranslateElementInit = () => {
-            // L'API est chargée, on peut forcer la traduction
-            forceInitialTranslation();
-        };
-    }
     
+    // Lance la vérification au montage
+    applyTranslationOnLoad();
+
     // ... (Logique de l'intervalle de masquage de la bannière inchangée)
     const interval = setInterval(() => {
       const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-      // ... (styles de masquage) ...
       if (bannerFrame) {
         bannerFrame.style.height = '20px';
         bannerFrame.style.minHeight = '20px';
@@ -182,7 +181,7 @@ export default function GoogleTranslateCustom() {
       }
     }, 500);
 
-    // La fonction de cleanup est cruciale car le composant va être détruit par la key!
+    // La fonction de cleanup est cruciale
     return () => clearInterval(interval);
   }, []); // [] : S'exécute au montage/démontage
 
@@ -253,26 +252,15 @@ const changeLang = (lang: string) => {
             strategy="afterInteractive"
           />
           {/* 🛑 SCRIPT D'INITIALISATION CORRIGÉ 🛑 */}
+{/* Script d'initialisation CORRIGÉ */}
           <Script id="google-translate-init" strategy="afterInteractive">
             {`
               function googleTranslateElementInit() {
-                  const checkExist = setInterval(function() {
-                      const element = document.getElementById('google_translate_element');
-                      
-                      if (element) {
-                          clearInterval(checkExist);
-                          
-                          // Initialisation classique de Google Translate
-                          new google.translate.TranslateElement({
-                              pageLanguage: 'fr',
-                              autoDisplay: false
-                          }, 'google_translate_element');
-                          
-                          // 🚨 Exécutez immédiatement la logique de persistance si besoin
-                          // window.dispatchEvent(new Event('domreadyforinitialtranslate')); 
-                          // NOTE : Ce trigger peut être géré dans votre useEffect du composant React
-                      }
-                  }, 100); // Vérifie toutes les 100ms
+                  // Cette fonction ne fait plus que l'initialisation de base.
+                new google.translate.TranslateElement({
+                  pageLanguage: 'fr',
+                  autoDisplay: false
+                }, 'google_translate_element');
               }
             `}
           </Script>
