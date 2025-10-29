@@ -22,7 +22,12 @@ useEffect(() => {
     setCarouselImages(shuffled.slice(0, 3));
   }, []);
 
-  if (carouselImages.length === 0) return null;
+if (carouselImages.length === 0) {
+    // 💡 Affichez un squelette ou un message de chargement
+    return <div className="h-40 w-full bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+        Chargement du carrousel...
+    </div>; 
+  }
 
   // Passe CarouselImage[] à ImageCarousel
   return <ImageCarousel images={carouselImages} />;
