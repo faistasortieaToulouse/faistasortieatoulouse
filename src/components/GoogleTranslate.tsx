@@ -75,87 +75,124 @@ function getCookie(name: string) {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-// 💡 Fonction pour déclencher la traduction manuellement après navigation
-const triggerGoogleTranslate = () => {
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-    const currentCookie = getCookie('googtrans');
-    const targetLang = currentCookie?.split('/')[2];
+// Remplacer l'ancienne fonction triggerGoogleTranslate (lignes ~80-92)
+// et ajouter la fonction initializeGoogleTranslate avant l'export par défaut.
 
-    if (select && targetLang && targetLang !== 'fr') {
-        select.value = targetLang;
-        // Déclenche l'événement 'change'
-        select.dispatchEvent(new Event('change'));
+// 💡 Fonction pour initialiser/réinitialiser le widget Google 
+const initializeGoogleTranslate = (targetLang: string) => {
+    if (typeof window.google?.translate?.TranslateElement === 'undefined') {
+        return; // Le script n'est pas encore chargé
     }
+    
+    // Étape 1: Vider l'élément pour forcer la réinitialisation par l'API de Google
+    const existingElement = document.getElementById('google_translate_element');
+    if (existingElement) {
+        existingElement.innerHTML = '';
+    }
+
+    // Étape 2: Créer le nouvel objet Google Translate
+    new window.google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        // Utiliser includedLanguages est une astuce pour forcer la traduction immédiate
+        includedLanguages: `fr,${targetLang}`, 
+        autoDisplay: false
+    }, 'google_translate_element');
+    
+    // Étape 3: Déclencher manuellement l'événement 'change'
+    setTimeout(() => {
+        const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+        if (combo && combo.value !== targetLang) {
+            combo.value = targetLang;
+            combo.dispatchEvent(new Event('change'));
+        }
+    }, 100);
+};
+
+
+// 💡 Nouvelle Fonction principale de déclenchement (utilise la réinitialisation)
+const triggerGoogleTranslate = (targetLang: string) => {
+    // Si la langue est français, on doit recharger la page pour supprimer les marques de traduction
+    if (targetLang === 'fr') {
+        setCookie('googtrans', '/fr/fr', 7);
+        window.location.reload(); 
+        return;
+    }
+    
+    // Sinon, on recrée le widget
+    initializeGoogleTranslate(targetLang);
 };
 
 export default function GoogleTranslateCustom() {
-  const pathname = usePathname(); // Détection de la navigation côté client
+  // L'import de usePathname est maintenu mais n'est plus utilisé dans un useEffect ici.
+  // const pathname = usePathname(); 
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
 
-  // 1. useEffect d'initialisation (gère les cookies et masquage de la bannière)
+  // 1. useEffect d'initialisation (Ce code s'exécute à chaque montage du composant)
   useEffect(() => {
     const cookie = getCookie('googtrans');
     const currentLang = cookie?.split('/')[2];
+    const initialLang = currentLang || 'fr'; // Nouveau: on garde la langue initiale
 
     if (!cookie || !currentLang) {
       setCookie('googtrans', '/fr/fr', 7);
     }
 
-    setSelectedLang(currentLang || 'fr');
+    setSelectedLang(initialLang);
     setScriptReady(true);
 
+    // ⭐️ NOUVEAU : On déclenche la traduction immédiatement si le composant est monté
+    // et qu'une langue est sélectionnée (cela se produit après chaque navigation grâce au Wrapper).
+    if (initialLang !== 'fr') {
+        triggerGoogleTranslate(initialLang);
+    }
+    
+    // ... (Logique de l'intervalle de masquage de la bannière inchangée)
     const interval = setInterval(() => {
-        const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-        if (bannerFrame) {
-            // ... (Styles de masquage inchangés) ...
-            bannerFrame.style.height = '20px';
-            bannerFrame.style.minHeight = '20px';
-            bannerFrame.style.maxHeight = '20px';
-            bannerFrame.style.overflow = 'hidden';
-            bannerFrame.style.position = 'fixed';
-            bannerFrame.style.bottom = '0';
-            bannerFrame.style.top = 'auto';
-            bannerFrame.style.zIndex = '9999';
-        }
+      const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+      // ... (styles de masquage) ...
+      if (bannerFrame) {
+        bannerFrame.style.height = '20px';
+        bannerFrame.style.minHeight = '20px';
+        bannerFrame.style.maxHeight = '20px';
+        bannerFrame.style.overflow = 'hidden';
+        bannerFrame.style.position = 'fixed';
+        bannerFrame.style.bottom = '0';
+        bannerFrame.style.top = 'auto';
+        bannerFrame.style.zIndex = '9999';
+      }
     }, 500);
 
+    // La fonction de cleanup est cruciale car le composant va être détruit par la key!
     return () => clearInterval(interval);
-  }, []);
+  }, []); // [] : S'exécute au montage/démontage
 
   // ⭐️ 2. useEffect de surveillance des changements de route ⭐️
+  // CE USEEFFECT EST MAINTENANT OBSOLÈTE ET DOIT ÊTRE SUPPRIMÉ OU COMMENTÉ
+  /*
   useEffect(() => {
       if (scriptReady) {
           // Un délai est nécessaire pour que le DOM de la nouvelle page soit prêt
           setTimeout(triggerGoogleTranslate, 50); 
       }
-  }, [pathname, scriptReady]); 
+  }, [pathname, scriptReady]);
+  */
 
-  // 3. Fonction changeLang mise à jour : Tente de déclencher la traduction sans recharger la page
-  const changeLang = (lang: string) => {
+// 3. Fonction changeLang (CORRIGÉE : Utilise uniquement le nouveau trigger)
+const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
-    const val = `/fr/${lang}`;
-    setCookie('googtrans', val, 7);
+    
+    // setCookie est maintenant géré à l'intérieur de triggerGoogleTranslate pour le 'fr'
+    if (lang !== 'fr') {
+        const val = `/fr/${lang}`;
+        setCookie('googtrans', val, 7);
+    }
 
     setSelectedLang(lang);
-
-    if (typeof window !== 'undefined' && window.google?.translate?.TranslateElement) {
-        const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-        
-        if (combo) {
-            combo.value = lang; 
-            combo.dispatchEvent(new Event('change'));
-        } else {
-             // Fallback si le widget n'est pas encore trouvé (rare)
-             window.location.reload(); 
-        }
-    } else {
-         // Fallback si le script Google n'est pas prêt
-         window.location.reload();
-    }
-  };
-
+    // Le nouveau trigger gère soit le reload (pour 'fr') soit la recréation du widget
+    triggerGoogleTranslate(lang);
+};
 
   return (
     <>
