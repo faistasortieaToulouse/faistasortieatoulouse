@@ -19,15 +19,15 @@ interface CarouselProps {
 const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
 
     // 3. LOGIQUE POUR CRÉER L'OBJET LOGO À PARTIR DE LA PROP (à l'intérieur du composant)
-    const logoImage: CarouselImage | undefined = useMemo(() => {
-        if (!logoUrl) return undefined;
-        return {
-            id: 'fts-logo',
-            imageUrl: logoUrl,
-            description: 'Logo FTS',
-            imageHint: 'logo'
-        };
-    }, [logoUrl]);
+    // const logoImage: CarouselImage | undefined = useMemo(() => {
+        // if (!logoUrl) return undefined;
+       //  return {
+            // id: 'fts-logo',
+           //  imageUrl: logoUrl,
+            // description: 'Logo FTS',
+           //  imageHint: 'logo'
+        // };
+    // }, [logoUrl]);
 
     // Sélectionne le logo + 3 images aléatoires
     const displayImages = useMemo(() => {
@@ -40,9 +40,10 @@ const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
         const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, needed);
         
         // Ajoute le logo si disponible
-        return logoImage ? [logoImage, ...shuffled] : shuffled;
+// L'ancienne ligne était : return logoImage ? [logoImage, ...shuffled] : shuffled;
+    return shuffled;
         
-    }, [images, logoImage]); // Dépendances corrigées
+    }, [images]); // Dépendances corrigées
     
     return (
         <div
