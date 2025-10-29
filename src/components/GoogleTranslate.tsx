@@ -142,10 +142,28 @@ export default function GoogleTranslateCustom() {
     setSelectedLang(initialLang);
     setScriptReady(true);
 
-    // ⭐️ NOUVEAU : On déclenche la traduction immédiatement si le composant est monté
-    // et qu'une langue est sélectionnée (cela se produit après chaque navigation grâce au Wrapper).
-    if (initialLang !== 'fr') {
-        triggerGoogleTranslate(initialLang);
+// ⭐️ LOGIQUE DE FORÇAGE DE LA TRADUCTION INITIALE ⭐️
+    // On lance la fonction pour appliquer la traduction après un court délai
+    const forceInitialTranslation = () => {
+        if (initialLang !== 'fr') {
+            // Utiliser un délai pour laisser le temps au script de Google de s'initialiser
+            setTimeout(() => {
+                triggerGoogleTranslate(initialLang);
+            }, 500); // Délai augmenté à 500ms
+        }
+    };
+
+    // 1. Si le script Google est déjà chargé (cas de navigation interne ou d'un montage tardif)
+    if (typeof window.google?.translate?.TranslateElement !== 'undefined') {
+        forceInitialTranslation();
+    } else {
+        // 2. Si le script n'est pas encore chargé (cas de F5), on écoute l'événement de script
+        // ATTENTION : Cette logique dépend du fait que le script utilise la fonction globale cb=googleTranslateElementInit
+        // Le code de googleTranslateElementInit va appeler notre logique une fois le script chargé.
+        window.googleTranslateElementInit = () => {
+            // L'API est chargée, on peut forcer la traduction
+            forceInitialTranslation();
+        };
     }
     
     // ... (Logique de l'intervalle de masquage de la bannière inchangée)
