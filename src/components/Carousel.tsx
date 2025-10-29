@@ -8,7 +8,8 @@ const Carousel: React.FC = () => {
   const displayImages = useMemo(() => {
     const logoImage = carouselImages.find(img => img.id === 'fts-logo');
     const otherImages = carouselImages.filter(img => img.id !== 'fts-logo');
-    const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, 2);
+    const needed = Math.min(2, otherImages.length);
+    const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, needed);
     return logoImage ? [logoImage, ...shuffled] : shuffled;
   }, []);
 
