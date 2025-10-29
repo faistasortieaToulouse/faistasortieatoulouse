@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
+import Image from "next/image";
 import { carouselImages, ImagePlaceholder } from '../lib/placeholder-images';
 
 const FALLBACK_IMAGE = '/images/fallback.png';
 
 const Carousel: React.FC = () => {
-  // Sélectionne le logo + 2 images aléatoires
+  // Sélectionne le logo + 3 images aléatoires
   const displayImages = useMemo(() => {
     const logoImage = carouselImages.find(img => img.id === 'fts-logo');
     const otherImages = carouselImages.filter(img => img.id !== 'fts-logo');
@@ -12,7 +13,7 @@ const Carousel: React.FC = () => {
     const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, needed);
     return logoImage ? [logoImage, ...shuffled] : shuffled;
   }, []);
-
+  
   return (
     <div
       style={{
@@ -36,7 +37,9 @@ const Carousel: React.FC = () => {
         >
           <img
             src={image.imageUrl || FALLBACK_IMAGE}
-            alt=""
+            alt={image.description || 'LogoFTS'}
+            width={300}
+            height={200}
             style={{
               width: '100%',
               height: 'auto',
