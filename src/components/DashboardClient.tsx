@@ -98,7 +98,7 @@ export default function DashboardClient({
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
-        <ClientCarousel />
+        <ClientCarousel images={carouselImages} />
       </section>
 
       {/* Stats rapides */}
