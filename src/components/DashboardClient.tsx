@@ -94,45 +94,12 @@ export default function DashboardClient({
         : img
   );
 
-  function RandomImageGrid({ images }: { images: CarouselImage[] }) {
-  const shuffled = useMemo(() => {
-    return [...images].sort(() => 0.5 - Math.random()).slice(0, 20);
-  }, [images]);
-
-  return (
-    <section className="p-4">
-      <h2 className="text-xl font-bold mb-4 text-primary">📸 Photos aléatoires</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {shuffled.map((img) => (
-          <div key={img.id} className="overflow-hidden rounded-lg shadow">
-            <Image
-              src={img.imageUrl}
-              alt={img.description}
-              width={300}
-              height={200}
-              className="w-full h-auto object-cover"
-              unoptimized
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
         <ClientCarousel />
       </section>
-
-      <section>
-  <ClientCarousel />
-</section>
-
-{/* Grille d’images aléatoires */}
-<RandomImageGrid images={carouselImages} />
 
       {/* Stats rapides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
