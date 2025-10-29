@@ -35,24 +35,24 @@ const Carousel: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          <img
-            src={image.imageUrl || FALLBACK_IMAGE}
-            alt={image.description || 'LogoFTS'}
-            width={300}
-            height={200}
-            style={{
-              width: '100%',
-              height: 'auto',
-              objectFit: 'cover',
-              borderRadius: '8px',
-            }}
-onError={(e) => {
-  const img = e.currentTarget as HTMLImageElement;
-  if (img.src !== window.location.origin + FALLBACK_IMAGE) {
-    img.src = FALLBACK_IMAGE;
-  }
-}}
-          />
+<img
+  src={image.imageUrl || FALLBACK_IMAGE}
+  alt={image.description || 'LogoFTS'}
+  width={300}
+  height={200}
+  style={{
+    width: '100%',
+    height: 'auto',
+    objectFit: 'cover',
+    borderRadius: '8px',
+  }}
+  onError={(e) => {
+    const img = e.currentTarget as HTMLImageElement;
+    if (!img.src.includes(FALLBACK_IMAGE)) {
+      img.src = FALLBACK_IMAGE;
+    }
+  }}
+/>
         </div>
       ))}
     </div>
