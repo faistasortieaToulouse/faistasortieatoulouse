@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import placeholderImages from '@/lib/placeholder-images.json';
+import { carouselImages as allCarouselImages } from '@/lib/placeholder-images';
 import { CarouselImage } from '@/types/types';
 import { ImageCarousel } from './image-carousel';
 
