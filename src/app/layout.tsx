@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import GoogleTranslate from '@/components/GoogleTranslate'; // client component
+// import GoogleTranslate from '@/components/GoogleTranslate'; // client component
+import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
 
 export const metadata: Metadata = {
   title: 'Toulouse Outings',
@@ -44,6 +45,9 @@ export default function RootLayout({
             car le widget est déjà intégré via GoogleTranslateWidget dans (main)/layout.tsx. */}
         {/* <GoogleTranslate /> */}
         {/* ✅ Active ton composant GoogleTranslate ici */}
+
+        {/* ✅ AJOUT DU WRAPPER AVEC LA LOGIQUE DE CLÉ DYNAMIQUE */}
+        <TranslateWrapper />
 
         <Toaster />
       </body>
