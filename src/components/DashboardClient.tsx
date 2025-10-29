@@ -21,6 +21,7 @@ import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
 import InstallPWAiOS from "@/components/InstallPWAiOS";
 import APKDownloadModal from "@/components/APKDownloadModal"; // Assurez-vous que le chemin est correct
+import { RandomImageGrid } from './RandomImageGrid';
 
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
@@ -100,6 +101,8 @@ export default function DashboardClient({
       <section>
         <ClientCarousel />
       </section>
+
+      <RandomImageGrid images={carouselImages} count={20} />
 
       {/* Stats rapides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
