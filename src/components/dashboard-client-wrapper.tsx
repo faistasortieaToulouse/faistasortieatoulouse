@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TimeWeatherBar } from './time-weather-bar';
 import { ImageCarousel } from './image-carousel';
 import { CarouselImage } from '@/types/types';
@@ -10,17 +10,19 @@ interface Props {
 }
 
 export function DashboardClientWrapper({ placeholderImages }: Props) {
-  // Tirage aléatoire côté client pour éviter l'hydration error
-  const carouselImages = useMemo(() => {
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+
+  useEffect(() => {
+    // Mélange aléatoire à chaque montage
     const shuffled = [...placeholderImages].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
+    setCarouselImages(shuffled.slice(0, 3));
   }, [placeholderImages]);
 
   return (
     <>
       <TimeWeatherBar />
       <section>
-        <ImageCarousel images={carouselImages} />
+        {carouselImages.length > 0 && <ImageCarousel images={carouselImages} />}
       </section>
     </>
   );
