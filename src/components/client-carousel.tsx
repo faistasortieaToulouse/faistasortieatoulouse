@@ -1,27 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import placeholderImages from '@/lib/placeholder-images.json';
-import { CarouselImage } from '@/types/types';
+// Supprimer placeholderImages car les images sont passées par props
+// import placeholderImages from '@/lib/placeholder-images.json'; 
+
+// Garder l'import du type
+import { CarouselImage } from '@/types/types'; 
+
+// Assurez-vous d'importer votre composant de rendu final
 import { ImageCarousel } from './image-carousel';
 
-export function ClientCarousel() {
-  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+// 1. Définir l'interface des props pour accepter le tableau d'images
+interface ClientCarouselProps {
+  images: CarouselImage[];
+}
 
-  useEffect(() => {
-    const imagesArray: CarouselImage[] = placeholderImages.carouselImages
-      .filter((url: string) => typeof url === 'string' && url.startsWith('http'))
-      .map((imageUrl: string, index: number) => ({
-        id: index.toString(),
-        imageUrl,
-        description: `Image ${index + 1}`,
-      }));
+// 2. Accepter les props et les utiliser directement
+export function ClientCarousel({ images }: ClientCarouselProps) {
+  // Supprimer tout le useEffect et le useState car les données viennent du parent.
 
-    const shuffled = [...imagesArray].sort(() => 0.5 - Math.random());
-    setCarouselImages(shuffled.slice(0, 3));
-  }, []);
+  // 3. Vérification des données (si nécessaire)
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 font-semibold">
+        <span className="text-center p-4">
+          Aucune image à afficher. (Vérifiez la source de données dans DashboardCarousel.tsx)
+        </span>
+      </div>
+    );
+  }
 
-  if (carouselImages.length === 0) return null;
-
-  return <ImageCarousel images={carouselImages} />;
+  // Si vous voulez toujours un tri aléatoire, vous devez le faire ici avant de le passer, 
+  // ou mieux, dans le composant parent qui charge les données si elles sont statiques.
+  // Pour l'instant, on passe les images telles quelles pour résoudre l'erreur.
+  
+  // Si vous souhaitez n'afficher que les 3 premières images (comme dans votre ancien useEffect):
+  // const imagesToShow = images.slice(0, 3);
+  
+  // Utiliser toutes les images passées:
+  return <ImageCarousel images={images} />;
 }
