@@ -4,13 +4,42 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { usePathname } from 'next/navigation'; // ⬅️ IMPORT NÉCESSAIRE POUR NEXT.JS
 
-// --- (Vos constantes LANGS et EXTRA_LANGS sont conservées) ---
-const LANGS = [
-// ... (liste complète)
+// ⭐️ DÉFINITION DE L'INTERFACE ⭐️
+interface Language {
+  code: string;
+  label: string;
+}
+
+// ⭐️ APPLIQUER LE TYPE À LANGS ⭐️
+const LANGS: Language[] = [
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Allemand' },
+  { code: 'en', label: 'Anglais' },
+  { code: 'ar', label: 'Arabe' },
+  { code: 'zh-CN', label: 'Chinois (simpl.)' },
+  { code: 'es', label: 'Espagnol' },
+  { code: 'it', label: 'Italien' },
+  { code: 'ja', label: 'Japonais' },
+  { code: 'pt', label: 'Portugais' },
+  { code: 'ru', label: 'Russe' },
+  { code: 'tr', label: 'Turc' },
 ];
 
-const EXTRA_LANGS = [
-// ... (liste complète)
+// ⭐️ APPLIQUER LE TYPE À EXTRA_LANGS ⭐️
+const EXTRA_LANGS: Language[] = [
+  { code: 'eu', label: 'Basque' },
+  { code: 'ko', label: 'Coréen' },
+  { code: 'fa', label: 'Farci' },
+  { code: 'el', label: 'Grec' },
+  { code: 'hi', label: 'Hindi' },
+  { code: 'id', label: 'Indonésien' },
+  { code: 'nl', label: 'Néerlandais' },
+  { code: 'oc', label: 'Occitan' },
+  { code: 'pl', label: 'Polonais' },
+  { code: 'ro', label: 'Roumain' },
+  { code: 'sv', label: 'Suédois' },
+  { code: 'th', label: 'Thaïlandais' },
+  { code: 'vi', label: 'Vietnamien' },
 ];
 
 // --- (Vos fonctions setCookie et getCookie sont conservées) ---
