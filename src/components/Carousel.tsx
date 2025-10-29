@@ -54,7 +54,7 @@ const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
                 scrollbarWidth: 'none', // cache scrollbar Firefox
             }}
         >
-            {displayImages.map((image: ImagePlaceholder) => (
+            {displayImages.map((image: CarouselImage) => (
                 <div
                     key={image.id}
                     style={{
