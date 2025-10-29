@@ -17,17 +17,18 @@ const Carousel: React.FC = () => {
         display: 'flex',
         gap: '16px',
         padding: '16px',
-        overflowX: 'auto', // permet le scroll horizontal
-        scrollbarWidth: 'none', // pour Firefox
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
       }}
     >
       {randomImages.map((image: ImagePlaceholder) => (
         <div
           key={image.id}
           style={{
-            flex: '0 0 auto', // empêche le shrink, garde la taille
-            minWidth: '150px', // largeur minimale pour mobile
-            maxWidth: '80vw', // ne dépasse jamais 80% de l'écran
+            flex: '0 0 auto',
+            minWidth: '120px',
+            width: 'calc(33.33% - 16px)', // 3 images visibles sur grand écran
+            maxWidth: '300px', // limite la taille sur desktop
             textAlign: 'center',
           }}
         >
@@ -36,7 +37,7 @@ const Carousel: React.FC = () => {
             alt=""
             style={{
               width: '100%',
-              height: 'auto', // hauteur adaptative
+              height: 'auto',
               objectFit: 'cover',
               borderRadius: '8px',
             }}
