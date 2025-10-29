@@ -46,9 +46,12 @@ const Carousel: React.FC = () => {
               objectFit: 'cover',
               borderRadius: '8px',
             }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = FALLBACK_IMAGE;
-            }}
+onError={(e) => {
+  const img = e.currentTarget as HTMLImageElement;
+  if (img.src !== window.location.origin + FALLBACK_IMAGE) {
+    img.src = FALLBACK_IMAGE;
+  }
+}}
           />
         </div>
       ))}
