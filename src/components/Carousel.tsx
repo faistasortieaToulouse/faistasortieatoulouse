@@ -4,11 +4,11 @@ import { carouselImages, ImagePlaceholder } from '../lib/placeholder-images';
 const FALLBACK_IMAGE = '/images/fallback.png';
 
 const Carousel: React.FC = () => {
-  // Sélectionne le logo + 2 images aléatoires
+  // Sélectionne le logo + 3 images aléatoires
   const displayImages = useMemo(() => {
     const logoImage = carouselImages.find(img => img.id === 'fts-logo');
     const otherImages = carouselImages.filter(img => img.id !== 'fts-logo');
-    const needed = Math.min(3, otherImages.length);
+    const needed = Math.min(3, otherImages.length); // prend 3 images supplémentaires
     const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, needed);
     return logoImage ? [logoImage, ...shuffled] : shuffled;
   }, []);
@@ -17,8 +17,8 @@ const Carousel: React.FC = () => {
     <div
       style={{
         display: 'flex',
-        gap: '16px',
-        padding: '16px',
+        gap: '12px',
+        padding: '12px',
         overflowX: 'auto',
         scrollbarWidth: 'none', // cache scrollbar Firefox
       }}
@@ -28,15 +28,15 @@ const Carousel: React.FC = () => {
           key={image.id}
           style={{
             flex: '0 0 auto',       // empêche le shrink
-            minWidth: '120px',      // largeur minimale mobile
-            maxWidth: '300px',      // largeur maximale desktop
-            width: 'calc(33.33% - 16px)', // 3 images visibles sur desktop
+            width: '80vw',          // largeur adaptée aux mobiles
+            maxWidth: '300px',      // limite sur desktop
+            minWidth: '120px',      // minimum pour très petits écrans
             textAlign: 'center',
           }}
         >
           <img
             src={image.imageUrl || FALLBACK_IMAGE}
-            alt=""
+            alt={image.description || 'LogoFTS'}
             style={{
               width: '100%',
               height: 'auto',
