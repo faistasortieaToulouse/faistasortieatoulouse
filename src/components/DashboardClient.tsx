@@ -100,7 +100,7 @@ export default function DashboardClient({
     <div className="flex flex-col gap-6 w-full">
       {/* Carrousel */}
       <section>
-        <Carousel />
+        <Carousel images={imagesForCarousel} logoUrl={ftsLogoUrl} />
       </section>
 
       {/* Stats rapides */}
