@@ -7,46 +7,36 @@ export type ImagePlaceholder = {
   imageHint: string;
 };
 
+const FALLBACK_IMAGE = '/images/fallback.png';
+
+const createPlaceholder = (
+  item: string | Partial<ImagePlaceholder>,
+  index: number,
+  prefix = 'Image'
+): ImagePlaceholder => {
+  if (typeof item === 'string') {
+    return {
+      id: String(index),
+      description: `${prefix} ${index + 1}`,
+      imageUrl: item || FALLBACK_IMAGE,
+      imageHint: `${prefix} ${index + 1}`,
+    };
+  }
+  const obj = item as Partial<ImagePlaceholder>;
+  return {
+    id: obj.id ?? String(index),
+    description: obj.description ?? `${prefix} ${index + 1}`,
+    imageUrl: obj.imageUrl ?? FALLBACK_IMAGE,
+    imageHint: obj.imageHint ?? '',
+  };
+};
+
 // --- placeholderImages ---
 export const placeholderImages: ImagePlaceholder[] = Array.isArray(data.placeholderImages)
-  ? data.placeholderImages.map((item, index) => {
-      // On force item comme Partial<ImagePlaceholder> pour TypeScript
-      const obj = item as Partial<ImagePlaceholder>;
-      return {
-        id: obj.id ?? String(index),
-        description: obj.description ?? `Placeholder image ${index + 1}`,
-        imageUrl: obj.imageUrl ?? '',
-        imageHint: obj.imageHint ?? '',
-      };
-    })
+  ? data.placeholderImages.map((item, index) => createPlaceholder(item, index, 'Placeholder image'))
   : [];
 
 // --- carouselImages ---
 export const carouselImages: ImagePlaceholder[] = Array.isArray(data.carouselImages)
-  ? data.carouselImages.map((item, index) => {
-      if (typeof item === 'string') {
-        return {
-          id: String(index),
-          description: `Carousel image ${index + 1}`,
-          imageUrl: item,
-          imageHint: `Image ${index + 1}`,
-        };
-      } else if (typeof item === 'object' && item !== null) {
-        const obj = item as Partial<ImagePlaceholder>;
-        return {
-          id: obj.id ?? String(index),
-          description: obj.description ?? `Carousel image ${index + 1}`,
-          imageUrl: obj.imageUrl ?? '',
-          imageHint: obj.imageHint ?? '',
-        };
-      } else {
-        // fallback sécurisé si le JSON contient une valeur inattendue
-        return {
-          id: String(index),
-          description: `Carousel image ${index + 1}`,
-          imageUrl: '',
-          imageHint: `Image ${index + 1}`,
-        };
-      }
-    })
+  ? data.carouselImages.map((item, index) => createPlaceholder(item, index, 'Carousel image'))
   : [];
