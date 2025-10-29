@@ -9,7 +9,7 @@ interface Props {
   count?: number; // nombre d’images à afficher (optionnel)
 }
 
-export function RandomImageGrid({ images, count = 20 }: Props) {
+export function RandomImageGrid({ images, count = 3 }: Props) {
   const shuffled = useMemo(() => {
     return [...images].sort(() => 0.5 - Math.random()).slice(0, count);
   }, [images, count]);
