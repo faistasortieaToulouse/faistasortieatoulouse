@@ -180,7 +180,6 @@ iframe.goog-te-banner-frame {
   opacity: 1 !important;
 }
 
-// À ajouter ou vérifier dans votre balise <style jsx global>
 .goog-te-gadget-simple,
 .goog-te-combo {
     display: none !important;
