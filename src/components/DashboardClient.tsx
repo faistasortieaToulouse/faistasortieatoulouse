@@ -34,7 +34,7 @@ interface DashboardClientProps {
   discordPolls: any[];
   eventsData: DiscordEvent[];
   totalMembers: number;
-  // ftsLogoUrl?: string;
+  ftsLogoUrl?: string;
 }
 
 export default function DashboardClient({
@@ -42,7 +42,7 @@ export default function DashboardClient({
   discordPolls,
   eventsData,
   totalMembers,
-  // ftsLogoUrl,
+  ftsLogoUrl,
 }: DashboardClientProps) {
   const { toast } = useToast();
 
@@ -129,7 +129,7 @@ export default function DashboardClient({
       </div>
 
       {/* Menu dashboard */}
-      <DashboardMenu />
+      <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
 
 {/* Grille principale */}
 <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
