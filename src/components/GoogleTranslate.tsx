@@ -67,15 +67,25 @@ useEffect(() => {
 
   setSelectedLang(currentLang || 'fr');
   setScriptReady(true);
-  
-  // Aucune fonction de nettoyage (return) n'est nécessaire ici.
+
+  // ✅ version active et correcte
+  const interval = setInterval(() => {
+    const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+    if (bannerFrame) {
+      bannerFrame.style.height = '20px';
+      bannerFrame.style.minHeight = '20px';
+      bannerFrame.style.maxHeight = '20px';
+      bannerFrame.style.overflow = 'hidden';
+      bannerFrame.style.position = 'fixed';
+      bannerFrame.style.bottom = '0';
+      bannerFrame.style.top = 'auto';
+      bannerFrame.style.zIndex = '9999';
+    }
+  }, 500);
+
+  return () => clearInterval(interval);
 }, []);
 
-return;
-*/
-
-    return () => clearInterval(interval);
-  }, []);
 
   const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
