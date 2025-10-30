@@ -48,11 +48,13 @@ const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
     return (
         <div
             style={{
-                display: 'flex',
-                gap: '12px',
-                padding: '12px',
-                overflowX: 'auto',
-                scrollbarWidth: 'none', // cache scrollbar Firefox
+            display: 'flex',
+            justifyContent: 'center', // centre horizontalement
+            alignItems: 'center',     // centre verticalement si nécessaire
+            gap: '12px',
+            padding: '12px',
+            overflowX: 'auto',
+            scrollbarWidth: 'none', // cache scrollbar Firefox
             }}
         >
             {displayImages.map((image: CarouselImage) => (
