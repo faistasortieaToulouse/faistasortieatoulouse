@@ -1,60 +1,34 @@
 import React, { useMemo } from 'react';
 // Retire l'import d'Image si vous n'utilisez que la balise <img>
 // import Image from "next/image"; 
-// S'assurer que le type est importé une seule fois
-import { ImagePlaceholder } from '../lib/placeholder-images'; 
-// Retire l'import des données brutes, elles doivent venir des props
-// import { carouselImages } from '../lib/placeholder-images'; 
 import { CarouselImage } from '@/types/types'; // Importez le type CarouselImage
 
 const FALLBACK_IMAGE = '/images/fallback.png';
 
 // 1. DÉFINITION DE L'INTERFACE DE PROPS
 interface CarouselProps {
-    images: CarouselImage[];      // Les images d'activités
-    logoUrl: string | undefined;     // L'URL du logo (peut être undefined)
+    images: CarouselImage[]; // Les images d'activités
 }
 
 // 2. LE COMPOSANT ACCEPTE LES PROPS
-const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
+const Carousel: React.FC<CarouselProps> = ({ images }) => {
 
-    // 3. LOGIQUE POUR CRÉER L'OBJET LOGO À PARTIR DE LA PROP (à l'intérieur du composant)
-    // const logoImage: CarouselImage | undefined = useMemo(() => {
-        // if (!logoUrl) return undefined;
-       //  return {
-            // id: 'fts-logo',
-           //  imageUrl: logoUrl,
-            // description: 'Logo FTS',
-           //  imageHint: 'logo'
-        // };
-    // }, [logoUrl]);
-
-    // Sélectionne le logo + 3 images aléatoires
+    // Sélectionne 3 images aléatoires parmi les props
     const displayImages = useMemo(() => {
-        // La recherche de logo est retirée, on utilise l'objet créé au-dessus.
-        
-        // Les autres images sont les props 'images' (les activités)
-        const otherImages = images;
-        
-        const needed = Math.min(3, otherImages.length);
-        const shuffled = otherImages.sort(() => 0.5 - Math.random()).slice(0, needed);
-        
-        // Ajoute le logo si disponible
-// L'ancienne ligne était : return logoImage ? [logoImage, ...shuffled] : shuffled;
-    return shuffled;
-        
+        const needed = Math.min(3, images.length);
+        return images.sort(() => 0.5 - Math.random()).slice(0, needed);
     }, [images]); // Dépendances corrigées
-    
+
     return (
         <div
             style={{
-            display: 'flex',
-            justifyContent: 'center', // centre horizontalement
-            alignItems: 'center',     // centre verticalement si nécessaire
-            gap: '12px',
-            padding: '12px',
-            overflowX: 'auto',
-            scrollbarWidth: 'none', // cache scrollbar Firefox
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px',
+                overflowX: 'auto',
+                scrollbarWidth: 'none', // cache scrollbar Firefox
             }}
         >
             {displayImages.map((image: CarouselImage) => (
@@ -70,7 +44,7 @@ const Carousel: React.FC<CarouselProps> = ({ images, logoUrl }) => {
                 >
                     <img
                         src={image.imageUrl || FALLBACK_IMAGE}
-                        alt={image.description || 'LogoFTS'}
+                        alt={image.description || 'Image'}
                         width={300}
                         height={200}
                         style={{
