@@ -7,7 +7,7 @@ import { Menu, X, Download, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardMenuProps {
-  ftsLogoUrl?: string | StaticImageData; // <-- 2. Le type StaticImageData est maintenant accepté
+  ftsLogoUrl?: string | StaticImageData; // <-- Problème ici
 }
 
 export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
