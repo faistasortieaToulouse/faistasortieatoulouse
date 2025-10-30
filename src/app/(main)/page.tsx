@@ -110,7 +110,7 @@ export default async function DashboardPage() {
           <p className="mt-2 text-accent">Avec FTS on est bien dans la ville rose !</p>
         </div>
         <div className="relative w-24 h-24 flex-shrink-0">
-          <Image src={FTS_LOGO_URL} alt="Logo FTS" fill className="rounded-lg object-cover" />
+          <Image src={FTS_LOGO_URL} alt="Logo FTS" fill className="rounded-lg object-cover" unoptimized />
         </div>
       </header>
 
