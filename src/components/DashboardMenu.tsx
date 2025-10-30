@@ -49,17 +49,20 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
             </Button>
           </li>
 
-          {/* Logo FTST */}
-          <li className="flex justify-center mt-2">
-            {ftsLogoUrl && (
-              <Image
-                src={ftsLogoUrl}
-                alt="Logo FTST"
-                width={40}
-                height={40}
-              />
-            )}
-          </li>
+{/* Logo FTST */}
+<li className="flex justify-center mt-2">
+  {ftsLogoUrl && (
+    <div className="w-10 h-10 md:w-12 md:h-12 relative">
+      <Image
+        src={ftsLogoUrl}
+        alt="Logo FTST"
+        fill
+        style={{ objectFit: "contain" }}
+        sizes="40px"
+      />
+    </div>
+  )}
+</li>
 
           {/* Événements désactivés */}
           <li className="mt-2">
