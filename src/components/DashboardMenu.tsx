@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; // <-- IMPORT MANQUANT
 import { Menu, X, Download, PartyPopper } from "lucide-react";
+import Image, { StaticImageData } from "next/image";
 import { Button } from "@/components/ui/button";
 
 interface DashboardMenuProps {
-  ftsLogoUrl?: string;
+  ftsLogoUrl?: string | StaticImageData; // <-- 2. Le type StaticImageData est maintenant accepté
 }
 
 export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
