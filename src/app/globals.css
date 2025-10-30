@@ -154,8 +154,13 @@ button.group:hover span {
   font-size: 0 !important;
 }
 
-.goog-te-banner-frame.skiptranslate {
+.goog-te-banner-frame.skiptranslate,
+body > .skiptranslate,
+iframe.goog-te-banner-frame,
+iframe#\:1\.container {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
 }
 
 iframe.goog-te-banner-frame {
@@ -175,5 +180,11 @@ iframe.goog-te-banner-frame {
   opacity: 1 !important;
 }
 
+// À ajouter ou vérifier dans votre balise <style jsx global>
+.goog-te-gadget-simple,
+.goog-te-combo {
+    display: none !important;
+    visibility: hidden !important;
+}
 
 
