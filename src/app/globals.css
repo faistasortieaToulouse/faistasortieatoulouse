@@ -186,4 +186,9 @@ iframe.goog-te-banner-frame {
     visibility: hidden !important;
 }
 
+/* src/app/globals.css ou dans un bloc style global */
+.vercel-toolbar-root {
+  display: none !important;
+}
+
 
