@@ -17,7 +17,7 @@ export function GoogleTranslateWidget() {
             new (window as any).google.translate.TranslateElement({
             pageLanguage: 'fr',
             includedLanguages: 'en,es,it,de,pt,ru,ar,tr,zh-CN,ja',
-            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+            layout: (window as any).google.translate.TranslateElement.InlineLayout.NONE,
             autoDisplay: false
             }, 'google_translate_element');
         };
