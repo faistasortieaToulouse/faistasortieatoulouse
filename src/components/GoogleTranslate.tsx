@@ -131,7 +131,7 @@ useEffect(() => {
             src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
             strategy="afterInteractive"
           />
-// LIGNE 160 DANS src/components/GoogleTranslate.tsx
+          
 <Script id="google-translate-init" strategy="afterInteractive">
     {`
         function googleTranslateElementInit() {
