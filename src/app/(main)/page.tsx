@@ -5,6 +5,7 @@ import { TimeWeatherBar } from '@/components/time-weather-bar';
 import Image from 'next/image';
 import { ClientOnly } from '@/components/ClientOnly';
 import ftsLogo from '/public/icons/logoFTS180iphone.jpg';
+import ftsLogoImage from '@/public/icons/logoFTS180iphone.jpg';
 
 export const revalidate = 300;
 
@@ -111,7 +112,7 @@ export default async function DashboardPage() {
           <p className="mt-2 text-accent">Avec FTS on est bien dans la ville rose !</p>
         </div>
         <div className="relative w-24 h-24 flex-shrink-0">
-          <Image src={FTS_LOGO_URL} alt="Logo FTS" fill className="rounded-lg object-cover" />
+          <Image src={ftsLogoImage} alt="Logo FTS" fill className="rounded-lg object-cover" />
         </div>
       </header>
 
