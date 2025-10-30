@@ -59,6 +59,7 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
         fill
         style={{ objectFit: "contain" }}
         sizes="40px"
+        unoptimized // <--- AJOUTEZ CETTE LIGNE
       />
     </div>
   )}
