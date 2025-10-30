@@ -10,7 +10,7 @@ export const revalidate = 300;
 const GUILD_ID = '1422806103267344416';
 const POLLS_CHANNEL_ID = '1422806103904882842';
 const FTS_LOGO_URL =
-  'http://bilingue31.free.fr/logoFTS180iphone.jpg';
+  '/images/logoFTS180iphone.jpg';
 
 export default async function DashboardPage() {
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
