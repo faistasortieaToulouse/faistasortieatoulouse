@@ -56,30 +56,35 @@ export default function GoogleTranslateCustom() {
   const [scriptReady, setScriptReady] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
 
-  useEffect(() => {
-    const cookie = getCookie('googtrans');
-    const currentLang = cookie?.split('/')[2];
+useEffect(() => {
+  const cookie = getCookie('googtrans');
+  const currentLang = cookie?.split('/')[2];
 
-    if (!cookie || !currentLang) {
-      setCookie('googtrans', '/fr/fr', 7);
-    }
+  if (!cookie || !currentLang) {
+    setCookie('googtrans', '/fr/fr', 7);
+  }
 
-    setSelectedLang(currentLang || 'fr');
-    setScriptReady(true);
+  setSelectedLang(currentLang || 'fr');
+  setScriptReady(true);
 
-/* const interval = setInterval(() => {
+  // ✅ On déclare bien l'interval ici
+  const interval = setInterval(() => {
     const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
     if (bannerFrame) {
-        bannerFrame.style.height = '20px';
-        bannerFrame.style.minHeight = '20px';
-        bannerFrame.style.maxHeight = '20px';
-        bannerFrame.style.overflow = 'hidden';
-        bannerFrame.style.position = 'fixed';
-        bannerFrame.style.bottom = '0';
-        bannerFrame.style.top = 'auto';
-        bannerFrame.style.zIndex = '9999';
+      bannerFrame.style.height = '20px';
+      bannerFrame.style.minHeight = '20px';
+      bannerFrame.style.maxHeight = '20px';
+      bannerFrame.style.overflow = 'hidden';
+      bannerFrame.style.position = 'fixed';
+      bannerFrame.style.bottom = '0';
+      bannerFrame.style.top = 'auto';
+      bannerFrame.style.zIndex = '9999';
     }
-}, 500);
+  }, 500);
+
+  // ✅ On nettoie correctement
+  return () => clearInterval(interval);
+}, []);
 
 return;
 */
