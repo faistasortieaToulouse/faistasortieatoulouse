@@ -47,7 +47,7 @@ export default function RootLayout({
         {/* ✅ Active ton composant GoogleTranslate ici */}
 
         {/* ✅ AJOUT DU WRAPPER AVEC LA LOGIQUE DE CLÉ DYNAMIQUE */}
-        <TranslateWrapper />
+        {/* <TranslateWrapper /> */}
 
         <Toaster />
       </body>
