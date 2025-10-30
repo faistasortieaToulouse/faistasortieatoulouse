@@ -56,6 +56,7 @@ export default function GoogleTranslateCustom() {
   const [scriptReady, setScriptReady] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
 
+// NOUVEAU CODE SANS LE HACK D'INTERVALLE
 useEffect(() => {
   const cookie = getCookie('googtrans');
   const currentLang = cookie?.split('/')[2];
@@ -66,24 +67,8 @@ useEffect(() => {
 
   setSelectedLang(currentLang || 'fr');
   setScriptReady(true);
-
-  // ✅ On déclare bien l'interval ici
-  const interval = setInterval(() => {
-    const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-    if (bannerFrame) {
-      bannerFrame.style.height = '20px';
-      bannerFrame.style.minHeight = '20px';
-      bannerFrame.style.maxHeight = '20px';
-      bannerFrame.style.overflow = 'hidden';
-      bannerFrame.style.position = 'fixed';
-      bannerFrame.style.bottom = '0';
-      bannerFrame.style.top = 'auto';
-      bannerFrame.style.zIndex = '9999';
-    }
-  }, 500);
-
-  // ✅ On nettoie correctement
-  return () => clearInterval(interval);
+  
+  // Aucune fonction de nettoyage (return) n'est nécessaire ici.
 }, []);
 
 return;
