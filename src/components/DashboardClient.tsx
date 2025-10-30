@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import Image, { StaticImageData } from "next/image"; // <-- 1. Import de StaticImageData
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ interface DashboardClientProps {
   discordPolls: any[];
   eventsData: DiscordEvent[];
   totalMembers: number;
-  ftsLogoUrl?: string;
+  ftsLogoUrl?: string | StaticImageData; // <-- 2. CORRECTION CLÉ : Accepte StaticImageData
 }
 
 export default function DashboardClient({
