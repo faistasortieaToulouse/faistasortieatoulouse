@@ -67,9 +67,9 @@ export default function GoogleTranslateCustom() {
     setSelectedLang(currentLang || 'fr');
     setScriptReady(true);
 
-    const interval = setInterval(() => {
-      const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-      if (bannerFrame) {
+/* const interval = setInterval(() => {
+    const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+    if (bannerFrame) {
         bannerFrame.style.height = '20px';
         bannerFrame.style.minHeight = '20px';
         bannerFrame.style.maxHeight = '20px';
@@ -78,8 +78,11 @@ export default function GoogleTranslateCustom() {
         bannerFrame.style.bottom = '0';
         bannerFrame.style.top = 'auto';
         bannerFrame.style.zIndex = '9999';
-      }
-    }, 500);
+    }
+}, 500);
+
+return;
+*/
 
     return () => clearInterval(interval);
   }, []);
@@ -128,16 +131,19 @@ export default function GoogleTranslateCustom() {
             src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
             strategy="afterInteractive"
           />
-          <Script id="google-translate-init" strategy="afterInteractive">
-            {`
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({
-                  pageLanguage: 'fr',
-                  autoDisplay: false
-                }, 'google_translate_element');
-              }
-            `}
-          </Script>
+// LIGNE 160 DANS src/components/GoogleTranslate.tsx
+<Script id="google-translate-init" strategy="afterInteractive">
+    {`
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'fr',
+                autoDisplay: false,
+                // 🚨 AJOUTEZ CETTE LIGNE 🚨
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE 
+            }, 'google_translate_element');
+        }
+    `}
+</Script>
         </>
       )}
 
