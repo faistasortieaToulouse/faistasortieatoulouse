@@ -4,8 +4,7 @@ import { DiscordChannel, DiscordEvent, DiscordWidgetData } from '@/types/types';
 import { TimeWeatherBar } from '@/components/time-weather-bar';
 import Image from 'next/image';
 import { ClientOnly } from '@/components/ClientOnly';
-import ftsLogo from '/public/icons/logoFTS180iphone.jpg';
-import ftsLogoImage from '@/public/icons/logoFTS180iphone.jpg';
+import ftsLogo from '../../../public/icons/logoFTS180iphone.jpg';
 
 export const revalidate = 300;
 
@@ -14,7 +13,6 @@ const POLLS_CHANNEL_ID = '1422806103904882842';
 
 // MODIFICATION CLÉ: Remplacement de l'URL Firebase par le chemin local statique.
 const FTS_LOGO_OBJECT = ftsLogo; // L'objet image importé (pour le rendu serveur)
-const FTS_LOGO_URL_STRING = '/icons/logoFTS180iphone.jpg'; // Le chemin string (pour la prop du client)
 
 export default async function DashboardPage() {
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
@@ -112,7 +110,7 @@ export default async function DashboardPage() {
           <p className="mt-2 text-accent">Avec FTS on est bien dans la ville rose !</p>
         </div>
         <div className="relative w-24 h-24 flex-shrink-0">
-          <Image src={ftsLogoImage} alt="Logo FTS" fill className="rounded-lg object-cover" />
+          <Image src={ftsLogo} alt="Logo FTS" fill className="rounded-lg object-cover" />
         </div>
       </header>
 
@@ -127,7 +125,7 @@ export default async function DashboardPage() {
         discordPolls={discordPolls}
         eventsData={eventsData}
         totalMembers={totalMembersCount}
-        ftsLogoUrl={FTS_LOGO_URL}
+        ftsLogoUrl={FTS_LOGO_OBJECT}
       />
     </div>
   );
