@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image, { StaticImageData } from "next/image"; // Import unique et correct <-- À simplifier
-import { Menu, X, Download, PartyPopper } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
+import { Menu, X, Download, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardMenuProps {
