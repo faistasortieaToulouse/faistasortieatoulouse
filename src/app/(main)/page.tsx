@@ -10,7 +10,7 @@ export const revalidate = 300;
 const GUILD_ID = '1422806103267344416';
 const POLLS_CHANNEL_ID = '1422806103904882842';
 const FTS_LOGO_URL =
-  'https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogoFTS650bas.jpg?alt=media&token=a8b14c5e-5663-4754-a2fa-149f9636909c';
+  'http://bilingue31.free.fr/logoFTS180iphone.jpg';
 
 export default async function DashboardPage() {
   const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
