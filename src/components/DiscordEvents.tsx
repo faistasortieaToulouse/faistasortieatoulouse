@@ -28,10 +28,10 @@ export function DiscordEvents({ events }: DiscordEventsProps) {
 
         return (
           <li key={event.id} className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-            {event.image && (
+            {event.cover_image && (
               <div className="relative w-full h-48">
                 <Image
-                  src={`https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`}
+                  src={`https://cdn.discordapp.com/guild-events/${event.id}/${event.cover_image}.png`}
                   alt={`Image de ${event.name}`}
                   fill
                   className="object-cover"
