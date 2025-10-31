@@ -14,6 +14,7 @@ interface DiscordEvent {
   channel_id: string;
   entity_metadata?: {
     location?: string;
+    image_url?: string;
   };
 }
 
@@ -22,7 +23,6 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
     (a, b) => new Date(a.scheduled_start_time).getTime() - new Date(b.scheduled_start_time).getTime()
   );
 
-  // ✅ Auto-refresh si aucun événement n'est trouvé
   useEffect(() => {
     if (!events || events.length === 0) {
       const hasRetried = sessionStorage.getItem('discord-events-auto-refresh');
@@ -37,7 +37,6 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
         console.warn('⚠️ Aucun événement trouvé après rechargement — arrêt des tentatives automatiques.');
       }
     } else {
-      // Si des événements s’affichent, on réinitialise la sécurité
       sessionStorage.removeItem('discord-events-auto-refresh');
     }
   }, [events]);
@@ -46,9 +45,7 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Événements à venir</CardTitle>
-        <CardDescription>
-          Voici les prochains événements prévus sur le serveur Discord.
-        </CardDescription>
+        <CardDescription>Voici les prochains événements prévus sur le serveur Discord.</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -56,23 +53,28 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
           <div className="space-y-4">
             {sortedEvents.map((event) => (
               <div key={event.id} className="rounded-lg border bg-card p-4 shadow-sm">
+                {/* Image de l'événement */}
+                {event.entity_metadata?.image_url && (
+                  <img
+                    src={event.entity_metadata.image_url}
+                    alt={event.name}
+                    className="w-20 h-20 object-cover rounded-md mb-3"
+                  />
+                )}
+
+                {/* Titre */}
                 <h3 className="mb-2 font-semibold text-primary">{event.name}</h3>
+
+                {/* Détails */}
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  {/* Date */}
                   <div className="flex items-start gap-2">
                     <Calendar className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                    <span>
-                      {format(new Date(event.scheduled_start_time), "EEEE d MMMM yyyy", { locale: fr })}
-                    </span>
+                    <span>{format(new Date(event.scheduled_start_time), "EEEE d MMMM yyyy", { locale: fr })}</span>
                   </div>
-                  {/* Heure */}
                   <div className="flex items-start gap-2">
                     <Clock className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                    <span>
-                      {format(new Date(event.scheduled_start_time), "HH'h'mm", { locale: fr })}
-                    </span>
+                    <span>{format(new Date(event.scheduled_start_time), "HH'h'mm", { locale: fr })}</span>
                   </div>
-                  {/* Lieu avec lien Google Maps */}
                   {event.entity_metadata?.location && (
                     <div className="flex items-start gap-2">
                       <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -90,6 +92,7 @@ export function DiscordEvents({ events }: { events?: DiscordEvent[] }) {
                   )}
                 </div>
 
+                {/* Lien Discord */}
                 <Button asChild size="sm" variant="outline" className="mt-4">
                   <a
                     href={`https://discord.com/events/1422806103267344416/${event.id}`}
