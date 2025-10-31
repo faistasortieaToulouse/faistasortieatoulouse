@@ -28,6 +28,7 @@ export interface DiscordEvent {
     location?: string; // lieu de l'événement
   };
   image?: string; // ✅ Ajouté pour permettre l'affichage de l'image de couverture
+  guild_id: string; // ✅ Ajout nécessaire pour le lien Discord
 }
 
 // Données complètes pour le widget Discord dans le dashboard
