@@ -119,7 +119,7 @@ export default function EventMap({ events }: EventMapProps) {
   };
 
   const getEventImageUrl = (ev: Event) => {
-    if (!ev.imageHash) return null;
+    if (!ev.imageHash) return undefined;
     return `/api/event-image?eventId=${ev.id}&imageHash=${ev.imageHash}`;
   };
 
