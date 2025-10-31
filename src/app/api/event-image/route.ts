@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     // 6. Gestion des erreurs internes (ex: timeout de fetch ou crash)
     console.error('API Internal Error:', err);
-    console.log('Fetching image from:', url);
+    console.log('Fetching image from:', imageUrl);
     console.log('Response status:', imageRes.status);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
