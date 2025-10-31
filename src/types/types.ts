@@ -27,6 +27,7 @@ export interface DiscordEvent {
   entity_metadata?: {
     location?: string; // lieu de l'événement
   };
+  image?: string; // ✅ Ajouté pour permettre l'affichage de l'image de couverture
 }
 
 // Données complètes pour le widget Discord dans le dashboard
