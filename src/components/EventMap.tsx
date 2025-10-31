@@ -31,7 +31,7 @@ interface Event {
   date?: string;
   time?: string;
   datetime?: string;
-  image?: string; // URL de l'image Discord
+  image?: string; // hash ou URL Discord
 }
 
 interface EventMapProps {
@@ -46,13 +46,11 @@ interface EventWithCoords extends Event {
 export default function EventMap({ events }: EventMapProps) {
   const [eventsWithCoords, setEventsWithCoords] = useState<EventWithCoords[]>([]);
 
-  // Construire l'URL de l'image Discord
   const getDiscordEventImageUrl = (event: Event) => {
     if (!event.image) return null;
     return `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=128`;
   };
 
-  // Géocodage
   useEffect(() => {
     async function geocodeAddress(address: string) {
       try {
@@ -79,11 +77,10 @@ export default function EventMap({ events }: EventMapProps) {
             ...ev,
             latitude: coords.lat,
             longitude: coords.lng,
-            image: getDiscordEventImageUrl(ev), // Ajouter l'image ici
+            image: getDiscordEventImageUrl(ev),
           };
         })
       );
-
       setEventsWithCoords(mapped.filter(Boolean) as EventWithCoords[]);
     }
 
@@ -106,16 +103,8 @@ export default function EventMap({ events }: EventMapProps) {
   const formatDateTime = (ev: Event) => {
     if (ev.datetime) {
       const d = new Date(ev.datetime);
-      const dateStr = d.toLocaleDateString('fr-FR', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      });
-      const timeStr = d.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+      const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
       return `${dateStr} • ${timeStr}`;
     }
     if (ev.date || ev.time) {
@@ -128,18 +117,23 @@ export default function EventMap({ events }: EventMapProps) {
 
   return (
     <div style={{ display: 'flex', gap: '2rem' }}>
-      {/* Liste des événements avec images */}
+      {/* Liste des événements */}
       <div style={{ flex: 1 }}>
         <h2>Événements à venir</h2>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {eventsWithCoords.map(ev => (
             <li key={ev.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-              {ev.image && (
+              {ev.image ? (
                 <img
                   src={ev.image}
                   alt={ev.name}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} 
                   style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '1rem' }}
                 />
+              ) : (
+                <div style={{ width: '60px', height: '60px', background: '#eee', borderRadius: '4px', marginRight: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '0.8rem' }}>
+                  Pas d'image
+                </div>
               )}
               <div>
                 <strong>{ev.name}</strong>
