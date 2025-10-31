@@ -37,7 +37,11 @@ export function DiscordEvents({ events, limit }: DiscordEventsProps) {
                 {event.image && (
                   <div className="relative w-full h-24 sm:h-28 md:h-32">
                     <Image
-                      src={`https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`}
+    src={
+      event.image
+        ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
+        : '/images/event-placeholder.jpg' // ✅ Image par défaut
+    }
                       alt={`Image de ${event.name}`}
                       fill
                       className="object-cover"
