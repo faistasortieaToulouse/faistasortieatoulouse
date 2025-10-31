@@ -34,7 +34,7 @@ interface Event {
   date?: string;
   time?: string;
   datetime?: string;
-  imageHash?: string; // hash récupéré depuis Discord API
+  imageHash?: string;
 }
 
 interface EventMapProps {
@@ -95,6 +95,7 @@ export default function EventMap({ events }: EventMapProps) {
     e.target.openPopup();
   };
 
+  // 🕓 Format date et heure
   const formatDateTime = (ev: Event) => {
     if (ev.datetime) {
       const d = new Date(ev.datetime);
@@ -137,9 +138,9 @@ export default function EventMap({ events }: EventMapProps) {
             position={[ev.latitude, ev.longitude]}
             eventHandlers={{ click: handleMarkerClick }}
           >
+            {/* ✅ Popup : titre + date/heure + image */}
             <Popup>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                {/* Image de l'événement ou placeholder */}
                 {getEventImageUrl(ev) ? (
                   <img
                     src={getEventImageUrl(ev)}
@@ -148,28 +149,30 @@ export default function EventMap({ events }: EventMapProps) {
                     style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '1rem' }}
                   />
                 ) : (
-                  <div style={{
-                    width: '60px', height: '60px', background: '#eee',
-                    borderRadius: '4px', marginRight: '1rem',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#999', fontSize: '0.8rem'
-                  }}>
+                  <div
+                    style={{
+                      width: '60px', height: '60px', background: '#eee',
+                      borderRadius: '4px', marginRight: '1rem',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#999', fontSize: '0.8rem'
+                    }}
+                  >
                     Pas d'image
                   </div>
                 )}
 
-                {/* Titre et date/heure */}
                 <div>
                   <strong>{ev.name}</strong>
                   {formatDateTime(ev) && (
-                    <span style={{ marginLeft: '0.5rem', color: '#555' }}>
-                      ({formatDateTime(ev)})
-                    </span>
+                    <div style={{ color: '#555', fontSize: '0.9rem' }}>
+                      {formatDateTime(ev)}
+                    </div>
                   )}
                 </div>
               </div>
             </Popup>
 
+            {/* ✅ Tooltip : uniquement le titre sur ordinateur */}
             {!isMobile && (
               <Tooltip sticky direction="top">
                 {ev.name}
