@@ -9,17 +9,14 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 
-// Chargement dynamique (Next.js)
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 const Tooltip = dynamic(() => import('react-leaflet').then(m => m.Tooltip), { ssr: false });
 
-const isMobile =
-  typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-// ✅ Correction des icônes Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/leaflet/marker-icon-2x.png',
@@ -34,6 +31,7 @@ interface Event {
   date?: string;
   time?: string;
   datetime?: string;
+  image?: string; // URL de l'image Discord
 }
 
 interface EventMapProps {
@@ -48,7 +46,13 @@ interface EventWithCoords extends Event {
 export default function EventMap({ events }: EventMapProps) {
   const [eventsWithCoords, setEventsWithCoords] = useState<EventWithCoords[]>([]);
 
-  // 🧭 Géocodage
+  // Construire l'URL de l'image Discord
+  const getDiscordEventImageUrl = (event: Event) => {
+    if (!event.image) return null;
+    return `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=128`;
+  };
+
+  // Géocodage
   useEffect(() => {
     async function geocodeAddress(address: string) {
       try {
@@ -71,7 +75,12 @@ export default function EventMap({ events }: EventMapProps) {
         events.map(async (ev) => {
           const coords = await geocodeAddress(ev.location);
           if (!coords) return null;
-          return { ...ev, latitude: coords.lat, longitude: coords.lng };
+          return {
+            ...ev,
+            latitude: coords.lat,
+            longitude: coords.lng,
+            image: getDiscordEventImageUrl(ev), // Ajouter l'image ici
+          };
         })
       );
 
@@ -94,7 +103,6 @@ export default function EventMap({ events }: EventMapProps) {
     e.target.openPopup();
   };
 
-  // 🕓 Format date et heure sur la même ligne
   const formatDateTime = (ev: Event) => {
     if (ev.datetime) {
       const d = new Date(ev.datetime);
@@ -110,51 +118,68 @@ export default function EventMap({ events }: EventMapProps) {
       });
       return `${dateStr} • ${timeStr}`;
     }
-
     if (ev.date || ev.time) {
-      const dateStr = ev.date ? ev.date : '';
-      const timeStr = ev.time ? ev.time : '';
+      const dateStr = ev.date ?? '';
+      const timeStr = ev.time ?? '';
       return `${dateStr}${dateStr && timeStr ? ' • ' : ''}${timeStr}`;
     }
-
     return '';
   };
 
   return (
-    <MapContainer center={center} zoom={12} style={{ height: '500px', width: '100%' }}>
-      <TileLayer
-        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      <MarkerClusterGroup chunkedLoading>
-        {eventsWithCoords.map((ev) => (
-          <Marker
-            key={ev.id}
-            position={[ev.latitude, ev.longitude]}
-            eventHandlers={{ click: handleMarkerClick }}
-          >
-            {/* ✅ Popup : titre + date/heure sur une seule ligne */}
-            <Popup>
-              <div style={{ fontSize: '0.95rem' }}>
+    <div style={{ display: 'flex', gap: '2rem' }}>
+      {/* Liste des événements avec images */}
+      <div style={{ flex: 1 }}>
+        <h2>Événements à venir</h2>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {eventsWithCoords.map(ev => (
+            <li key={ev.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+              {ev.image && (
+                <img
+                  src={ev.image}
+                  alt={ev.name}
+                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '1rem' }}
+                />
+              )}
+              <div>
                 <strong>{ev.name}</strong>
-                {formatDateTime(ev) && (
-                  <span style={{ marginLeft: '0.5rem', color: '#555' }}>
-                    ({formatDateTime(ev)})
-                  </span>
-                )}
+                <div style={{ fontSize: '0.9rem', color: '#555' }}>{formatDateTime(ev)}</div>
               </div>
-            </Popup>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-            {/* ✅ Tooltip sur ordinateur */}
-            {!isMobile && (
-              <Tooltip sticky direction="top">
-                {ev.name}
-              </Tooltip>
-            )}
-          </Marker>
-        ))}
-      </MarkerClusterGroup>
-    </MapContainer>
+      {/* Carte */}
+      <div style={{ flex: 2 }}>
+        <MapContainer center={center} zoom={12} style={{ height: '500px', width: '100%' }}>
+          <TileLayer
+            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <MarkerClusterGroup chunkedLoading>
+            {eventsWithCoords.map(ev => (
+              <Marker
+                key={ev.id}
+                position={[ev.latitude, ev.longitude]}
+                eventHandlers={{ click: handleMarkerClick }}
+              >
+                <Popup>
+                  <div style={{ fontSize: '0.95rem' }}>
+                    <strong>{ev.name}</strong>
+                    {formatDateTime(ev) && (
+                      <span style={{ marginLeft: '0.5rem', color: '#555' }}>
+                        ({formatDateTime(ev)})
+                      </span>
+                    )}
+                  </div>
+                </Popup>
+                {!isMobile && <Tooltip sticky direction="top">{ev.name}</Tooltip>}
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        </MapContainer>
+      </div>
+    </div>
   );
 }
