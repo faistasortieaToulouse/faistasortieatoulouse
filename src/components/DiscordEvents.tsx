@@ -10,7 +10,7 @@ interface DiscordEventsProps {
 }
 
 export function DiscordEvents({ events, limit }: DiscordEventsProps) {
-  const displayedEvents = limit ? events.slice(0, limit) : events;
+  const displayedEvents = events;
 
   if (!displayedEvents || displayedEvents.length === 0) {
     return <p className="text-muted-foreground">Aucun événement prévu pour le moment.</p>;
