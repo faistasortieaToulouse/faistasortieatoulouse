@@ -26,6 +26,7 @@ const navItems = [
   { href: "/organiser-randos", icon: Mountain, label: "Organise tes Randos" },
   { href: "/organiser-sorties", icon: Zap, label: "Organise tes Sorties" },
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
+  { href: "/discord-events", icon: Calendar, label: "Découvre les évènements" },
   { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
   { href: "/facebook", icon: Facebook, label: "Groupes Facebook" },
