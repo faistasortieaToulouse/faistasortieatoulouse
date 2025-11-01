@@ -17,9 +17,9 @@ const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg';
 const EventImage: React.FC<{ event: DiscordEvent, index: number }> = ({ event, index }) => {
     
     // Détermine l'URL Discord (avec taille réduite ET format JPG pour la légèreté) si elle existe.
-    // Changement de .png à .jpg pour optimiser le poids du fichier.
+    // Changement de la taille de 256 à 128 pour réduire drastiquement le poids du fichier et accélérer le chargement.
     const discordUrl = event.image
-      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.jpg?size=256`
+      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.jpg?size=128`
       : null; // Utiliser null si Discord n'a pas d'image
       
     // 1. Détermine la source initiale : Si Discord n'a pas d'URL, on utilise directement l'image de secours.
