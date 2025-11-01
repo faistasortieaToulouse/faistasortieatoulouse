@@ -16,9 +16,9 @@ const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg';
 
 // Composant pour l'image de l'événement avec gestion d'erreur
 const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
-    // 1. Détermine l'URL Discord initiale
+    // 1. Détermine l'URL Discord initiale (on ajoute un paramètre 'size' pour s'assurer d'avoir une image de haute qualité si disponible)
     const initialDiscordUrl = event.image
-      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
+      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=512` // Demande une taille plus grande
       : DEFAULT_IMAGE_FALLBACK;
       
     // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
@@ -33,6 +33,14 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     };
     
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
+    // Nous utilisons 'unoptimized' car Discord n'est pas configuré dans next.config.js
+    // Cependant, pour que l'image Next.js gère mieux les images qui ne sont pas étirées, nous ajoutons l'attribut 'sizes'.
+    const imageSizes = `
+        (max-width: 640px) 100vw,   // 1 colonne sur mobile
+        (max-width: 1024px) 50vw,  // 2 colonnes sur tablette
+        33vw                      // 3 colonnes sur desktop
+    `;
+
     return (
         <div className="relative w-full h-24 sm:h-28 md:h-32">
             <Image
@@ -40,8 +48,10 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
                 alt={`Image de ${event.name}`}
                 fill
                 className="object-cover"
-                // Désactive l'optimisation Next.js pour éviter les problèmes avec les CDN externes (Discord)
                 unoptimized
+                // Ajout de l'attribut sizes pour indiquer au navigateur la taille de l'image
+                // Cela est la meilleure pratique pour la netteté et la performance.
+                sizes={imageSizes}
                 // Gère l'erreur de chargement pour passer au fallback
                 onError={handleImageError}
             />
