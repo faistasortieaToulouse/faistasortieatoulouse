@@ -26,10 +26,17 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     
     // 3. Gestion d'erreur: bascule vers l'image par défaut si l'image Discord échoue
     const handleImageError = () => {
-        // Bascule vers l'image locale uniquement si nous essayions l'image Discord
+        // Log l'erreur pour aider au débogage
+        console.error("Erreur de chargement d'image pour l'événement:", event.name, "URL tentée:", currentImageSrc);
+
+        // Si l'URL actuelle n'est pas déjà l'image de secours, on la définit.
+        // Cela couvre le cas où l'image Discord échoue.
         if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
             setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
-        }
+        } 
+        // Si l'image de secours elle-même échoue (ce qui provoquerait un bouclage ici), 
+        // nous pouvons choisir de ne rien faire ou de mettre un placeholder HTML, 
+        // mais pour l'instant, nous faisons confiance au chemin local.
     };
     
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
@@ -38,6 +45,20 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
         (max-width: 1024px) 50vw,  // 2 colonnes sur tablette
         33vw                      // 3 colonnes sur desktop
     `;
+
+    // Vérifie si l'événement a une image ou si nous sommes sur l'image par défaut.
+    const hasValidImage = event.image || currentImageSrc === DEFAULT_IMAGE_FALLBACK;
+    
+    // Si nous n'avons ni image Discord, ni image de secours chargée (après une potentielle erreur), 
+    // affichez un conteneur vide pour éviter un crash.
+    if (!hasValidImage && !event.image) {
+        return (
+            <div className="relative w-full h-24 sm:h-28 md:h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <p className="text-sm text-gray-500 dark:text-gray-400 p-2 text-center">Image non disponible</p>
+            </div>
+        );
+    }
+
 
     return (
         <div className="relative w-full h-24 sm:h-28 md:h-32">
