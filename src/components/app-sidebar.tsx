@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // Remplacement de 'next/link' et 'next/image' par des éléments HTML natifs
 // pour éviter les erreurs de dépendance dans cet environnement.
-// import Link from "next/link";
-// import Image from "next/image";
 import { ChevronLeft, Zap, ExternalLink, Mountain, Footprints } from 'lucide-react';
 import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Map, LifeBuoy } from "lucide-react";
@@ -37,35 +35,22 @@ const navItems = [
 ];
 
 // Define logo sources
-const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; // Fonctionne sur ordinateur
-const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2"; // Fonctionne sur téléphone
+// L'URL Firebase est celle qui fonctionne sur téléphone
+const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
+// Le chemin local est celui qui fonctionne sur ordinateur
+const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; 
 
 export function AppSidebar() {
-  // Réintroduction de la logique de détection d'écran pour choisir le bon logo
-  const [isMobile, setIsMobile] = useState(false);
-  const MOBILE_BREAKPOINT = 768; // Tailwind 'md' breakpoint
+  // Démarre avec l'URL externe (préférée pour les mobiles et pour tester)
+  const [logoSrc, setLogoSrc] = useState(EXTERNAL_LOGO);
 
-  useEffect(() => {
-    // Fonction pour vérifier la taille de l'écran (côté client uniquement)
-    if (typeof window !== 'undefined') {
-        const checkScreenSize = () => {
-          // Si la largeur est inférieure ou égale au breakpoint, on considère mobile
-          setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-        };
-
-        // Set initial state
-        checkScreenSize();
-
-        // Add event listener for resizing
-        window.addEventListener('resize', checkScreenSize);
-
-        // Cleanup the event listener on component unmount
-        return () => window.removeEventListener('resize', checkScreenSize);
+  // Fonction appelée si le chargement de l'image échoue
+  const handleImageError = () => {
+    // Si l'image de Firebase ne se charge pas, basculer vers le chemin local
+    if (logoSrc === EXTERNAL_LOGO) {
+      setLogoSrc(LOCAL_LOGO);
     }
-  }, []);
-
-  // Utilisation conditionnelle: Externe (téléphone) pour mobile, Local (ordinateur) pour le reste.
-  const currentLogo = isMobile ? EXTERNAL_LOGO : LOCAL_LOGO;
+  };
 
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl">
@@ -75,9 +60,10 @@ export function AppSidebar() {
           <div className="relative w-10 h-10 flex-shrink-0">
             {/* Remplacement de Image par <img> */}
             <img
-              // Utilisation du logo sélectionné conditionnellement
-              src={currentLogo}
+              src={logoSrc}
               alt="FTS Logo"
+              // Ajout de onError pour gérer le basculement d'image
+              onError={handleImageError}
               // Styles pour simuler fill et object-cover
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               className="rounded-full"
