@@ -37,19 +37,19 @@ const navItems = [
 ];
 
 // Define logo sources
-// Suppression du logo local, utilisation exclusive de l'URL Firebase.
-const FTS_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
+const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; // Fonctionne sur ordinateur
+const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2"; // Fonctionne sur téléphone
 
 export function AppSidebar() {
-  // Suppression de isMobile et useEffect car nous n'avons plus besoin de la détection de l'écran.
-  // const [isMobile, setIsMobile] = useState(false);
-  // const MOBILE_BREAKPOINT = 768; // Tailwind 'md' breakpoint
+  // Réintroduction de la logique de détection d'écran pour choisir le bon logo
+  const [isMobile, setIsMobile] = useState(false);
+  const MOBILE_BREAKPOINT = 768; // Tailwind 'md' breakpoint
 
-  /*
   useEffect(() => {
     // Fonction pour vérifier la taille de l'écran (côté client uniquement)
     if (typeof window !== 'undefined') {
         const checkScreenSize = () => {
+          // Si la largeur est inférieure ou égale au breakpoint, on considère mobile
           setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
         };
 
@@ -63,10 +63,9 @@ export function AppSidebar() {
         return () => window.removeEventListener('resize', checkScreenSize);
     }
   }, []);
-  */
 
-  // Utilisation directe du logo externe qui a montré une meilleure fiabilité sur mobile
-  const currentLogo = FTS_LOGO;
+  // Utilisation conditionnelle: Externe (téléphone) pour mobile, Local (ordinateur) pour le reste.
+  const currentLogo = isMobile ? EXTERNAL_LOGO : LOCAL_LOGO;
 
   return (
     <aside className="w-64 h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl">
@@ -76,7 +75,7 @@ export function AppSidebar() {
           <div className="relative w-10 h-10 flex-shrink-0">
             {/* Remplacement de Image par <img> */}
             <img
-              // Utilisation du logo unique
+              // Utilisation du logo sélectionné conditionnellement
               src={currentLogo}
               alt="FTS Logo"
               // Styles pour simuler fill et object-cover
