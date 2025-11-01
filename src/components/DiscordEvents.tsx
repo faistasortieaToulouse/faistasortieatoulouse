@@ -3,11 +3,52 @@
 import { DiscordEvent } from '@/types/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import React, { useState } from 'react';
 
 interface DiscordEventsProps {
   events: DiscordEvent[];
   limit?: number;
 }
+
+// Chemin vers l'image par défaut qui sera utilisée si l'image Discord est manquante ou échoue
+// J'utilise une image intermédiaire pour la gestion d'erreur afin de garantir une taille uniforme.
+const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg'; 
+
+// Composant pour l'image de l'événement avec gestion d'erreur
+const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
+    // 1. Détermine l'URL Discord initiale
+    const initialDiscordUrl = event.image
+      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
+      : DEFAULT_IMAGE_FALLBACK;
+      
+    // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
+    const [currentImageSrc, setCurrentImageSrc] = useState(initialDiscordUrl);
+    
+    // 3. Gestion d'erreur: bascule vers l'image par défaut si l'image Discord échoue
+    const handleImageError = () => {
+        // Bascule vers l'image locale uniquement si nous essayions l'image Discord
+        if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
+            setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
+        }
+    };
+    
+    // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
+    return (
+        <div className="relative w-full h-24 sm:h-28 md:h-32">
+            <Image
+                src={currentImageSrc}
+                alt={`Image de ${event.name}`}
+                fill
+                className="object-cover"
+                // Désactive l'optimisation Next.js pour éviter les problèmes avec les CDN externes (Discord)
+                unoptimized
+                // Gère l'erreur de chargement pour passer au fallback
+                onError={handleImageError}
+            />
+        </div>
+    );
+};
+
 
 export function DiscordEvents({ events, limit }: DiscordEventsProps) {
   // 🔃 Tri chronologique
@@ -45,19 +86,9 @@ export function DiscordEvents({ events, limit }: DiscordEventsProps) {
                 key={event.id}
                 className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
               >
-                <div className="relative w-full h-24 sm:h-28 md:h-32">
-                  <Image
-                    src={
-                      event.image
-                        ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
-                        : '/images/event-placeholder.jpg' // ✅ Image par défaut
-                    }
-                    alt={`Image de ${event.name}`}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                </div>
+                {/* Utilisation du nouveau composant EventImage */}
+                <EventImage event={event} />
+
                 <div className="p-3 flex flex-col gap-2">
                   <h3 className="text-base font-semibold text-primary">{event.name}</h3>
                   <p className="text-sm text-muted-foreground">
