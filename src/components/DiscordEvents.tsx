@@ -16,9 +16,9 @@ const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg';
 
 // Composant pour l'image de l'événement avec gestion d'erreur
 const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
-    // 1. Détermine l'URL Discord initiale (on ajoute un paramètre 'size' pour s'assurer d'avoir une image de haute qualité si disponible)
+    // 1. Détermine l'URL Discord initiale (Taille réduite à 256 pour un chargement plus rapide)
     const initialDiscordUrl = event.image
-      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=512` // Demande une taille plus grande
+      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=256` // Réduction de 512 à 256
       : DEFAULT_IMAGE_FALLBACK;
       
     // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
@@ -33,8 +33,6 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     };
     
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
-    // Nous utilisons 'unoptimized' car Discord n'est pas configuré dans next.config.js
-    // Cependant, pour que l'image Next.js gère mieux les images qui ne sont pas étirées, nous ajoutons l'attribut 'sizes'.
     const imageSizes = `
         (max-width: 640px) 100vw,   // 1 colonne sur mobile
         (max-width: 1024px) 50vw,  // 2 colonnes sur tablette
@@ -49,6 +47,7 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
                 fill
                 className="object-cover"
                 unoptimized
+                loading="lazy" // Assure un chargement paresseux explicite
                 // Ajout de l'attribut sizes pour indiquer au navigateur la taille de l'image
                 // Cela est la meilleure pratique pour la netteté et la performance.
                 sizes={imageSizes}
