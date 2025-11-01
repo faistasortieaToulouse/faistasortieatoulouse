@@ -11,14 +11,13 @@ interface DiscordEventsProps {
 }
 
 // Chemin vers l'image par défaut qui sera utilisée si l'image Discord est manquante ou échoue
-// J'utilise une image intermédiaire pour la gestion d'erreur afin de garantir une taille uniforme.
 const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg'; 
 
-// Composant pour l'image de l'événement avec gestion d'erreur
-const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
-    // 1. Détermine l'URL Discord initiale (Taille réduite à 256 pour un chargement plus rapide)
+// Composant pour l'image de l'événement avec gestion d'erreur et priorité de chargement
+const EventImage: React.FC<{ event: DiscordEvent, index: number }> = ({ event, index }) => {
+    // 1. Détermine l'URL Discord initiale (on réintroduit ?size=256 pour réduire le poids de l'image source)
     const initialDiscordUrl = event.image
-      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=256` // Réduction de 512 à 256
+      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=256`
       : DEFAULT_IMAGE_FALLBACK;
       
     // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
@@ -30,15 +29,14 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
         console.error("Erreur de chargement d'image pour l'événement:", event.name, "URL tentée:", currentImageSrc);
 
         // Si l'URL actuelle n'est pas déjà l'image de secours, on la définit.
-        // Cela couvre le cas où l'image Discord échoue.
         if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
             setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
         } 
-        // Si l'image de secours elle-même échoue (ce qui provoquerait un bouclage ici), 
-        // nous pouvons choisir de ne rien faire ou de mettre un placeholder HTML, 
-        // mais pour l'instant, nous faisons confiance au chemin local.
     };
     
+    // Déterminer si l'image doit être chargée en priorité (les 3 premières images)
+    const shouldLoadPriority = index < 3; 
+
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
     const imageSizes = `
         (max-width: 640px) 100vw,   // 1 colonne sur mobile
@@ -67,10 +65,10 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
                 alt={`Image de ${event.name}`}
                 fill
                 className="object-cover"
-                unoptimized
-                loading="lazy" // Assure un chargement paresseux explicite
+                unoptimized // <-- Réactivé pour éviter l'erreur de configuration Next.js
+                loading={shouldLoadPriority ? 'eager' : 'lazy'} // Chargement prioritaire pour les premières images
+                priority={shouldLoadPriority} // Attribut priority pour le LCP
                 // Ajout de l'attribut sizes pour indiquer au navigateur la taille de l'image
-                // Cela est la meilleure pratique pour la netteté et la performance.
                 sizes={imageSizes}
                 // Gère l'erreur de chargement pour passer au fallback
                 onError={handleImageError}
@@ -99,7 +97,7 @@ export function DiscordEvents({ events, limit }: DiscordEventsProps) {
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="max-h-[700px] overflow-y-auto p-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md">
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedEvents.map((event) => {
+          {displayedEvents.map((event, index) => {
             const startDate = new Date(event.scheduled_start_time);
             const formattedDate = startDate.toLocaleDateString('fr-FR', {
               weekday: 'long',
@@ -116,8 +114,8 @@ export function DiscordEvents({ events, limit }: DiscordEventsProps) {
                 key={event.id}
                 className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
               >
-                {/* Utilisation du nouveau composant EventImage */}
-                <EventImage event={event} />
+                {/* Utilisation du nouveau composant EventImage, passage de l'index */}
+                <EventImage event={event} index={index} />
 
                 <div className="p-3 flex flex-col gap-2">
                   <h3 className="text-base font-semibold text-primary">{event.name}</h3>
