@@ -15,23 +15,27 @@ const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg';
 
 // Composant pour l'image de l'événement avec gestion d'erreur et priorité de chargement
 const EventImage: React.FC<{ event: DiscordEvent, index: number }> = ({ event, index }) => {
-    // 1. Détermine l'URL Discord initiale (on réintroduit ?size=256 pour réduire le poids de l'image source)
-    const initialDiscordUrl = event.image
+    
+    // Détermine l'URL Discord (avec taille réduite) si elle existe.
+    const discordUrl = event.image
       ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=256`
-      : DEFAULT_IMAGE_FALLBACK;
+      : null; // Utiliser null si Discord n'a pas d'image
       
-    // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
-    const [currentImageSrc, setCurrentImageSrc] = useState(initialDiscordUrl);
+    // 1. Détermine la source initiale : Si Discord n'a pas d'URL, on utilise directement l'image de secours.
+    const initialSrc = discordUrl || DEFAULT_IMAGE_FALLBACK;
+
+    // 2. État pour la source actuelle de l'image (démarre avec Discord si disponible, sinon le fallback)
+    const [currentImageSrc, setCurrentImageSrc] = useState(initialSrc);
     
     // 3. Gestion d'erreur: bascule vers l'image par défaut si l'image Discord échoue
     const handleImageError = () => {
         // Log l'erreur pour aider au débogage
         console.error("Erreur de chargement d'image pour l'événement:", event.name, "URL tentée:", currentImageSrc);
 
-        // Si l'URL actuelle n'est pas déjà l'image de secours, on la définit.
-        if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
+        // Si l'URL actuelle est l'URL Discord et qu'elle a échoué, on passe au Fallback.
+        if (currentImageSrc === discordUrl) {
             setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
-        } 
+        }
     };
     
     // Déterminer si l'image doit être chargée en priorité (les 3 premières images)
@@ -43,16 +47,12 @@ const EventImage: React.FC<{ event: DiscordEvent, index: number }> = ({ event, i
         (max-width: 1024px) 50vw,  // 2 colonnes sur tablette
         33vw                      // 3 colonnes sur desktop
     `;
-
-    // Vérifie si l'événement a une image ou si nous sommes sur l'image par défaut.
-    const hasValidImage = event.image || currentImageSrc === DEFAULT_IMAGE_FALLBACK;
     
-    // Si nous n'avons ni image Discord, ni image de secours chargée (après une potentielle erreur), 
-    // affichez un conteneur vide pour éviter un crash.
-    if (!hasValidImage && !event.image) {
+    // Vérification de base pour s'assurer que currentImageSrc n'est jamais vide
+    if (!currentImageSrc) {
         return (
             <div className="relative w-full h-24 sm:h-28 md:h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400 p-2 text-center">Image non disponible</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 p-2 text-center">Image non trouvée</p>
             </div>
         );
     }
@@ -65,13 +65,13 @@ const EventImage: React.FC<{ event: DiscordEvent, index: number }> = ({ event, i
                 alt={`Image de ${event.name}`}
                 fill
                 className="object-cover"
-                unoptimized // <-- Réactivé pour éviter l'erreur de configuration Next.js
-                loading={shouldLoadPriority ? 'eager' : 'lazy'} // Chargement prioritaire pour les premières images
-                priority={shouldLoadPriority} // Attribut priority pour le LCP
-                // Ajout de l'attribut sizes pour indiquer au navigateur la taille de l'image
+                unoptimized // Maintenu pour éviter l'erreur de configuration Next.js
+                loading={shouldLoadPriority ? 'eager' : 'lazy'} 
+                priority={shouldLoadPriority}
                 sizes={imageSizes}
                 // Gère l'erreur de chargement pour passer au fallback
-                onError={handleImageError}
+                // Note : On n'appelle handleImageError que si on est en train de charger l'URL Discord.
+                onError={handleImageError} 
             />
         </div>
     );
