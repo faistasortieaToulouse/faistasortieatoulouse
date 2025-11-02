@@ -38,8 +38,8 @@ return (
 <Image
   src={currentImageSrc}
   alt={`Image de ${event.name}`}
-  width={event.imageWidth ?? 800}
-  height={event.imageHeight ?? 600}
+  width={800}
+  height={600}
   unoptimized
   className="rounded-md object-contain"
 />
