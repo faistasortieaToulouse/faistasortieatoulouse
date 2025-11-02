@@ -16,7 +16,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/**' },
     ],
   },
-  transpilePackages: ['react-day-picker'],
 };
 
 export default nextConfig;
