@@ -20,8 +20,8 @@ import { DiscordPolls } from "./discord-polls";
 import { AiRecommendations } from "./ai-recommendations";
 import InstallPWAiOS from "@/components/InstallPWAiOS";
 import APKDownloadModal from "@/components/APKDownloadModal";
-import React from 'react';
-import Carousel from '../components/Carousel';
+import React from "react";
+import Carousel from "../components/Carousel";
 
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
@@ -161,11 +161,11 @@ export default function DashboardClient({
         </div>
 
         {/* Colonne droite */}
-        <div className="flex flex-col gap-8 flex-1 w-full">
-          <DiscordWidget className="w-full" />
-          <DiscordChannelList channels={discordData.channels} className="w-full" />
+        <div className="flex flex-col gap-8 flex-1 w-full overflow-x-auto">
+          <DiscordWidget />
+          <DiscordChannelList channels={discordData.channels} />
 
-          <Card className="p-4 w-full">
+          <Card className="p-4 w-full min-w-[300px]">
             <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
             <div className="max-h-[400px] overflow-auto pr-2 bg-gray-100 dark:bg-gray-800 w-full">
               <DiscordPolls polls={discordPolls} />
@@ -195,7 +195,13 @@ export default function DashboardClient({
             className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
           >
             <Store className="h-5 w-5" />
-            <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} className="w-auto h-auto" />
+            <Image
+              src="/images/google-play-badge.png"
+              alt="Disponible sur Google Play"
+              width={180}
+              height={53}
+              className="w-auto h-auto"
+            />
           </a>
 
           <APKDownloadModal />
