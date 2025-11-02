@@ -130,8 +130,8 @@ export default function DashboardClient({
       <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
 
       {/* Grille principale responsive avec scroll horizontal si besoin */}
-      <section className="overflow-x-auto w-full">
-        <div className="min-w-[320px] grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Colonne gauche */}
           <div className="flex flex-col gap-8">
             <Card className="p-4 w-full min-w-0">
@@ -163,13 +163,12 @@ export default function DashboardClient({
 
           {/* Colonne droite */}
           <div className="flex flex-col gap-8 min-w-0">
-            <div className="overflow-x-auto w-full">
-              <div className="min-w-max">
+              <div className="w-full min-w-0">    
                 <DiscordWidget />
               </div>
             </div>
 
-            <div className="overflow-x-auto w-full">
+            <div className="w-full min-w-0">
               <div className="min-w-max">
                 <DiscordChannelList channels={discordData.channels} />
               </div>
