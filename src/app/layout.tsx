@@ -3,6 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 // import GoogleTranslate from '@/components/GoogleTranslate'; // client component
 import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
+// layout.tsx
+import 'react-day-picker/dist/style.css';
 
 export const metadata: Metadata = {
   title: 'Toulouse Outings',
