@@ -5,8 +5,13 @@ import { Toaster } from '@/components/ui/toaster';
 import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
 
 export const metadata: Metadata = {
-  title: 'Toulouse Outings',
-  description: 'Application pour faire des sorties à Toulouse',
+  title: 'Toulouse Outings',
+  description: 'Application pour faire des sorties à Toulouse',
+  icons: {
+    icon: '/icons/favicon.ico',            // ✅ Favicon pour PC / Windows
+    shortcut: '/icons/favicon.ico',        // ✅ Icône de raccourci (Windows / Linux)
+    apple: '/icons/logoFTS180iphone.png',  // ✅ Icône Apple (iOS / macOS)
+  },
 };
 
 export default function RootLayout({
