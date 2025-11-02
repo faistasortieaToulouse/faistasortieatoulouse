@@ -1,111 +1,221 @@
-import type {Config} from 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-export default {
-  darkMode: ['class'],
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-  theme: {
-    extend: {
-      fontFamily: {
-        body: ['PT Sans', 'sans-serif'],
-        headline: ['PT Sans', 'sans-serif'],
-        code: ['monospace'],
-      },
-      colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        chart: {
-          '1': 'hsl(var(--chart-1))',
-          '2': 'hsl(var(--chart-2))',
-          '3': 'hsl(var(--chart-3))',
-          '4': 'hsl(var(--chart-4))',
-          '5': 'hsl(var(--chart-5))',
-        },
-        sidebar: {
-          DEFAULT: 'hsl(var(--sidebar-background))',
-          foreground: 'hsl(var(--sidebar-foreground))',
-          primary: 'hsl(var(--sidebar-primary))',
-          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-          accent: 'hsl(var(--sidebar-accent))',
-          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-          border: 'hsl(var(--sidebar-border))',
-          ring: 'hsl(var(--sidebar-ring))',
-        },
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-      },
-      screens: {
-        'xs': '360px', // 👈 Ajout très utile pour les petits téléphones
-      },
-      keyframes: {
-        'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-        },
-        'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
-        },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-      },
-      container: {
-        center: true,
-        padding: {
-          DEFAULT: '1rem',
-          sm: '1.5rem',
-          lg: '2rem',
-          xl: '2.5rem',
-        },
-    },
-  },
-  plugins: [require('tailwindcss-animate')],
-} satisfies Config;
+/* --- Variables globales --- */
+@layer base {
+  :root {
+    --background: 319 60% 95%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 319 60% 98%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 319 60% 98%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 319 63% 50%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 290 64% 40%;
+    --accent-foreground: 355.7 100% 97.3%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 355.7 100% 97.3%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 319 63% 50%;
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    --sidebar-background: 319 60% 92%;
+    --sidebar-foreground: 20 14.3% 4.1%;
+    --sidebar-primary: 319 63% 50%;
+    --sidebar-primary-foreground: 355.7 100% 97.3%;
+    --sidebar-accent: 319 60% 88%;
+    --sidebar-accent-foreground: 20 14.3% 4.1%;
+    --sidebar-border: 319 60% 85%;
+    --sidebar-ring: 319 63% 50%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 319 63% 50%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 290 64% 40%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 319 63% 50%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    --sidebar-background: 24 9.8% 10%;
+    --sidebar-foreground: 60 9.1% 97.8%;
+    --sidebar-primary: 319 63% 50%;
+    --sidebar-primary-foreground: 355.7 100% 97.3%;
+    --sidebar-accent: 24 9.8% 15%;
+    --sidebar-accent-foreground: 60 9.1% 97.8%;
+    --sidebar-border: 24 9.8% 15%;
+    --sidebar-ring: 319 63% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* --- Global responsive rules --- */
+  html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  img, video, canvas, iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  button, a {
+    touch-action: manipulation;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    position: relative;
+    margin: 0;
+    min-height: 100vh;
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
+  }
+}
+
+/* --- Containers --- */
+@layer components {
+  .container {
+    @apply container; /* ✅ Utilise la config Tailwind pour paddings responsive */
+  }
+}
+
+/* --- Leaflet Map --- */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 1rem;
+}
+
+/* --- React Day Picker (calendrier) --- */
+.rdp {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--card));
+  --rdp-cell-size: 40px;
+  color: hsl(var(--foreground));
+  font-size: 0.9rem;
+}
+
+.rdp-months {
+  background-color: hsl(var(--card));
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.rdp-day {
+  color: hsl(var(--foreground)) !important;
+  border-radius: 50%;
+}
+
+.rdp-day_selected {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-weight: 600;
+}
+
+.rdp-day_today {
+  border: 2px solid hsl(var(--primary)) !important;
+}
+
+.rdp-day:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.rdp-day_eventDay::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+}
+
+/* --- Google Translate Widget --- */
+.goog-te-combo,
+.goog-te-menu-value,
+.goog-te-gadget-icon,
+.goog-logo-link,
+.goog-te-overlay,
+.goog-te-gadget-simple {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+.goog-te-banner-frame.skiptranslate,
+body > .skiptranslate,
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+iframe.goog-te-banner-frame {
+  position: fixed !important;
+  bottom: 0 !important;
+  top: auto !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+}
+
+/* --- Leaflet tooltip --- */
+.leaflet-tooltip {
+  z-index: 1000 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+}
+
+/* --- Vercel Toolbar --- */
+.vercel-toolbar-root {
+  display: none !important;
+}
