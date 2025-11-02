@@ -161,28 +161,27 @@ export default function DashboardClient({
             </Card>
           </div>
 
-          {/* Colonne droite */}
-          <div className="flex flex-col gap-8 min-w-0">
-              <div className="w-full min-w-0">    
-                <DiscordWidget />
-              </div>
-            </div>
+{/* Colonne droite */}
+<div className="flex flex-col gap-8 min-w-0">
+  <div className="w-full min-w-0">
+    <DiscordWidget />
+  </div>
 
-            <div className="w-full min-w-0">
-              <div className="min-w-max">
-                <DiscordChannelList channels={discordData.channels} />
-              </div>
-            </div>
+  <div className="w-full min-w-0">
+    <div className="min-w-max">
+      <DiscordChannelList channels={discordData.channels} />
+    </div>
+  </div>
 
-            <Card className="p-4 w-full min-w-0">
-              <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
-              <div className="overflow-x-auto max-h-[400px] bg-gray-100 dark:bg-gray-800 w-full">
-                <div className="min-w-max">
-                  <DiscordPolls polls={discordPolls} />
-                </div>
-              </div>
-            </Card>
-          </div>
+  <Card className="p-4 w-full min-w-0">
+    <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
+    <div className="overflow-x-auto max-h-[400px] bg-gray-100 dark:bg-gray-800 w-full">
+      <div className="min-w-max">
+        <DiscordPolls polls={discordPolls} />
+      </div>
+    </div>
+  </Card>
+</div>
         </div>
       </section>
 
