@@ -172,11 +172,6 @@ export default function DashboardClient({
     </div>
   </Card>
 
-  <Card className="p-4 w-full min-w-0">
-    <h2 className="text-xl font-bold mb-3 text-primary">Salons du serveur</h2>
-    <DiscordChannelList channels={discordData.channels} />
-  </Card>
-
     {/* La Liste des Canaux, elle prend maintenant toute la largeur de la colonne */}
     <Card className="p-4 w-full min-w-0">
         <h2 className="text-xl font-bold mb-3 text-primary">Salons du serveur</h2>
