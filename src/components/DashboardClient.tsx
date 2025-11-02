@@ -130,12 +130,12 @@ export default function DashboardClient({
       <DashboardMenu ftsLogoUrl={ftsLogoUrl} />
 
       {/* Grille principale responsive */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {/* Colonne gauche */}
         <div className="flex flex-col gap-8 flex-1 w-full">
           <Card className="p-4 w-full">
             <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
-            <div className="max-h-[400px] overflow-y-auto overflow-x-auto pr-2 bg-gray-100 dark:bg-gray-800 w-full">
+            <div className="max-h-[400px] overflow-auto pr-2 bg-gray-100 dark:bg-gray-800 w-full">
               <DiscordEvents events={discordData.events} />
             </div>
           </Card>
@@ -167,7 +167,7 @@ export default function DashboardClient({
 
           <Card className="p-4 w-full">
             <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
-            <div className="max-h-[400px] overflow-y-auto overflow-x-auto pr-2 bg-gray-100 dark:bg-gray-800 w-full">
+            <div className="max-h-[400px] overflow-auto pr-2 bg-gray-100 dark:bg-gray-800 w-full">
               <DiscordPolls polls={discordPolls} />
             </div>
           </Card>
@@ -188,7 +188,6 @@ export default function DashboardClient({
       {/* Section téléchargement / partage */}
       <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full">
         <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
-          {/* Google Play */}
           <a
             href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
             target="_blank"
@@ -199,13 +198,10 @@ export default function DashboardClient({
             <Image src="/images/google-play-badge.png" alt="Disponible sur Google Play" width={180} height={53} className="w-auto h-auto" />
           </a>
 
-          {/* APK */}
           <APKDownloadModal />
 
-          {/* PWA iOS */}
           <InstallPWAiOS />
 
-          {/* Partage */}
           <Button
             onClick={handleShare}
             className="flex items-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg transition"
