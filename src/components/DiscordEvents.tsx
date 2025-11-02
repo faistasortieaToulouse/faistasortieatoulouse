@@ -34,7 +34,7 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
     return (
-        <div className="relative w-full h-24 sm:h-28 md:h-32">
+        <div className="relative w-full h-16 sm:h-20 md:h-24"> 
             <Image
                 src={currentImageSrc}
                 alt={`Image de ${event.name}`}
