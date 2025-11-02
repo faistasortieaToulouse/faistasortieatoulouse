@@ -25,7 +25,7 @@ const navItems = [
   { href: "/tourisme-offices", icon: Footprints, label: "Organise tes Balades" },
   { href: "/organiser-randos", icon: Mountain, label: "Organise tes Randos" },
   { href: "/organiser-sorties", icon: Zap, label: "Organise tes Sorties" },
-  { href: "/discord-events", icon: Calendar, label: "Découvre les évènements" },
+  { href: "/discord-events", icon: Calendar, label: "Découvre les sorties" },
   { href: "/calendar", icon: Calendar, label: "Calendrier" },
     { href: "/mobility", icon: Car, label: "Mobilité" },
   { href: "/meetup", icon: Users, label: "Événements Meetup" },
