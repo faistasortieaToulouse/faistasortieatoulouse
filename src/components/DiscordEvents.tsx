@@ -33,20 +33,19 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     };
     
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
-    return (
-        <div className="relative w-full aspect-[16/9]">
-            <Image
-                src={currentImageSrc}
-                alt={`Image de ${event.name}`}
-                fill
-                className="object-cover"
-                // Désactive l'optimisation Next.js pour éviter les problèmes avec les CDN externes (Discord)
-                unoptimized
-                // Gère l'erreur de chargement pour passer au fallback
-                onError={handleImageError}
-            />
-        </div>
-    );
+return (
+  <div className="relative w-full flex justify-center items-center">
+    <Image
+      src={currentImageSrc}
+      alt={`Image de ${event.name}`}
+      width={600} // ou la largeur max que tu veux
+      height={400} // hauteur proportionnelle
+      className="object-contain rounded-md"
+      unoptimized
+      onError={handleImageError}
+    />
+  </div>
+);
 };
 
 
