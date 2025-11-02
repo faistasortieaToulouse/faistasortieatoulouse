@@ -10,44 +10,42 @@ interface DiscordEventsProps {
   limit?: number;
 }
 
-// Chemin vers l'image par défaut qui sera utilisée si l'image Discord est manquante ou échoue
-// J'utilise une image intermédiaire pour la gestion d'erreur afin de garantir une taille uniforme.
-const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg'; 
+// Image par défaut si l'image Discord est absente ou échoue
+const DEFAULT_IMAGE_FALLBACK = '/images/EvenentnotFTS.jpg';
 
-// Composant pour l'image de l'événement avec gestion d'erreur
+// Composant d’image d’événement
 const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
-    // 1. Détermine l'URL Discord initiale
-    const initialDiscordUrl = event.image
-      ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
-      : DEFAULT_IMAGE_FALLBACK;
-      
-    // 2. État pour la source actuelle de l'image (démarre avec Discord ou le fallback par défaut)
-    const [currentImageSrc, setCurrentImageSrc] = useState(initialDiscordUrl);
-    
-    // 3. Gestion d'erreur: bascule vers l'image par défaut si l'image Discord échoue
-    const handleImageError = () => {
-        // Bascule vers l'image locale uniquement si nous essayions l'image Discord
-        if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
-            setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
-        }
-    };
-    
-    // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
-return (
-  <div className="relative w-full flex justify-center items-center">
-<Image
-  src={currentImageSrc}
-  alt={`Image de ${event.name}`}
-  width={800}
-  height={600}
-  unoptimized
-  className="rounded-md object-contain"
-/>
-  </div>
-);
+  // 1️⃣ Détermine l’URL Discord initiale
+  const initialDiscordUrl = event.image
+    ? `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png`
+    : DEFAULT_IMAGE_FALLBACK;
+
+  // 2️⃣ État local pour la source actuelle
+  const [currentImageSrc, setCurrentImageSrc] = useState(initialDiscordUrl);
+
+  // 3️⃣ Gestion d’erreur : bascule sur l’image locale
+  const handleImageError = () => {
+    if (currentImageSrc.startsWith('https://cdn.discordapp.com')) {
+      setCurrentImageSrc(DEFAULT_IMAGE_FALLBACK);
+    }
+  };
+
+  // 4️⃣ Rendu de l’image : même taille pour Discord et fallback
+  return (
+    <div className="relative w-full aspect-[16/9] bg-gray-100 dark:bg-gray-900 rounded-md overflow-hidden flex justify-center items-center">
+      <Image
+        src={currentImageSrc}
+        alt={`Image de ${event.name}`}
+        fill
+        className="object-contain"
+        unoptimized
+        onError={handleImageError}
+      />
+    </div>
+  );
 };
 
-
+// Composant principal
 export function DiscordEvents({ events, limit }: DiscordEventsProps) {
   // 🔃 Tri chronologique
   const sortedEvents = [...events].sort(
@@ -84,7 +82,6 @@ export function DiscordEvents({ events, limit }: DiscordEventsProps) {
                 key={event.id}
                 className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
               >
-                {/* Utilisation du nouveau composant EventImage */}
                 <EventImage event={event} />
 
                 <div className="p-3 flex flex-col gap-2">
