@@ -71,6 +71,10 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      },
+      screens: {
+        'xs': '360px', // 👈 Ajout très utile pour les petits téléphones
+      },
       keyframes: {
         'accordion-down': {
           from: {
@@ -93,6 +97,14 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '1rem',
+          sm: '1.5rem',
+          lg: '2rem',
+          xl: '2.5rem',
+        },
     },
   },
   plugins: [require('tailwindcss-animate')],
