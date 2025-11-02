@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Variables globales et styles de base === */
 @layer base {
   :root {
     --background: 319 60% 95%;
@@ -105,11 +104,11 @@
     @apply bg-background text-foreground;
     position: relative;
     margin: 0;
-    min-height: 100vh;
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
+    min-height: 100vh;
   }
 
   .leaflet-container {
@@ -118,28 +117,99 @@
     border-radius: 1rem;
   }
 
+  .rdp {
+    --rdp-accent-color: hsl(var(--primary));
+    --rdp-background-color: hsl(var(--card));
+    --rdp-cell-size: 40px;
+    color: hsl(var(--foreground));
+    font-size: 0.9rem;
+  }
+
+  .rdp-months {
+    background-color: hsl(var(--card));
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  .rdp-day {
+    color: hsl(var(--foreground)) !important;
+    border-radius: 50%;
+  }
+
+  .rdp-day_selected {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    font-weight: 600;
+  }
+
+  .rdp-day_today {
+    border: 2px solid hsl(var(--primary)) !important;
+  }
+
+  .rdp-day:hover {
+    background-color: hsl(var(--muted)) !important;
+  }
+
+  .rdp-day_eventDay::after {
+    content: "";
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: hsl(var(--primary));
+    border-radius: 50%;
+  }
+
+  button.group:hover span {
+    display: block;
+  }
+
+  /* Masquage du widget Google Translate */
+  .goog-te-combo,
+  .goog-te-menu-value,
+  .goog-te-gadget-icon,
+  .goog-logo-link,
+  .goog-te-overlay {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .goog-te-gadget {
+    font-size: 0 !important;
+  }
+
+  .goog-te-banner-frame.skiptranslate,
+  body > .skiptranslate,
+  iframe.goog-te-banner-frame,
+  iframe#\:1\.container {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+  }
+
+  iframe.goog-te-banner-frame {
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    overflow: hidden !important;
+    z-index: 9999 !important;
+  }
+
   .leaflet-tooltip {
     z-index: 1000 !important;
     pointer-events: none !important;
     opacity: 1 !important;
   }
 
-  /* Google Translate */
-  .goog-te-combo,
-  .goog-te-menu-value,
-  .goog-te-gadget-icon,
-  .goog-logo-link,
-  .goog-te-overlay,
-  .goog-te-gadget-simple {
+  .goog-te-gadget-simple,
+  .goog-te-combo {
     display: none !important;
     visibility: hidden !important;
-  }
-
-  iframe.goog-te-banner-frame,
-  body > .skiptranslate {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
   }
 
   .vercel-toolbar-root {
@@ -147,59 +217,14 @@
   }
 }
 
-/* === Composants responsives === */
 @layer components {
   .container {
-    @apply mx-auto px-4 sm:px-6 lg:px-8;
+    @apply mx-auto px-4;
+    @screen sm {
+      @apply px-6;
+    }
+    @screen lg {
+      @apply px-8;
+    }
   }
-}
-
-/* === Personnalisation du calendrier (react-day-picker) === */
-.rdp {
-  --rdp-accent-color: hsl(var(--primary));
-  --rdp-background-color: hsl(var(--card));
-  --rdp-cell-size: 40px;
-  color: hsl(var(--foreground));
-  font-size: 0.9rem;
-}
-
-.rdp-months {
-  background-color: hsl(var(--card));
-  border-radius: 1rem;
-  padding: 1rem;
-}
-
-.rdp-day {
-  color: hsl(var(--foreground)) !important;
-  border-radius: 50%;
-}
-
-.rdp-day_selected {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  font-weight: 600;
-}
-
-.rdp-day_today {
-  border: 2px solid hsl(var(--primary)) !important;
-}
-
-.rdp-day:hover {
-  background-color: hsl(var(--muted)) !important;
-}
-
-.rdp-day_eventDay::after {
-  content: "";
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background-color: hsl(var(--primary));
-  border-radius: 50%;
-}
-
-button.group:hover span {
-  display: block;
 }
