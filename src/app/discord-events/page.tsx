@@ -27,7 +27,7 @@ export default async function DiscordEventsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-primary">📆 Événements Discord</h1>
-      <DiscordEvents events={eventsData} limit={7} />
+      <DiscordEvents events={eventsData} limit={20} />
 
     </div>
   );
