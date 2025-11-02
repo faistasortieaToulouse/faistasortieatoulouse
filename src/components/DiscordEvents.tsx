@@ -38,8 +38,8 @@ return (
     <Image
       src={currentImageSrc}
       alt={`Image de ${event.name}`}
-      width={600} // ou la largeur max que tu veux
-      height={400} // hauteur proportionnelle
+      width={400} // ou la largeur max que tu veux
+      height={266} // hauteur proportionnelle
       className="object-contain rounded-md"
       unoptimized
       onError={handleImageError}
