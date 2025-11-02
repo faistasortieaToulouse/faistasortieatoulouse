@@ -35,15 +35,14 @@ const EventImage: React.FC<{ event: DiscordEvent }> = ({ event }) => {
     // 4. Rendu de l'image (maintenez les dimensions dans le conteneur parent)
 return (
   <div className="relative w-full flex justify-center items-center">
-    <Image
-      src={currentImageSrc}
-      alt={`Image de ${event.name}`}
-      width={400} // ou la largeur max que tu veux
-      height={266} // hauteur proportionnelle
-      className="object-contain rounded-md"
-      unoptimized
-      onError={handleImageError}
-    />
+<Image
+  src={currentImageSrc}
+  alt={`Image de ${event.name}`}
+  width={event.imageWidth ?? 800}
+  height={event.imageHeight ?? 600}
+  unoptimized
+  className="rounded-md object-contain"
+/>
   </div>
 );
 };
