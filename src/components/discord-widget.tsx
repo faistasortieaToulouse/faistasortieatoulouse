@@ -10,7 +10,7 @@ export function DiscordWidget() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // Timeout pour vérifier si le widget s'affiche
+    // Vérifie si le widget s'affiche après 5s
     const timeout = setTimeout(() => {
       if (!loaded && !error) {
         const hasRetried = sessionStorage.getItem('discord-widget-auto-refresh');
@@ -25,19 +25,20 @@ export function DiscordWidget() {
       } else {
         sessionStorage.removeItem('discord-widget-auto-refresh');
       }
-    }, 5000); // 5s
+    }, 5000);
 
     return () => clearTimeout(timeout);
   }, [loaded, error]);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Rejoins la conversation</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center">
+
+      <CardContent className="flex flex-col items-center justify-center w-full">
         {!loaded && !error && (
-          <p className="text-sm text-muted-foreground mb-2">
+          <p className="text-sm text-muted-foreground mb-2 text-center">
             Chargement du widget Discord…
           </p>
         )}
@@ -48,16 +49,17 @@ export function DiscordWidget() {
           </p>
         )}
 
-        <iframe
-          src="https://discord.com/widget?id=1422806103267344416&theme=dark"
-          width="350"
-          height="900"
-          allowTransparency={true}
-          frameBorder="0"
-          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-          className="rounded-lg"
-          onLoad={() => setLoaded(true)}
-        />
+        {/* Container responsive pour supprimer le scroll horizontal */}
+        <div className="w-full">
+          <iframe
+            src="https://discord.com/widget?id=1422806103267344416&theme=dark"
+            className="w-full h-[500px] md:h-[600px] rounded-lg"
+            allowTransparency={true}
+            frameBorder="0"
+            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+            onLoad={() => setLoaded(true)}
+          />
+        </div>
 
         {(!loaded || error) && (
           <div className="mt-3">
