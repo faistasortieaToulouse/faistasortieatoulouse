@@ -53,7 +53,7 @@ export function DiscordWidget() {
         <div className="w-full">
           <iframe
             src="https://discord.com/widget?id=1422806103267344416&theme=dark"
-            className="w-full h-[300px] md:h-[400px] rounded-lg"
+            className="w-full h-[450px] md:h-[450px] rounded-lg"
             allowTransparency={true}
             frameBorder="0"
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
