@@ -163,11 +163,14 @@ export default function DashboardClient({
 
 {/* Colonne droite */}
     {/* Conteneur pour le Widget Discord et la Liste des Canaux */}
-<div className="flex flex-col gap-8 min-w-0">
-  {/* Widget Discord */}
-  <div className="w-full min-w-0">
-    <DiscordWidget />
-  </div>
+<div className="flex flex-col gap-6 w-full">
+  {/* Discord Widget */}
+  <Card className="p-4 w-full">
+    <h2 className="text-xl font-bold mb-3 text-primary">Widget Discord</h2>
+    <div className="w-full">
+      <DiscordWidget />
+    </div>
+  </Card>
 
   <Card className="p-4 w-full min-w-0">
     <h2 className="text-xl font-bold mb-3 text-primary">Salons du serveur</h2>
