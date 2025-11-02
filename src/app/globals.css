@@ -84,7 +84,6 @@
 
 html, body {
   width: 100%;
-  overflow-x: hidden;
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent; /* supprime le flash bleu sur mobile */
 }
