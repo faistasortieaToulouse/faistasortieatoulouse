@@ -164,14 +164,15 @@ export default function DashboardClient({
 {/* Colonne droite */}
     {/* Conteneur pour le Widget Discord et la Liste des Canaux */}
 <div className="flex flex-col gap-8 min-w-0">
+  {/* Widget Discord */}
   <div className="w-full min-w-0">
     <DiscordWidget />
   </div>
 
-  <div className="w-full min-w-0">
+  <Card className="p-4 w-full min-w-0">
+    <h2 className="text-xl font-bold mb-3 text-primary">Salons du serveur</h2>
     <DiscordChannelList channels={discordData.channels} />
-  </div>
-</div>
+  </Card>
 
     {/* La Liste des Canaux, elle prend maintenant toute la largeur de la colonne */}
     <Card className="p-4 w-full min-w-0">
