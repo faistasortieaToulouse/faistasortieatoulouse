@@ -219,18 +219,22 @@ export default function DashboardClient({
               className="w-auto h-auto"
             />
           </a>
+      <APKDownloadModal />
+    </div>
 
-          <APKDownloadModal />
+    {/* Ligne inférieure : QR code + bouton partager côte à côte */}
+    <div className="flex flex-wrap justify-center items-center gap-6">
+      <div className="flex flex-col items-center">
+        <InstallPWAiOS />
+      </div>
 
-          <InstallPWAiOS />
-
-          <Button
-            onClick={handleShare}
-            className="flex items-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-lg transition"
-          >
-            <Share2 className="h-5 w-5" />
-            <span className="font-semibold">Partager l'application</span>
-          </Button>
+      <Button
+        onClick={handleShare}
+        className="flex items-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition"
+      >
+        <Share2 className="h-5 w-5" />
+        <span className="font-semibold">Partager l'application</span>
+      </Button>
         </div>
       </section>
     </div>
