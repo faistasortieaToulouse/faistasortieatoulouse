@@ -10,14 +10,6 @@ import { Map, LifeBuoy } from "lucide-react";
 // import { SidebarTrigger } from "@/components/ui/sidebar";
 // import GoogleTranslate from '@/components/GoogleTranslate';
 
-// Composant de substitution pour SidebarTrigger (simplement un bouton)
-const SidebarTrigger = ({ className }: { className: string }) => (
-  <button className={className} aria-label="Toggle Sidebar">
-    <ChevronLeft className="w-6 h-6 text-gray-700" />
-  </button>
-);
-
-
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
   { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Sorties à Toulouse", external: true },
