@@ -13,6 +13,34 @@ import { Map, LifeBuoy } from "lucide-react";
 // Composant de substitution pour SidebarTrigger (simplement un bouton)
 const SidebarTrigger = ({ className }: { className: string }) => (
   <button className={className} aria-label="Toggle Sidebar">
+    <ChevronLeft className="w-6 h-6 text-gray-700" />
+  </button>
+);
+
+
+const navItems = [
+  { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
+  { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Sorties à Toulouse", external: true },
+  { href: "https://discord.com/channels/1422806103267344416/1422806103904882842", icon: MessageSquare, label: "Discussions", external: true },
+  { href: "/tourisme-offices", icon: Footprints, label: "Organise tes Balades" },
+  { href: "/organiser-randos", icon: Mountain, label: "Organise tes Randos" },
+  { href: "/organiser-sorties", icon: Zap, label: "Organise tes Sorties" },
+  { href: "/discord-events", icon: Calendar, label: "Découvre les sorties" },
+  { href: "/calendar", icon: Calendar, label: "Calendrier" },
+    { href: "/mobility", icon: Car, label: "Mobilité" },
+  { href: "/meetup", icon: Users, label: "Événements Meetup" },
+  { href: "/facebook", icon: Facebook, label: "Groupes Facebook" },
+  { href: "/map", icon: Map, label: "Carte Interactive" },
+  { href: "/partenaires", icon: ExternalLink, label: "Partenaires" },
+  { href: "/help", icon: LifeBuoy, label: "Aide" },
+];
+
+// Define logo sources
+// L'URL Firebase est celle qui fonctionne sur téléphone
+const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicalstudio.firebasestorage.app/o/faistasortieatoulouse%2FlogofaistasortieToulouse105.png?alt=media&token=4ed06e88-d01b-403c-8cff-049c5943c0e2";
+// Le chemin local est celui qui fonctionne sur ordinateur
+const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; 
+
 export function AppSidebar() {
   const [logoSrc, setLogoSrc] = useState(EXTERNAL_LOGO);
   const [collapsed, setCollapsed] = useState(false);
