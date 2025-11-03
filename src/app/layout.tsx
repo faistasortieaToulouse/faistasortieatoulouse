@@ -46,7 +46,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         {/* Container principal flex pour sidebar + contenu */}
-        <div className="flex h-screen">
+        <div className="flex h-screen overflow-hidden">
           {/* Sidebar rétractable */}
           <AppSidebar />
 
