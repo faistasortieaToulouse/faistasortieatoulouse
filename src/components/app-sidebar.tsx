@@ -68,7 +68,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl transition-all duration-300 ${
+      className={`flex-none h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl transition-all duration-300 ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
