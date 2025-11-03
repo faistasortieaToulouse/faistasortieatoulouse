@@ -103,7 +103,7 @@ export default function DashboardClient({
 
       {/* Stats rapides */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Card className="p-4 flex flex-col justify-between min-h-[7rem] w-full">
+        <Card className="p-4 flex flex-col justify-between w-full h-auto min-h-[6rem]">
           <div className="flex justify-between items-start">
             <div>
               <div className="text-sm text-gray-700">Membres en ligne</div>
@@ -114,7 +114,7 @@ export default function DashboardClient({
           </div>
         </Card>
 
-        <Card className="p-4 flex flex-col justify-between min-h-[7rem] w-full">
+        <Card className="p-4 flex flex-col justify-between w-full h-auto min-h-[6rem]">
           <div className="flex justify-between items-start">
             <div>
               <div className="text-sm text-gray-700">Événements à venir</div>
@@ -134,16 +134,16 @@ export default function DashboardClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Colonne gauche */}
           <div className="flex flex-col gap-8">
-            <Card className="p-4 w-full min-w-0">
+            <Card className="p-4 w-full min-w-0 overflow-hidden">
               <h2 className="text-xl font-bold mb-3 text-primary">Événements Discord à Venir</h2>
               <div className="overflow-x-auto max-h-[400px] bg-gray-100 dark:bg-gray-800 w-full">
-                <div className="min-w-max">
+                <div className="min-w-0">
                   <DiscordEvents events={discordData.events} />
                 </div>
               </div>
             </Card>
 
-            <Card className="p-4 w-full min-w-0">
+            <Card className="p-4 w-full min-w-0 overflow-hidden">
               <h2 className="text-xl font-bold mb-1 text-primary">Recommandations d'Événements IA</h2>
               <p className="text-sm text-gray-500 mb-4 break-words">
                 Décrivez vos goûts et laissez l'IA vous suggérer des sorties à Toulouse !
@@ -151,7 +151,7 @@ export default function DashboardClient({
               <AiRecommendations eventData={JSON.stringify(discordData.events ?? [], null, 2)} />
             </Card>
 
-            <Card className="p-4 flex justify-between items-start min-h-[7rem] w-full min-w-0">
+            <Card className="p-4 flex justify-between items-start w-full h-auto min-h-[6rem]">
               <div>
                 <div className="text-sm text-gray-700">Membres sur le serveur</div>
                 <div className="text-2xl font-bold">{totalMembers}</div>
@@ -165,7 +165,7 @@ export default function DashboardClient({
     {/* Conteneur pour le Widget Discord et la Liste des Canaux */}
 <div className="flex flex-col gap-6 w-full">
   {/* Discord Widget */}
-  <Card className="p-4 w-full">
+  <Card className="p-4 w-full overflow-hidden max-h-[400px] sm:max-h-[500px]">
     <h2 className="text-xl font-bold mb-3 text-primary">Widget Discord</h2>
     <div className="w-full">
       <DiscordWidget />
@@ -173,15 +173,15 @@ export default function DashboardClient({
   </Card>
 
     {/* La Liste des Canaux, elle prend maintenant toute la largeur de la colonne */}
-    <Card className="p-4 w-full min-w-0">
+    <Card className="p-4 w-full min-w-0 overflow-hidden">
         <h2 className="text-xl font-bold mb-3 text-primary">Salons du serveur</h2>
         <DiscordChannelList channels={discordData.channels} />
     </Card>
 
-  <Card className="p-4 w-full min-w-0">
+  <Card className="p-4 w-full min-w-0 overflow-hidden">
     <h2 className="text-xl font-bold mb-3 text-primary">Sondages Actifs sur Discord</h2>
     <div className="overflow-x-auto max-h-[400px] bg-gray-100 dark:bg-gray-800 w-full">
-      <div className="min-w-max">
+      <div className="min-w-0">
         <DiscordPolls polls={discordPolls} />
       </div>
     </div>
@@ -202,7 +202,7 @@ export default function DashboardClient({
       </Alert>
 
 {/* Section téléchargement / partage */}
-<section className="flex flex-col items-center gap-6 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full">
+<section className="flex flex-col items-center gap-6 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full overflow-hidden">
   
   {/* Ligne supérieure : Google Play + APK */}
   <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
