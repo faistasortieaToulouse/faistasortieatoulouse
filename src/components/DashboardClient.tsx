@@ -201,42 +201,46 @@ export default function DashboardClient({
         </AlertDescription>
       </Alert>
 
-      {/* Section téléchargement / partage */}
-      <section className="flex flex-wrap justify-center gap-4 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full">
-        <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
-          <a
-            href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
-          >
-            <Store className="h-5 w-5" />
-            <Image
-              src="/images/google-play-badge.png"
-              alt="Disponible sur Google Play"
-              width={180}
-              height={53}
-              className="w-auto h-auto"
-            />
-          </a>
-      <APKDownloadModal />
+{/* Section téléchargement / partage */}
+<section className="flex flex-col items-center gap-6 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl w-full">
+  
+  {/* Ligne supérieure : Google Play + APK */}
+  <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 w-full">
+    <a
+      href="https://play.google.com/store/apps/details?id=com.votre.appli.android"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-2 p-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+    >
+      <Store className="h-5 w-5" />
+      <Image
+        src="/images/google-play-badge.png"
+        alt="Disponible sur Google Play"
+        width={180}
+        height={53}
+        className="w-auto h-auto"
+      />
+    </a>
+
+    <APKDownloadModal />
+  </div>
+
+  {/* Ligne inférieure : QR code + bouton partager */}
+  <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
+    <div className="flex flex-col items-center">
+      <InstallPWAiOS />
     </div>
 
-    {/* Ligne inférieure : QR code + bouton partager côte à côte */}
-    <div className="flex flex-wrap justify-center items-center gap-6">
-      <div className="flex flex-col items-center">
-        <InstallPWAiOS />
-      </div>
+    <Button
+      onClick={handleShare}
+      className="flex items-center justify-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition w-full sm:w-auto"
+    >
+      <Share2 className="h-5 w-5" />
+      <span className="font-semibold">Partager l'application</span>
+    </Button>
+  </div>
+</section>
 
-      <Button
-        onClick={handleShare}
-        className="flex items-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition"
-      >
-        <Share2 className="h-5 w-5" />
-        <span className="font-semibold">Partager l'application</span>
-      </Button>
-        </div>
-      </section>
     </div>
   );
 }
