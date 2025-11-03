@@ -95,7 +95,7 @@ export default function DashboardClient({
   );
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       {/* Carrousel */}
       <section>
         <Carousel images={carouselImages} />
