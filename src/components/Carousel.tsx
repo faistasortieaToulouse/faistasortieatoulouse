@@ -1,69 +1,78 @@
 import React, { useMemo } from 'react';
-// Retire l'import d'Image si vous n'utilisez que la balise <img>
-// import Image from "next/image"; 
-import { CarouselImage } from '@/types/types'; // Importez le type CarouselImage
+import { CarouselImage } from '@/types/types';
 
 const FALLBACK_IMAGE = '/images/fallback.png';
 
-// 1. DÉFINITION DE L'INTERFACE DE PROPS
 interface CarouselProps {
-    images: CarouselImage[]; // Les images d'activités
+  images: CarouselImage[];
 }
 
-// 2. LE COMPOSANT ACCEPTE LES PROPS
 const Carousel: React.FC<CarouselProps> = ({ images }) => {
+  const displayImages = useMemo(() => {
+    const needed = Math.min(3, images.length);
+    return images.sort(() => 0.5 - Math.random()).slice(0, needed);
+  }, [images]);
 
-    // Sélectionne 3 images aléatoires parmi les props
-    const displayImages = useMemo(() => {
-        const needed = Math.min(3, images.length);
-        return images.sort(() => 0.5 - Math.random()).slice(0, needed);
-    }, [images]); // Dépendances corrigées
-
-    return (
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '12px',
+        overflowX: 'auto',
+        scrollSnapType: 'x mandatory',
+        WebkitOverflowScrolling: 'touch',
+      }}
+      className="no-scrollbar"
+    >
+      {displayImages.map((image) => (
         <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px',
-                overflowX: 'auto',
-                scrollbarWidth: 'none', // cache scrollbar Firefox
-            }}
+          key={image.id}
+          style={{
+            flex: '0 0 auto',
+            width: '90%',          // sur mobile
+            maxWidth: '300px',     // limite sur grand écran
+            scrollSnapAlign: 'center',
+            textAlign: 'center',
+          }}
+          className="sm:w-[45%] md:w-[30%]" // ✅ tailwind responsive
         >
-            {displayImages.map((image: CarouselImage) => (
-                <div
-                    key={image.id}
-                    style={{
-                        flex: '0 0 auto',
-                        minWidth: '120px',
-                        maxWidth: '300px',
-                        width: 'calc(33.33% - 16px)',
-                        textAlign: 'center',
-                    }}
-                >
-                    <img
-                        src={image.imageUrl || FALLBACK_IMAGE}
-                        alt={image.description || 'Image'}
-                        width={300}
-                        height={200}
-                        style={{
-                            width: '100%',
-                            height: 'auto',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                        }}
-                        onError={(e) => {
-                            const img = e.currentTarget as HTMLImageElement;
-                            if (!img.src.includes(FALLBACK_IMAGE)) {
-                                img.src = FALLBACK_IMAGE;
-                            }
-                        }}
-                    />
-                </div>
-            ))}
+          <img
+            src={image.imageUrl || FALLBACK_IMAGE}
+            alt={image.description || 'Image'}
+            width={300}
+            height={200}
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'cover',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            }}
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              if (!img.src.includes(FALLBACK_IMAGE)) {
+                img.src = FALLBACK_IMAGE;
+              }
+            }}
+          />
         </div>
-    );
+      ))}
+
+      {/* Styles pour masquer scrollbar sur tous navigateurs */}
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default Carousel;
