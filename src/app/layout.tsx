@@ -43,7 +43,7 @@ export default function RootLayout({
         {/* Manifest PWA */}
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased min-h-screen">
         {children}
 
                 {/* Le composant GoogleTranslate a été retiré pour éviter les conflits lors du pré-rendu, 
