@@ -51,9 +51,9 @@ export default function RootLayout({
           <AppSidebar />
 
           {/* Contenu principal */}
-          <main className="flex-1 bg-white overflow-auto">
-            {children}
-          </main>
+<main className="flex-1 bg-white overflow-auto min-w-0">
+  {children}
+</main>
         </div>
 
         {/* GoogleTranslate / TranslateWrapper peuvent être activés ici si nécessaire */}
