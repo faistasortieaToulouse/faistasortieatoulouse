@@ -43,7 +43,7 @@ const SidebarTrigger = ({
 }) => {
   return (
     <button
-      className="lg:hidden cursor-pointer p-1 rounded-full hover:bg-purple-300 transition"
+      className="cursor-pointer p-1 rounded-full hover:bg-purple-300 transition"
       onClick={onClick}
       aria-label="Toggle Sidebar"
     >
@@ -72,6 +72,7 @@ export function AppSidebar() {
         collapsed ? "w-20" : "w-64"
       }`}
     >
+      {/* Header / Logo */}
       <div className="flex items-center justify-between mb-6">
         <a href="/" className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
@@ -90,29 +91,25 @@ export function AppSidebar() {
             </div>
           )}
         </a>
-
         <SidebarTrigger collapsed={collapsed} onClick={toggleSidebar} />
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          if (item.external) {
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200"
-              >
-                <Icon className="w-5 h-5" />
-                {!collapsed && item.label}
-              </a>
-            );
-          }
-
-          return (
+          return item.external ? (
+            <a
+              key={item.label}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 rounded hover:bg-purple-200"
+            >
+              <Icon className="w-5 h-5" />
+              {!collapsed && item.label}
+            </a>
+          ) : (
             <a
               key={item.label}
               href={item.href}
@@ -124,6 +121,7 @@ export function AppSidebar() {
           );
         })}
 
+        {/* Discord button */}
         <a
           href="https://discord.com/channels/1422806103267344416/1422806103904882842"
           target="_blank"
@@ -135,9 +133,6 @@ export function AppSidebar() {
           {!collapsed && "Rejoindre Discord"}
         </a>
       </nav>
-
-      <div className="mt-4 pt-4 border-t border-purple-300">
-      </div>
     </aside>
   );
 }
