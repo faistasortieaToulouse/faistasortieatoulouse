@@ -70,10 +70,10 @@ export function AppSidebar() {
 
   return (
     <aside
-className={`
-  fixed top-0 left-0 h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-md transition-all duration-300 z-50
-  ${collapsed ? 'w-0 overflow-hidden' : 'w-64'}
-`}
+  className={`
+    fixed top-0 left-0 h-full flex flex-col p-4 pt-10 shadow-md transition-all duration-300 z-50
+    ${collapsed ? 'w-0 bg-transparent overflow-hidden' : 'w-64 bg-[#F7DEEF]'}
+  `}
     >
       {/* Header / Logo */}
       <div className="flex items-center justify-between mb-6">
