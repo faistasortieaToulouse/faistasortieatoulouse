@@ -137,7 +137,6 @@ export function AppSidebar() {
       </nav>
 
       <div className="mt-4 pt-4 border-t border-purple-300">
-        <p className="text-sm text-gray-600 italic">Traduction (simulée)</p>
       </div>
     </aside>
   );
