@@ -1,19 +1,23 @@
-'use client'
+"use client"
 
-import type { ReactNode } from 'react'
-import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/app-sidebar'
-import { Footer } from '@/components/footer'
-import GoogleTranslate from '@/components/GoogleTranslate'
+import type { ReactNode } from "react"
+import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { Footer } from "@/components/footer"
+import GoogleTranslate from "@/components/GoogleTranslate"
 
-function MainWrapper({ children }: { children: ReactNode }) {
-  const { state } = useSidebar()                      // <= clé
-  const isCollapsed = state === "collapsed"           // shadcn v2
+function LayoutContent({ children }: { children: ReactNode }) {
+  const { state } = useSidebar()
+
+  // expanded = sidebar width 256px (16rem)
+  // collapsed = sidebar width 0
+  const paddingLeft = state === "collapsed" ? 0 : 256
 
   return (
-    <div className={`flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? 'ml-0' : 'ml-64'}`}>
+    <div style={{ paddingLeft, transition: "padding-left 300ms" }} className="flex flex-col min-h-screen">
       <header className="relative z-10 flex justify-between p-2 bg-background shadow-sm">
         <SidebarTrigger />
+        
         <div className="w-48">
           <GoogleTranslate />
         </div>
@@ -27,15 +31,15 @@ function MainWrapper({ children }: { children: ReactNode }) {
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider>
       <Sidebar>
         <AppSidebar />
       </Sidebar>
 
       <SidebarInset>
-        <MainWrapper>
+        <LayoutContent>
           {children}
-        </MainWrapper>
+        </LayoutContent>
       </SidebarInset>
     </SidebarProvider>
   )
