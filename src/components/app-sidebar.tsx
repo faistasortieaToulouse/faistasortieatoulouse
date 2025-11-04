@@ -33,29 +33,6 @@ const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicals
 // Le chemin local est celui qui fonctionne sur ordinateur
 const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; 
 
-// Définition du SidebarTrigger CORRECT
-const SidebarTrigger = ({
-  collapsed,
-  onClick,
-}: {
-  collapsed: boolean;
-  onClick: () => void;
-}) => {
-  return (
-    <button
-      className="lg:hidden cursor-pointer p-1 rounded-full hover:bg-purple-300 transition"
-      onClick={onClick}
-      aria-label="Toggle Sidebar"
-    >
-      <ChevronLeft
-        className={`w-6 h-6 text-gray-700 transition-transform duration-300 ${
-          collapsed ? "rotate-180" : ""
-        }`}
-      />
-    </button>
-  );
-};
-
 export function AppSidebar() {
   const [logoSrc, setLogoSrc] = useState(EXTERNAL_LOGO);
   const [collapsed, setCollapsed] = useState(false);
@@ -91,7 +68,6 @@ export function AppSidebar() {
           )}
         </a>
 
-        <SidebarTrigger collapsed={collapsed} onClick={toggleSidebar} />
       </div>
 
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
