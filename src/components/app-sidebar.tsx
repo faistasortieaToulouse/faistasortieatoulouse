@@ -1,4 +1,4 @@
-"use client";
+a"use client";
 
 import React, { useState } from "react";
 // Remplacement de 'next/link' et 'next/image' par des éléments HTML natifs
@@ -69,7 +69,7 @@ export function AppSidebar() {
   return (
     <aside
       className={`h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl transition-all duration-300 ${
-        collapsed ? "w-20" : "w-64"
+        collapsed ? "w-0 overflow-hidden" : "w-64"
       }`}
     >
       <div className="flex items-center justify-between mb-6">
