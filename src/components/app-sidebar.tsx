@@ -1,4 +1,4 @@
-a"use client";
+"use client";
 
 import React, { useState } from "react";
 // Remplacement de 'next/link' et 'next/image' par des éléments HTML natifs
