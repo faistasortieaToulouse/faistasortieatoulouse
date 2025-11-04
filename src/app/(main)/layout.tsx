@@ -1,39 +1,36 @@
+// faistasortietest2/src/components/MainLayout.tsx
 'use client';
 
 import type { ReactNode } from 'react';
-import { SidebarProvider } from '@/context/SidebarContext';
+import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { Footer } from '@/components/footer';
 import GoogleTranslate from '@/components/GoogleTranslate';
-import { SidebarTrigger } from '@/components/ui/sidebar'; // si tu veux garder ce composant
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
-        {/* Sidebar */}
+      <Sidebar>
         <AppSidebar />
-
-        {/* Main content */}
-        <div className="flex flex-col flex-grow">
-          {/* Header */}
-          <header className="relative z-10 flex justify-between items-center p-2 bg-background shadow-sm">
-            {/* Menu burger */}
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen">
+          {/* HEADER : Ajout du SidebarTrigger pour ouvrir/fermer la barre latérale */}
+          <header className="relative z-10 flex justify-between p-2 bg-background shadow-sm">
+            {/* 1. Bouton Menu Burger */}
             <SidebarTrigger />
-
-            {/* Google Translate */}
+            
+            {/* 2. Google Translate (aligné à droite) */}
             <div className="w-48">
               <GoogleTranslate />
             </div>
+          
           </header>
 
-          {/* Page content */}
-          <main className="flex-grow">{children}</main>
-
-          {/* Footer */}
+          <div className="flex-grow">{children}</div>
           <Footer />
         </div>
-      </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
