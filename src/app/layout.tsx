@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { SidebarProvider } from '@/context/SidebarContext';
 // import GoogleTranslate from '@/components/GoogleTranslate'; // client component
 import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
 
@@ -44,6 +45,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="font-body antialiased">
+        <SidebarProvider>
         {children}
 
                 {/* Le composant GoogleTranslate a été retiré pour éviter les conflits lors du pré-rendu, 
@@ -55,6 +57,7 @@ export default function RootLayout({
         {/* <TranslateWrapper /> */}
 
         <Toaster />
+        </SidebarProvider>
       </body>
     </html>
   );
