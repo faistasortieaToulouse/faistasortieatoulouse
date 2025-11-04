@@ -66,12 +66,13 @@ export function AppSidebar() {
 
   const toggleSidebar = () => setCollapsed(!collapsed);
 
-  return (
-    <aside
-      className={`h-full bg-[#F7DEEF] flex flex-col p-4 pt-10 shadow-2xl transition-all duration-300 ${
-        collapsed ? "w-10 overflow-hidden" : "w-64"
-      }`}
-    >
+<aside
+  className={`h-full transition-all duration-300 ${
+    collapsed
+      ? 'absolute w-0 overflow-hidden opacity-0 pointer-events-none'
+      : 'relative w-64 bg-[#F7DEEF] shadow-2xl p-4 pt-10'
+  }`}
+>
       <div className="flex items-center justify-between mb-6">
         <a href="/" className="flex items-center gap-3">
           <div className="relative w-10 h-10 flex-shrink-0">
