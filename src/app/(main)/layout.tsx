@@ -16,7 +16,7 @@ function MainContent({ children }: { children: ReactNode }) {
   // largeur du sidebar quand expanded = 16rem = 256px (défini par --sidebar-width)
   // largeur quand collapsed = icône rail (ici on met 48px), ou 0 si tu veux
   const expandedPx = 256;
-  const collapsedPx = 48; // ajuste si tu veux 0
+  const collapsedPx = 0; // ajuste si tu veux 0 au lieu de 48
 
   const paddingLeft = state === 'collapsed' ? collapsedPx : expandedPx;
 
