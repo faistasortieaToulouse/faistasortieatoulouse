@@ -9,6 +9,7 @@ import { Map, LifeBuoy } from "lucide-react";
 // Les imports suivants sont commentés car ils ne sont pas définis dans cet environnement
 // import { SidebarTrigger } from "@/components/ui/sidebar";
 // import GoogleTranslate from '@/components/GoogleTranslate';
+import { useSidebar } from "@/context/SidebarContext";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -57,13 +58,28 @@ const SidebarTrigger = ({
 };
 
 export function AppSidebar() {
+  const { collapsed, toggle } = useSidebar();
   const [logoSrc, setLogoSrc] = useState(EXTERNAL_LOGO);
-  const [collapsed, setCollapsed] = useState(false);
 
   const handleImageError = () => {
     if (logoSrc === EXTERNAL_LOGO) setLogoSrc(LOCAL_LOGO);
   };
 
+  return (
+    <aside
+      className={`h-full transition-all duration-300 ${
+        collapsed
+          ? 'w-0 overflow-hidden opacity-0 pointer-events-none'
+          : 'w-64 bg-[#F7DEEF] shadow-2xl p-4 pt-10'
+      }`}
+    >
+      {/* ... */}
+      <SidebarTrigger collapsed={collapsed} onClick={toggle} />
+      {/* ... */}
+    </aside>
+  );
+}
+  
   const toggleSidebar = () => setCollapsed(!collapsed);
 
   return (
