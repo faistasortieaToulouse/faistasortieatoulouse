@@ -68,7 +68,7 @@ export default function DashboardClient({
         await navigator.share({
           title: "Mon Application TWA/PWA",
           text: "Téléchargez Mon Application pour ne rien manquer de nos événements et discussions !",
-          url: "https://mon-appli-fictive.com",
+          url: "https://faistasortieatoulouse.online",
         });
         toast({ title: "Partage réussi 🎉", description: "Merci d'avoir partagé l'application !" });
       } catch {
