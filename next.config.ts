@@ -44,4 +44,4 @@ value: `
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
