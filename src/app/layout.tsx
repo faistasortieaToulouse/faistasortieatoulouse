@@ -5,8 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
 
 export const metadata: Metadata = {
-  title: 'Sorties à Toulouse',
-  description: 'Application pour faire des sorties à Toulouse',
+  title: 'Fais ta Sortie à Toulouse FTS',
+  description: 'Application pour faire des sorties à Toulouse Fais Ta Sortie à Toulouse FTS, gratuit et sans limite, pour sortir à Toulouse',
   icons: {
     icon: '/icons/favicon.ico',            // ✅ Favicon pour PC / Windows
     shortcut: '/icons/favicon.ico',        // ✅ Icône de raccourci (Windows / Linux)
