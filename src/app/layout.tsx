@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TranslateWrapper } from '@/components/TranslateWrapper'; // ⬅️ IMPORT DU NOUVEAU WRAPPER
 
 export const metadata: Metadata = {
-  title: 'Toulouse Outings',
+  title: 'Sorties à Toulouse',
   description: 'Application pour faire des sorties à Toulouse',
   icons: {
     icon: '/icons/favicon.ico',            // ✅ Favicon pour PC / Windows
