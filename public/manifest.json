@@ -1,7 +1,7 @@
 {
   "name": "Fais ta Sortie à Toulouse",
   "short_name": "FTST",
-  "description": "Calendrier et événements Discord à Toulouse",
+  "description": "Calendrier des événements à Toulouse et de tes sorties que tu partages",
   "lang": "fr-FR",
   "start_url": "https://faistasortieatoulouse.online"
   "display": "standalone",
