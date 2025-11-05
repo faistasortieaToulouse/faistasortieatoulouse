@@ -3,7 +3,7 @@
   "short_name": "FTST",
   "description": "Calendrier et événements Discord à Toulouse",
   "lang": "fr-FR",
-  "start_url": "/",
+  "start_url": "https://faistasortieatoulouse.online"
   "display": "standalone",
   "background_color": "#1f2937",
   "theme_color": "#2563eb",
