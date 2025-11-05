@@ -1,3 +1,4 @@
+import withPWA from 'next-pwa';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -14,6 +15,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'secure.meetupstatic.com', pathname: '/**' },
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/**' },
     ],
+  },
+  pwa: {
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
   },
   async headers() {
     return [
