@@ -79,7 +79,7 @@ export default function DashboardClient({
         });
       }
     } else {
-      navigator.clipboard.writeText("https://mon-appli-fictive.com");
+      navigator.clipboard.writeText("https://faistasortieatoulouse.online");
       toast({
         title: "Lien copié !",
         description: "Le lien de l'application a été copié dans votre presse-papiers.",
