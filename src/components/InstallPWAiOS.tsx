@@ -58,7 +58,7 @@ export default function InstallPWAiOS() {
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop' | 'loading'>('loading');
   const [isStandalone, setIsStandalone] = useState(false);
   // Utiliser la location actuelle pour le QR code
-  const appUrl = typeof window !== 'undefined' ? window.location.href : 'https://mon-appli-fictive.com';
+  const appUrl = typeof window !== 'undefined' ? window.location.href : 'https://faistasortieatoulouse.online';
 
   useEffect(() => {
     // Exécuter la détection côté client
