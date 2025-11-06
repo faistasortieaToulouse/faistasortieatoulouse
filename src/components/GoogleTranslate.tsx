@@ -127,16 +127,31 @@ const changeLang = (lang: string) => {
         deleteCookie('googtrans'); 
         deleteCookie('googtrans_save'); 
 
-        // 2. Préparer l'URL pour la réinitialisation : ajouter le paramètre 'notranslate'
-        const cleanUrl = window.location.href.split('#')[0]; // Enlève le fragment #googtrans(...)
+        // 2. 🛑 NOUVEAU : Tentative de réinitialisation via la fonction interne de Google Translate.
+        // Cible la traduction de la langue actuellement sélectionnée vers la langue d'origine (fr).
+        const currentTranslation = getCookie('googtrans'); 
+        const sourceLang = currentTranslation ? currentTranslation.split('/')[1] : 'fr';
         
-        // 🛑 L'astuce : ajouter un paramètre pour forcer la désactivation de Google Translate
-        const resetUrl = cleanUrl.includes('?') 
-            ? cleanUrl + '&notranslate=true' 
-            : cleanUrl + '?notranslate=true';
-            
-        // 3. Rediriger pour désactiver la traduction
-        window.location.href = resetUrl;
+        if (typeof (window as any).doGTranslate === 'function') {
+            // Forcer la traduction vers la langue source pour annuler
+            (window as any).doGTranslate(sourceLang + '|fr');
+        } else {
+             // Utiliser l'astuce du fragment d'URL pour la désactivation (méthode de secours)
+             window.location.hash = '#googtrans(fr|fr)'; 
+        }
+
+        // 3. CLÉ : Nettoyer l'historique/URL sans recharger
+        // Ceci enlève le #googtrans(...) sans redémarrer le cycle de traduction.
+        const cleanUrl = window.location.href.split('#')[0];
+        window.history.pushState('', document.title, cleanUrl);
+
+        // 4. Mettre à jour l'état local pour refléter 'fr'
+        setSelectedLang('fr');
+        
+        // 5. Recharger après un court délai pour que l'API ait le temps de réagir au doGTranslate
+        setTimeout(() => {
+            window.location.reload();
+        }, 50); 
         
     } else {
         // Définir le cookie si on traduit vers une autre langue.
@@ -145,7 +160,7 @@ const changeLang = (lang: string) => {
         window.location.reload();
     }
     
-    // Si ce n'est pas le retour au français, recharger (pour les changements de langue)
+    // Si ce n'est pas le retour au français, on recharge au-dessus.
     if (lang !== 'fr') {
         window.location.reload();
     }
