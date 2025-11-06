@@ -35,37 +35,51 @@ const EXTRA_LANGS = [
 ];
 
 function setCookie(name: string, value: string, days?: number) {
-  if (typeof document === 'undefined') return;
-  // Définir le domaine sur .votre-domaine.online
-  const domain = document.location.hostname.endsWith('.online') 
-    ? '.faistasortieatoulouse.online' 
-    : document.location.hostname;
+    if (typeof document === 'undefined') return;
     
-  let cookie = `${name}=${value};path=/;domain=${domain};`; // <-- AJOUT DE domain
-  if (days) {
-    const d = new Date();
-    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    cookie += `expires=${d.toUTCString()};`;
-  }
-  document.cookie = cookie;
+    // Liste des domaines à cibler
+    const domains = [
+        document.location.hostname, // Domaine actuel (ex: www.faistasortieatoulouse.online)
+        '.' + document.location.hostname, // Domaine actuel avec point
+        '.faistasortieatoulouse.online', // Domaine racine (pour couvrir www. et l'absence de www.)
+    ];
+
+    let cookie = `${name}=${value};path=/;`;
+    if (days) {
+        const d = new Date();
+        d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+        cookie += `expires=${d.toUTCString()};`;
+    }
+
+    // Tenter de définir le cookie sur tous les domaines potentiels
+    domains.forEach(domain => {
+        document.cookie = `${cookie}domain=${domain};`;
+    });
 }
 
 function getCookie(name: string) {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : null;
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
 }
 
 function deleteCookie(name: string) {
-  if (typeof document === 'undefined') return;
-  
-  // Définir le domaine sur .votre-domaine.online pour la suppression
-  const domain = document.location.hostname.endsWith('.online') 
-    ? '.faistasortieatoulouse.online' 
-    : document.location.hostname;
+    if (typeof document === 'undefined') return;
 
-  // 🛑 CLÉ DE LA CORRECTION : La suppression doit cibler le même domaine que la création.
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;domain=${domain};`; // <-- AJOUT DE domain
+    // Liste des domaines à cibler pour la suppression
+    const domains = [
+        document.location.hostname, 
+        '.' + document.location.hostname,
+        '.faistasortieatoulouse.online',
+    ];
+    
+    // Le cookie de suppression (date expirée)
+    const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
+    
+    // Tenter de supprimer le cookie sur tous les domaines potentiels
+    domains.forEach(domain => {
+        document.cookie = `${expiredCookie}domain=${domain};`;
+    });
 }
 
 export default function GoogleTranslateCustom() {
