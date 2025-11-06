@@ -105,20 +105,39 @@ export default function GoogleTranslateCustom() {
     }, []);
 
 
-    const changeLang = (lang: string) => {
-        if (lang === selectedLang) return;
+const changeLang = (lang: string) => {
+    if (lang === selectedLang) return;
 
-        if (lang === 'fr') {
-            // ✅ CORRECTION CLÉ : Supprimer le cookie pour revenir au français
-            deleteCookie('googtrans');
-        } else {
-            // Définir le cookie pour toute autre langue
-            const val = `/fr/${lang}`;
-            setCookie('googtrans', val, 7);
+    if (lang === 'fr') {
+        // 1. Tenter de supprimer le cookie
+        deleteCookie('googtrans');
+        
+        // 2. Tenter de supprimer le cookie de session (parfois créé par Google)
+        deleteCookie('googtrans_save'); 
+
+        // 3. Forcer la réinitialisation côté Google Translate (méthode de secours)
+        const frame = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+        if (frame) {
+            frame.value = ''; // Réinitialiser le sélecteur caché
         }
-
+        
+        // 4. Forcer la redirection vers la page non traduite (la plus fiable pour 'fr')
+        // Cela supprime les fragments d'URL que Google ajoute parfois (#googtrans(fr|en...))
+        const cleanUrl = window.location.href.split('#')[0];
+        window.location.href = cleanUrl;
+        
+    } else {
+        // Définir le cookie si on traduit vers une autre langue.
+        const val = `/fr/${lang}`;
+        setCookie('googtrans', val, 7);
         window.location.reload();
-    };
+    }
+    
+    // Si ce n'est pas le retour au français, recharger (pour les changements de langue)
+    if (lang !== 'fr') {
+        window.location.reload();
+    }
+};
 
     return (
         <>
