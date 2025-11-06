@@ -123,23 +123,20 @@ const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
 
     if (lang === 'fr') {
-        // --- 💥 Nouvelle Logique de Réinitialisation ---
-        
-        // 1. Tenter la réinitialisation directe de Google Translate
-        // window.location.hash = '#googtrans(fr|fr)'; // Technique alternative, mais moins fiable
-        
-        // Supprimer le cookie pour s'assurer qu'il n'y ait pas de confusion au rechargement
+        // 1. Tenter la suppression agressive du cookie (méthode de secours)
         deleteCookie('googtrans'); 
-        
-        // Tentative d'appel de la fonction de réinitialisation si elle existe
-        if (typeof (window as any).doGTranslate === 'function') {
-            (window as any).doGTranslate('fr|fr');
-        }
+        deleteCookie('googtrans_save'); 
 
-        // 2. Forcer la redirection vers la page SANS le fragment d'URL de traduction
-        // C'est l'étape la plus critique.
-        const cleanUrl = window.location.href.split('#')[0];
-        window.location.href = cleanUrl;
+        // 2. Préparer l'URL pour la réinitialisation : ajouter le paramètre 'notranslate'
+        const cleanUrl = window.location.href.split('#')[0]; // Enlève le fragment #googtrans(...)
+        
+        // 🛑 L'astuce : ajouter un paramètre pour forcer la désactivation de Google Translate
+        const resetUrl = cleanUrl.includes('?') 
+            ? cleanUrl + '&notranslate=true' 
+            : cleanUrl + '?notranslate=true';
+            
+        // 3. Rediriger pour désactiver la traduction
+        window.location.href = resetUrl;
         
     } else {
         // Définir le cookie si on traduit vers une autre langue.
