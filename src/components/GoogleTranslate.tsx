@@ -35,27 +35,37 @@ const EXTRA_LANGS = [
 ];
 
 function setCookie(name: string, value: string, days?: number) {
-    if (typeof document === 'undefined') return;
-    let cookie = `${name}=${value};path=/;`;
-    if (days) {
-        const d = new Date();
-        d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-        cookie += `expires=${d.toUTCString()};`;
-    }
-    document.cookie = cookie;
+  if (typeof document === 'undefined') return;
+  // Définir le domaine sur .votre-domaine.online
+  const domain = document.location.hostname.endsWith('.online') 
+    ? '.faistasortieatoulouse.online' 
+    : document.location.hostname;
+    
+  let cookie = `${name}=${value};path=/;domain=${domain};`; // <-- AJOUT DE domain
+  if (days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    cookie += `expires=${d.toUTCString()};`;
+  }
+  document.cookie = cookie;
 }
 
 function getCookie(name: string) {
-    if (typeof document === 'undefined') return null;
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? decodeURIComponent(match[2]) : null;
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
-// 👈 NOUVELLE FONCTION CLÉ POUR LA CORRECTION
 function deleteCookie(name: string) {
-    if (typeof document === 'undefined') return;
-    // Définit la date d'expiration dans le passé pour forcer la suppression
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
+  if (typeof document === 'undefined') return;
+  
+  // Définir le domaine sur .votre-domaine.online pour la suppression
+  const domain = document.location.hostname.endsWith('.online') 
+    ? '.faistasortieatoulouse.online' 
+    : document.location.hostname;
+
+  // 🛑 CLÉ DE LA CORRECTION : La suppression doit cibler le même domaine que la création.
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;domain=${domain};`; // <-- AJOUT DE domain
 }
 
 export default function GoogleTranslateCustom() {
