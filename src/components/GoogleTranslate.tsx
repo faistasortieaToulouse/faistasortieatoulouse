@@ -123,20 +123,21 @@ const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
 
     if (lang === 'fr') {
-        // 1. Tenter de supprimer le cookie
-        deleteCookie('googtrans');
+        // --- 💥 Nouvelle Logique de Réinitialisation ---
         
-        // 2. Tenter de supprimer le cookie de session (parfois créé par Google)
-        deleteCookie('googtrans_save'); 
-
-        // 3. Forcer la réinitialisation côté Google Translate (méthode de secours)
-        const frame = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-        if (frame) {
-            frame.value = ''; // Réinitialiser le sélecteur caché
+        // 1. Tenter la réinitialisation directe de Google Translate
+        // window.location.hash = '#googtrans(fr|fr)'; // Technique alternative, mais moins fiable
+        
+        // Supprimer le cookie pour s'assurer qu'il n'y ait pas de confusion au rechargement
+        deleteCookie('googtrans'); 
+        
+        // Tentative d'appel de la fonction de réinitialisation si elle existe
+        if (typeof (window as any).doGTranslate === 'function') {
+            (window as any).doGTranslate('fr|fr');
         }
-        
-        // 4. Forcer la redirection vers la page non traduite (la plus fiable pour 'fr')
-        // Cela supprime les fragments d'URL que Google ajoute parfois (#googtrans(fr|en...))
+
+        // 2. Forcer la redirection vers la page SANS le fragment d'URL de traduction
+        // C'est l'étape la plus critique.
         const cleanUrl = window.location.href.split('#')[0];
         window.location.href = cleanUrl;
         
