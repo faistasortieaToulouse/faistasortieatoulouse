@@ -36,13 +36,12 @@ const EXTRA_LANGS = [
 
 function setCookie(name: string, value: string, days?: number) {
     if (typeof document === 'undefined') return;
-
-    const host = document.location.hostname;
-
-    const domainsToTry = [
-        host,                // www.faistasortieatoulouse.online
-        '.' + host,          // .faistasortieatoulouse.online
-        'faistasortieatoulouse.online', // domaine racine
+    
+    // Liste des domaines à cibler
+    const domains = [
+        document.location.hostname, // Domaine actuel (ex: www.faistasortieatoulouse.online)
+        '.' + document.location.hostname, // Domaine actuel avec point
+        '.faistasortieatoulouse.online', // Domaine racine (pour couvrir www. et l'absence de www.)
     ];
 
     let cookie = `${name}=${value};path=/;`;
@@ -52,8 +51,8 @@ function setCookie(name: string, value: string, days?: number) {
         cookie += `expires=${d.toUTCString()};`;
     }
 
-    // Définir le cookie sur tous les domaines possibles
-    domainsToTry.forEach(domain => {
+    // Tenter de définir le cookie sur tous les domaines potentiels
+    domains.forEach(domain => {
         document.cookie = `${cookie}domain=${domain};`;
     });
 }
@@ -67,16 +66,18 @@ function getCookie(name: string) {
 function deleteCookie(name: string) {
     if (typeof document === 'undefined') return;
 
-    const host = document.location.hostname;
-    const domainsToTry = [
-        host,
-        '.' + host,
-        'faistasortieatoulouse.online',
+    // Liste des domaines à cibler pour la suppression
+    const domains = [
+        document.location.hostname, 
+        '.' + document.location.hostname,
+        '.faistasortieatoulouse.online',
     ];
-
+    
+    // Le cookie de suppression (date expirée)
     const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
-
-    domainsToTry.forEach(domain => {
+    
+    // Tenter de supprimer le cookie sur tous les domaines potentiels
+    domains.forEach(domain => {
         document.cookie = `${expiredCookie}domain=${domain};`;
     });
 }
@@ -117,31 +118,28 @@ export default function GoogleTranslateCustom() {
         return () => clearInterval(interval);
     }, []);
 
+
 const changeLang = (lang: string) => {
   if (lang === selectedLang) return;
 
-  const applyTranslation = () => {
-    if (lang === 'fr') {
-      document.cookie = 'googtrans=/fr/fr; path=/;';
-      (window as any).doGTranslate?.('fr|fr');
-    } else {
-      document.cookie = `googtrans=/fr/${lang}; path=/;`;
-      (window as any).doGTranslate?.(`fr|${lang}`);
-    }
-    setSelectedLang(lang);
-  };
+  // Définir le cookie googtrans sur le domaine courant
+  const cookieValue = lang === 'fr' ? '/fr/fr' : `/fr/${lang}`;
+  document.cookie = `googtrans=${cookieValue}; path=/;`;
 
+  // Appeler doGTranslate si prêt
   if (typeof (window as any).doGTranslate === 'function') {
-    applyTranslation();
+    const code = lang === 'fr' ? 'fr|fr' : `fr|${lang}`;
+    (window as any).doGTranslate(code);
   } else {
-    // Si le script n'est pas encore prêt, attendre 100ms
-    setTimeout(applyTranslation, 100);
+    // Méthode de secours si doGTranslate n'est pas encore chargé
+    window.location.hash = `#googtrans(${cookieValue})`;
   }
 
-  // Reload après un court délai pour forcer l'application du cookie
-  setTimeout(() => {
-    window.location.reload();
-  }, 200);
+  // Mettre à jour l'état local
+  setSelectedLang(lang);
+
+  // Reload rapide pour que Google Translate applique la traduction
+  setTimeout(() => window.location.reload(), 50);
 };
 
 
