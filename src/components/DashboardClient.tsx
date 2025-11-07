@@ -22,7 +22,9 @@ import InstallPWAiOS from "@/components/InstallPWAiOS";
 import APKDownloadModal from "@/components/APKDownloadModal";
 import React from "react";
 import Carousel from "../components/Carousel";
+import dynamic from "next/dynamic";
 
+const DesktopQRCode = dynamic(() => import("@/components/DesktopQRCode"), { ssr:false });
 const TimeWeatherBar = dynamic(
   () => import("./time-weather-bar").then(mod => mod.TimeWeatherBar),
   { ssr: false }
@@ -230,6 +232,7 @@ export default function DashboardClient({
   {/* Ligne inférieure : QR code + bouton partager */}
   <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
     <div className="flex flex-col items-center">
+      <DesktopQRCode />
       <InstallPWAiOS />
     </div>
 
