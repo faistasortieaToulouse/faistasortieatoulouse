@@ -121,22 +121,13 @@ const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
 
     if (lang === 'fr') {
-        deleteCookie('googtrans');
-        deleteCookie('googtrans_save');
-
-        if (typeof (window as any).doGTranslate === 'function') {
-            (window as any).doGTranslate('fr|fr');
-        } else {
-            window.location.hash = '#googtrans(fr|fr)';
-        }
-
+        // Supprime le cookie pour revenir à français
+        document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         setSelectedLang('fr');
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 50);
+        window.location.reload();
     } else {
-        setCookie('googtrans', `/fr/${lang}`, 7);
+        // Définit le cookie pour la nouvelle langue
+        document.cookie = `googtrans=/fr/${lang}; path=/;`;
         setSelectedLang(lang);
         window.location.reload();
     }
