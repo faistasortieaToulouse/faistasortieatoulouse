@@ -235,6 +235,11 @@ export default function DashboardClient({
     <InstallPWAiOS />
   </div>
 
+  {/* QR code centré sous le bloc */}
+<div className="flex justify-center mt-6">
+  <DesktopQRCode />
+</div>
+  
   <Button
     onClick={handleShare}
     className="flex items-center justify-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition w-full sm:w-auto"
@@ -244,10 +249,6 @@ export default function DashboardClient({
   </Button>
 </div>
 
-{/* QR code centré sous le bloc */}
-<div className="flex justify-center mt-6">
-  <DesktopQRCode />
-</div>
 </section>
 
     </div>
