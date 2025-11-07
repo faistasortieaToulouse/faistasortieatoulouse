@@ -231,7 +231,6 @@ export default function DashboardClient({
   {/* Ligne inférieure : QR code + bouton partager */}
   <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
     <div className="flex flex-col items-center">
-      <DesktopQRCode />
       <InstallPWAiOS />
     </div>
 
