@@ -118,20 +118,32 @@ export default function GoogleTranslateCustom() {
     }, []);
 
 const changeLang = (lang: string) => {
-    if (lang === selectedLang) return;
+  if (lang === selectedLang) return;
 
+  const applyTranslation = () => {
     if (lang === 'fr') {
-        // Supprime le cookie pour revenir à français
-        document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        setSelectedLang('fr');
-        window.location.reload();
+      document.cookie = 'googtrans=/fr/fr; path=/;';
+      (window as any).doGTranslate?.('fr|fr');
     } else {
-        // Définit le cookie pour la nouvelle langue
-        document.cookie = `googtrans=/fr/${lang}; path=/;`;
-        setSelectedLang(lang);
-        window.location.reload();
+      document.cookie = `googtrans=/fr/${lang}; path=/;`;
+      (window as any).doGTranslate?.(`fr|${lang}`);
     }
+    setSelectedLang(lang);
+  };
+
+  if (typeof (window as any).doGTranslate === 'function') {
+    applyTranslation();
+  } else {
+    // Si le script n'est pas encore prêt, attendre 100ms
+    setTimeout(applyTranslation, 100);
+  }
+
+  // Reload après un court délai pour forcer l'application du cookie
+  setTimeout(() => {
+    window.location.reload();
+  }, 200);
 };
+
 
     return (
         <>
