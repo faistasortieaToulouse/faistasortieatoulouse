@@ -140,20 +140,6 @@ const changeLang = (lang: string) => {
     setSelectedLang(lang);
 };
 
-        
-    } else {
-        // Définir le cookie si on traduit vers une autre langue.
-        const val = `/fr/${lang}`;
-        setCookie('googtrans', val, 7);
-        window.location.reload();
-    }
-    
-    // Si ce n'est pas le retour au français, on recharge au-dessus.
-    if (lang !== 'fr') {
-        window.location.reload();
-    }
-};
-
     return (
         <>
             <style jsx global>{`
