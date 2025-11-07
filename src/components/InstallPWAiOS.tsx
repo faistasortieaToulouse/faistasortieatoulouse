@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 // --- Ressources d'images ---
 // Assurez-vous que ces fichiers sont bien placés dans le dossier /public de votre projet Next.js.
 // Renommés pour correspondre aux extensions .jpg
-const SAFARI_SHARE_ICON_SRC = "/images/Copilot_20251106_212349.jpg"; // Icône de partage (carré avec flèche vers le haut)
-const ADD_TO_HOME_SCREEN_GUIDE_SRC = "/images/Gemini_Generated_Image_94f0j894f0j894f0.jpg"; // Menu avec "Ajouter à l'écran d'accueil"
+const SAFARI_SHARE_ICON_SRC = "/iphone/Copilot_20251106_212349.jpg"; // Icône de partage (carré avec flèche vers le haut)
+const ADD_TO_HOME_SCREEN_GUIDE_SRC = "/iphone/Gemini_Generated_Image_94f0j894f0j894f0.jpg"; // Menu avec "Ajouter à l'écran d'accueil"
 const APP_ICON_PLACEHOLDER_SRC = "/images/app-icon.png"; // Icône générique de votre appli
 const GOOGLE_PLAY_BADGE_SRC = "/images/google-play-badge.png"; // Badge Google Play
 // ---------------------------------------------------------------------
