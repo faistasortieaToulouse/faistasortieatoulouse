@@ -120,22 +120,26 @@ export default function GoogleTranslateCustom() {
 
 
 const changeLang = (lang: string) => {
-    if (lang === selectedLang) return;
-
-    if (typeof (window as any).doGTranslate !== 'function') {
-        console.warn('Google Translate API non prête');
+    if (!scriptReady) {
+        console.warn('Google Translate API pas encore prête');
         return;
     }
 
-    if (lang === 'fr') {
-        // Revenir au français
-        setCookie('googtrans', '/fr/fr', 7);
-        (window as any).doGTranslate('fr|fr');
-    } else {
-        // Traduire vers une autre langue
-        setCookie('googtrans', `/fr/${lang}`, 7);
-        (window as any).doGTranslate(`fr|${lang}`);
+    if (lang === selectedLang) return;
+
+    const gTranslate = (window as any).doGTranslate;
+
+    if (!gTranslate) {
+        console.warn('doGTranslate non disponible');
+        return;
     }
+
+    // Définir le cookie avant l'appel
+    const val = `/fr/${lang}`;
+    setCookie('googtrans', val, 7);
+
+    // Appel à l'API pour changer la langue
+    gTranslate(`fr|${lang}`);
 
     setSelectedLang(lang);
 };
