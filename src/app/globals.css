@@ -200,4 +200,16 @@ iframe.goog-te-banner-frame {
   display: none !important;
 }
 
+/* Dans globals.css ou tailwind */
+.no-desktop {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .no-desktop {
+    display: block;
+  }
+}
+
+
 
