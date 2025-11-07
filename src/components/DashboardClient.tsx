@@ -237,7 +237,7 @@ export default function DashboardClient({
   </div>
 
   {/* QR code centré sous le bloc */}
-<DesktopOnly>
+<div className="no-desktop">
   <DesktopQRCode />
 </DesktopOnly>
   
