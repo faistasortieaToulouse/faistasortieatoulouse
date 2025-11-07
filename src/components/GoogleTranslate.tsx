@@ -87,58 +87,30 @@ export default function GoogleTranslateCustom() {
     const [scriptReady, setScriptReady] = useState(false);
     const [showExtra, setShowExtra] = useState(false);
 
-    useEffect(() => {
-        const cookie = getCookie('googtrans');
-        const currentLang = cookie?.split('/')[2];
+useEffect(() => {
+  // Définir la fonction de callback globale avant de charger le script
+  (window as any).googleTranslateElementInit = () => {
+    new (window as any).google.translate.TranslateElement({
+      pageLanguage: 'fr',
+      autoDisplay: false,
+      layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+    }, 'google_translate_element');
 
-        // Maintien de la vérification initiale
-        if (!cookie || !currentLang) {
-            // S'assurer que le cookie est défini sur 'fr' par défaut au premier chargement
-            setCookie('googtrans', '/fr/fr', 7);
-        }
-
-        setSelectedLang(currentLang || 'fr');
-        setScriptReady(true);
-
-        // Code pour masquer la bannière, conservé ici
-        const interval = setInterval(() => {
-            const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-            if (bannerFrame) {
-                bannerFrame.style.height = '20px';
-                bannerFrame.style.minHeight = '20px';
-                bannerFrame.style.maxHeight = '20px';
-                bannerFrame.style.overflow = 'hidden';
-                bannerFrame.style.position = 'fixed';
-                bannerFrame.style.bottom = '0';
-                bannerFrame.style.top = 'auto';
-                bannerFrame.style.zIndex = '9999';
-            }
-        }, 500);
-
-        return () => clearInterval(interval);
-    }, []);
-
+    setScriptReady(true); // le script est prêt, on peut utiliser doGTranslate
+  };
+}, []);
 
 const changeLang = (lang: string) => {
-    if (!scriptReady) {
-        console.warn('Google Translate API pas encore prête');
-        return;
-    }
-
+    if (!scriptReady) return; // attendre l'API
     if (lang === selectedLang) return;
 
     const gTranslate = (window as any).doGTranslate;
-
-    if (!gTranslate) {
-        console.warn('doGTranslate non disponible');
-        return;
-    }
+    if (!gTranslate) return;
 
     // Définir le cookie avant l'appel
-    const val = `/fr/${lang}`;
-    setCookie('googtrans', val, 7);
+    setCookie('googtrans', `/fr/${lang}`, 7);
 
-    // Appel à l'API pour changer la langue
+    // Appeler Google Translate
     gTranslate(`fr|${lang}`);
 
     setSelectedLang(lang);
