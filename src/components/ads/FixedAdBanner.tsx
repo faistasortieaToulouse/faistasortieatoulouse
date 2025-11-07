@@ -1,3 +1,5 @@
+'use client';
+
 // components/ads/FixedAdBanner.tsx
 
 import React, { useEffect } from 'react';
