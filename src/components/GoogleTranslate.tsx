@@ -122,36 +122,24 @@ export default function GoogleTranslateCustom() {
 const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
 
+    if (typeof (window as any).doGTranslate !== 'function') {
+        console.warn('Google Translate API non prête');
+        return;
+    }
+
     if (lang === 'fr') {
-        // 1. Tenter la suppression agressive du cookie (méthode de secours)
-        deleteCookie('googtrans'); 
-        deleteCookie('googtrans_save'); 
+        // Revenir au français
+        setCookie('googtrans', '/fr/fr', 7);
+        (window as any).doGTranslate('fr|fr');
+    } else {
+        // Traduire vers une autre langue
+        setCookie('googtrans', `/fr/${lang}`, 7);
+        (window as any).doGTranslate(`fr|${lang}`);
+    }
 
-        // 2. 🛑 NOUVEAU : Tentative de réinitialisation via la fonction interne de Google Translate.
-        // Cible la traduction de la langue actuellement sélectionnée vers la langue d'origine (fr).
-        const currentTranslation = getCookie('googtrans'); 
-        const sourceLang = currentTranslation ? currentTranslation.split('/')[1] : 'fr';
-        
-        if (typeof (window as any).doGTranslate === 'function') {
-            // Forcer la traduction vers la langue source pour annuler
-            (window as any).doGTranslate(sourceLang + '|fr');
-        } else {
-             // Utiliser l'astuce du fragment d'URL pour la désactivation (méthode de secours)
-             window.location.hash = '#googtrans(fr|fr)'; 
-        }
+    setSelectedLang(lang);
+};
 
-        // 3. CLÉ : Nettoyer l'historique/URL sans recharger
-        // Ceci enlève le #googtrans(...) sans redémarrer le cycle de traduction.
-        const cleanUrl = window.location.href.split('#')[0];
-        window.history.pushState('', document.title, cleanUrl);
-
-        // 4. Mettre à jour l'état local pour refléter 'fr'
-        setSelectedLang('fr');
-        
-        // 5. Recharger après un court délai pour que l'API ait le temps de réagir au doGTranslate
-        setTimeout(() => {
-            window.location.reload();
-        }, 50); 
         
     } else {
         // Définir le cookie si on traduit vers une autre langue.
