@@ -36,12 +36,13 @@ const EXTRA_LANGS = [
 
 function setCookie(name: string, value: string, days?: number) {
     if (typeof document === 'undefined') return;
-    
-    // Liste des domaines à cibler
-    const domains = [
-        document.location.hostname, // Domaine actuel (ex: www.faistasortieatoulouse.online)
-        '.' + document.location.hostname, // Domaine actuel avec point
-        '.faistasortieatoulouse.online', // Domaine racine (pour couvrir www. et l'absence de www.)
+
+    const host = document.location.hostname;
+
+    const domainsToTry = [
+        host,                // www.faistasortieatoulouse.online
+        '.' + host,          // .faistasortieatoulouse.online
+        'faistasortieatoulouse.online', // domaine racine
     ];
 
     let cookie = `${name}=${value};path=/;`;
@@ -51,8 +52,8 @@ function setCookie(name: string, value: string, days?: number) {
         cookie += `expires=${d.toUTCString()};`;
     }
 
-    // Tenter de définir le cookie sur tous les domaines potentiels
-    domains.forEach(domain => {
+    // Définir le cookie sur tous les domaines possibles
+    domainsToTry.forEach(domain => {
         document.cookie = `${cookie}domain=${domain};`;
     });
 }
@@ -66,18 +67,16 @@ function getCookie(name: string) {
 function deleteCookie(name: string) {
     if (typeof document === 'undefined') return;
 
-    // Liste des domaines à cibler pour la suppression
-    const domains = [
-        document.location.hostname, 
-        '.' + document.location.hostname,
-        '.faistasortieatoulouse.online',
+    const host = document.location.hostname;
+    const domainsToTry = [
+        host,
+        '.' + host,
+        'faistasortieatoulouse.online',
     ];
-    
-    // Le cookie de suppression (date expirée)
+
     const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
-    
-    // Tenter de supprimer le cookie sur tous les domaines potentiels
-    domains.forEach(domain => {
+
+    domainsToTry.forEach(domain => {
         document.cookie = `${expiredCookie}domain=${domain};`;
     });
 }
@@ -87,33 +86,60 @@ export default function GoogleTranslateCustom() {
     const [scriptReady, setScriptReady] = useState(false);
     const [showExtra, setShowExtra] = useState(false);
 
-useEffect(() => {
-  // Définir la fonction de callback globale avant de charger le script
-  (window as any).googleTranslateElementInit = () => {
-    new (window as any).google.translate.TranslateElement({
-      pageLanguage: 'fr',
-      autoDisplay: false,
-      layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-    }, 'google_translate_element');
+    useEffect(() => {
+        const cookie = getCookie('googtrans');
+        const currentLang = cookie?.split('/')[2];
 
-    setScriptReady(true); // le script est prêt, on peut utiliser doGTranslate
-  };
-}, []);
+        // Maintien de la vérification initiale
+        if (!cookie || !currentLang) {
+            // S'assurer que le cookie est défini sur 'fr' par défaut au premier chargement
+            setCookie('googtrans', '/fr/fr', 7);
+        }
+
+        setSelectedLang(currentLang || 'fr');
+        setScriptReady(true);
+
+        // Code pour masquer la bannière, conservé ici
+        const interval = setInterval(() => {
+            const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+            if (bannerFrame) {
+                bannerFrame.style.height = '20px';
+                bannerFrame.style.minHeight = '20px';
+                bannerFrame.style.maxHeight = '20px';
+                bannerFrame.style.overflow = 'hidden';
+                bannerFrame.style.position = 'fixed';
+                bannerFrame.style.bottom = '0';
+                bannerFrame.style.top = 'auto';
+                bannerFrame.style.zIndex = '9999';
+            }
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, []);
 
 const changeLang = (lang: string) => {
-    if (!scriptReady) return; // attendre l'API
     if (lang === selectedLang) return;
 
-    const gTranslate = (window as any).doGTranslate;
-    if (!gTranslate) return;
+    if (lang === 'fr') {
+        deleteCookie('googtrans');
+        deleteCookie('googtrans_save');
 
-    // Définir le cookie avant l'appel
-    setCookie('googtrans', `/fr/${lang}`, 7);
+        if (typeof (window as any).doGTranslate === 'function') {
+            (window as any).doGTranslate('fr|fr');
+        } else {
+            window.location.hash = '#googtrans(fr|fr)';
+        }
 
-    // Appeler Google Translate
-    gTranslate(`fr|${lang}`);
+        setSelectedLang('fr');
 
-    setSelectedLang(lang);
+        setTimeout(() => {
+            window.location.reload();
+        }, 50);
+    } else {
+        setCookie('googtrans', `/fr/${lang}`, 7);
+        setSelectedLang(lang);
+        window.location.reload();
+    }
 };
 
     return (
