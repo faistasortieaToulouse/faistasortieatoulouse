@@ -228,20 +228,26 @@ export default function DashboardClient({
     <APKDownloadModal />
   </div>
 
-  {/* Ligne inférieure : QR code + bouton partager */}
-  <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
-    <div className="flex flex-col items-center">
-      <InstallPWAiOS />
-    </div>
+{/* Ligne inférieure : QR code + bouton partager */}
+<div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
 
-    <Button
-      onClick={handleShare}
-      className="flex items-center justify-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition w-full sm:w-auto"
-    >
-      <Share2 className="h-5 w-5" />
-      <span className="font-semibold">Partager l'application</span>
-    </Button>
+  <div className="flex flex-col items-center">
+    <InstallPWAiOS />
   </div>
+
+  <Button
+    onClick={handleShare}
+    className="flex items-center justify-center space-x-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg transition w-full sm:w-auto"
+  >
+    <Share2 className="h-5 w-5" />
+    <span className="font-semibold">Partager l'application</span>
+  </Button>
+</div>
+
+{/* QR code centré sous le bloc */}
+<div className="flex justify-center mt-6">
+  <DesktopQRCode />
+</div>
 </section>
 
     </div>
