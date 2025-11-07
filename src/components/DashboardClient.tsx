@@ -22,7 +22,6 @@ import InstallPWAiOS from "@/components/InstallPWAiOS";
 import APKDownloadModal from "@/components/APKDownloadModal";
 import React from "react";
 import Carousel from "../components/Carousel";
-import dynamic from "next/dynamic";
 
 const DesktopQRCode = dynamic(() => import("@/components/DesktopQRCode"), { ssr:false });
 const TimeWeatherBar = dynamic(
