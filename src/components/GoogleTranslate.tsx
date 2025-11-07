@@ -120,28 +120,51 @@ export default function GoogleTranslateCustom() {
 
 
 const changeLang = (lang: string) => {
-  if (lang === selectedLang) return;
+    if (lang === selectedLang) return;
 
-  // Définir le cookie googtrans sur le domaine courant
-  const cookieValue = lang === 'fr' ? '/fr/fr' : `/fr/${lang}`;
-  document.cookie = `googtrans=${cookieValue}; path=/;`;
+    if (lang === 'fr') {
+        // 1. Tenter la suppression agressive du cookie (méthode de secours)
+        deleteCookie('googtrans'); 
+        deleteCookie('googtrans_save'); 
 
-  // Appeler doGTranslate si prêt
-  if (typeof (window as any).doGTranslate === 'function') {
-    const code = lang === 'fr' ? 'fr|fr' : `fr|${lang}`;
-    (window as any).doGTranslate(code);
-  } else {
-    // Méthode de secours si doGTranslate n'est pas encore chargé
-    window.location.hash = `#googtrans(${cookieValue})`;
-  }
+        // 2. 🛑 NOUVEAU : Tentative de réinitialisation via la fonction interne de Google Translate.
+        // Cible la traduction de la langue actuellement sélectionnée vers la langue d'origine (fr).
+        const currentTranslation = getCookie('googtrans'); 
+        const sourceLang = currentTranslation ? currentTranslation.split('/')[1] : 'fr';
+        
+        if (typeof (window as any).doGTranslate === 'function') {
+            // Forcer la traduction vers la langue source pour annuler
+            (window as any).doGTranslate(sourceLang + '|fr');
+        } else {
+             // Utiliser l'astuce du fragment d'URL pour la désactivation (méthode de secours)
+             window.location.hash = '#googtrans(fr|fr)'; 
+        }
 
-  // Mettre à jour l'état local
-  setSelectedLang(lang);
+        // 3. CLÉ : Nettoyer l'historique/URL sans recharger
+        // Ceci enlève le #googtrans(...) sans redémarrer le cycle de traduction.
+        const cleanUrl = window.location.href.split('#')[0];
+        window.history.pushState('', document.title, cleanUrl);
 
-  // Reload rapide pour que Google Translate applique la traduction
-  setTimeout(() => window.location.reload(), 50);
+        // 4. Mettre à jour l'état local pour refléter 'fr'
+        setSelectedLang('fr');
+        
+        // 5. Recharger après un court délai pour que l'API ait le temps de réagir au doGTranslate
+        setTimeout(() => {
+            window.location.reload();
+        }, 50); 
+        
+    } else {
+        // Définir le cookie si on traduit vers une autre langue.
+        const val = `/fr/${lang}`;
+        setCookie('googtrans', val, 7);
+        window.location.reload();
+    }
+    
+    // Si ce n'est pas le retour au français, on recharge au-dessus.
+    if (lang !== 'fr') {
+        window.location.reload();
+    }
 };
-
 
     return (
         <>
