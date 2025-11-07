@@ -36,7 +36,7 @@ const isIOS = () => {
 const isDesktop = () => {
     if (typeof window === 'undefined') return true; // Considérer comme desktop en SSR
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.i.test(userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
     return !isMobile;
 };
 // --------------------------------------------------
