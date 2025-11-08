@@ -37,22 +37,6 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
         </Button>
       </div>
 
-      {/* LOGO FTST */}
-      {ftsLogoUrl && (
-        <div className="flex justify-center mt-4">
-          <div className="w-10 h-10 md:w-12 md:h-12 relative">
-            <Image
-              src={ftsLogoUrl}
-              alt="Logo FTST"
-              fill
-              style={{ objectFit: "contain" }}
-              sizes="40px"
-              unoptimized
-            />
-          </div>
-        </div>
-      )}
-
       {/* ÉVÉNEMENTS DÉSACTIVÉS */}
       <div className="flex flex-col md:flex-row gap-2 mt-4">
         <Button size="lg" variant="outline" disabled className="w-full md:w-auto">
