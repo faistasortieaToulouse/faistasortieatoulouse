@@ -4,7 +4,7 @@ import React, { useState } from "react";
 // Remplacement de 'next/link' et 'next/image' par des éléments HTML natifs
 // pour éviter les erreurs de dépendance dans cet environnement.
 import { ChevronLeft, Zap, ExternalLink, Mountain, Footprints } from 'lucide-react';
-import { Facebook, Calendar, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
+import { Facebook, Calendar, Landmark, Bus, LayoutDashboard, Users, MessageSquare, Car } from "lucide-react";
 import { Map, LifeBuoy } from "lucide-react";
 // Les imports suivants sont commentés car ils ne sont pas définis dans cet environnement
 // import { SidebarTrigger } from "@/components/ui/sidebar";
