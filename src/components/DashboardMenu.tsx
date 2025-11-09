@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Download, PartyPopper, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { StaticImageData } from "next/image";
 
 interface DashboardMenuProps {
