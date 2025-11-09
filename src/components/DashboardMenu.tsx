@@ -1,196 +1,118 @@
-import React, { useState } from 'react';
-import { Download, PartyPopper, Menu, X } from 'lucide-react';
+'use client';
 
-// Composant Simulé de la Barre Latérale (Ceci serait votre src/components/app-sidebar.tsx)
-// Il est rendu par le composant App ci-dessous.
-const AppSidebar = ({ isOpen, onClose }) => {
-  const sidebarClasses = `
-    fixed inset-y-0 left-0 w-64 bg-white shadow-2xl z-40 p-6 
-    transform transition-transform duration-300 ease-in-out
-    md:relative md:translate-x-0 md:shadow-none md:bg-gray-100 
-    h-full md:h-auto
-    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-  `;
+import { useState } from "react";
+import Link from "next/link";
+import Image, { StaticImageData } from "next/image";
+import { Menu, X, Download, PartyPopper } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-  // Les rubriques simulées de app-sidebar.tsx
-  const menuItems = [
-    { name: 'Accueil', href: '#' },
-    { name: 'Communauté', href: '#' },
-    { name: 'Événements', href: '#' },
-    { name: 'Partenariats', href: '#' },
-    { name: 'Aide & Support', href: '#' },
-  ];
+interface DashboardMenuProps {
+  ftsLogoUrl?: string | StaticImageData; // <-- Problème ici
+}
 
-  return (
-    <>
-      {/* Overlay pour le mobile (cliquer dessus ferme la sidebar) */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden" 
-          onClick={onClose}
-        />
-      )}
-      
-      <div id="app-sidebar" className={sidebarClasses}>
-        {/* En-tête de la Sidebar avec bouton de fermeture sur mobile */}
-        <div className="flex justify-between items-center mb-6 border-b pb-3 md:hidden">
-            <h2 className="text-xl font-bold text-indigo-700">Navigation</h2>
-            <button 
-                onClick={onClose} 
-                className="p-2 rounded-full hover:bg-indigo-200 transition"
-                aria-label="Fermer le menu"
-            >
-                <X className="h-6 w-6 text-indigo-700" />
-            </button>
-        </div>
-        
-        {/* Liste des rubriques */}
-        <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li key={item.name}>
-              <a
-                href={item.href}
-                className="block p-3 text-gray-700 font-semibold rounded-lg hover:bg-indigo-200 hover:text-indigo-700 transition duration-150 ease-in-out"
-                onClick={onClose} 
-              >
-                {item.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  );
-};
+export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggleMenu = () => setIsOpen(prev => !prev);
 
+  const mobileMenuClasses = `absolute top-full left-0 w-64 bg-white shadow-lg p-4 z-50 md:hidden ${
+    isOpen ? "block" : "hidden"
+  }`;
 
-// ------------------------------------------------------------------
-// C'est le composant principal de votre requête, exporté comme une fonction nommée.
-// Cela corrige l'erreur: 'DashboardMenu' is not exported from './DashboardMenu'
-// ------------------------------------------------------------------
-
-// Composant helper pour simuler les composants Link et Button externes
-const ButtonLink = ({ children, href, variant = 'primary', className = '' }) => (
-    <a href={href} target="_blank" className={`
-      w-full md:w-auto text-center px-6 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center text-lg
-      ${variant === 'primary' 
-        ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
-        : variant === 'outline' 
-        ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-        : variant === 'secondary'
-        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
-        : ''
-      }
-      ${className}
-    `}>
-      {children}
-    </a>
-);
-
-const ButtonDisabled = ({ children }) => (
-    <button disabled className="w-full md:w-auto text-center px-6 py-3 rounded-xl font-semibold transition shadow-md bg-white text-gray-400 border border-gray-200 cursor-not-allowed flex items-center justify-center text-lg">
-        {children}
-    </button>
-);
-
-
-// Utilisation d'un export nommé pour correspondre à votre import { DashboardMenu }
-export function DashboardMenu({ isSidebarOpen, onToggleSidebar }) {
-  
   return (
     <div className="relative w-full">
-      {/* BOUTONS TOUJOURS VISIBLES (mobile + desktop) */}
-      <div className="flex flex-col md:flex-row gap-4 mt-4">
-        
-        {/* 1. Bouton principal */}
-        <ButtonLink href="https://discord.com/channels/1422806103267344416/1422806103904882842" variant="primary">
-          Pour commencer clique sur ce bouton
-        </ButtonLink>
-
-        {/* 2. Bouton secondaire (Télécharger Discord) */}
-        <ButtonLink href="https://discord.com/download" variant="outline">
-          <Download className="mr-2 h-5 w-5 inline-block" />
-          Télécharger Discord
-        </ButtonLink>
-
-        {/* 3. Bouton de TOGGLE du menu (Visible sur mobile, masqué sur desktop) */}
+      {/* MOBILE: Hamburger */}
+      <div className="flex md:hidden justify-start">
         <button
-          onClick={onToggleSidebar}
-          className="w-full md:w-auto px-6 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center text-lg
-            bg-gray-200 text-gray-800 hover:bg-gray-300 md:hidden" 
-          aria-expanded={isSidebarOpen}
-          aria-controls="app-sidebar"
+          onClick={toggleMenu}
+          className="p-2 rounded-lg text-gray-900 hover:bg-gray-100 transition focus:outline-none"
+          aria-label="Ouvrir le menu"
         >
-          {isSidebarOpen ? (
-            <>
-              <X className="mr-2 h-5 w-5" />
-              Masquer le menu
-            </>
-          ) : (
-            <>
-              <Menu className="mr-2 h-5 w-5" />
-              Afficher le menu
-            </>
-          )}
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* ÉVÉNEMENTS DÉSACTIVÉS */}
-      <div className="flex flex-col md:flex-row gap-2 mt-4">
-        <ButtonDisabled>
-          <PartyPopper className="mr-2 h-5 w-5 inline-block" />
-          Girls Party
-        </ButtonDisabled>
-        <ButtonDisabled>
-          <PartyPopper className="mr-2 h-5 w-5 inline-block" />
-          Student Event
-        </ButtonDisabled>
-        <ButtonDisabled>
-          <PartyPopper className="mr-2 h-5 w-5 inline-block" />
-          Rando Trip
-        </ButtonDisabled>
+      <div className={mobileMenuClasses}>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <Button asChild size="lg" className="w-full">
+              <Link href="https://discord.com/channels/1422806103267344416/1422806103904882842" target="_blank">
+                Pour commencer clique sur ce bouton
+              </Link>
+            </Button>
+          </li>
+          <li>
+            <Button asChild size="lg" variant="outline" className="w-full">
+              <Link href="https://discord.com/download" target="_blank">
+                <Download className="mr-2 h-5 w-5" />
+                Télécharger Discord
+              </Link>
+            </Button>
+          </li>
+
+{/* Logo FTST */}
+<li className="flex justify-center mt-2">
+  {ftsLogoUrl && (
+    <div className="w-10 h-10 md:w-12 md:h-12 relative">
+      <Image
+        src={ftsLogoUrl}
+        alt="Logo FTST"
+        fill
+        style={{ objectFit: "contain" }}
+        sizes="40px"
+        unoptimized // <--- AJOUTEZ CETTE LIGNE
+      />
+    </div>
+  )}
+</li>
+
+          {/* Événements désactivés */}
+          <li className="mt-2">
+            <Button size="lg" variant="outline" disabled className="w-full mb-1">
+              <PartyPopper className="mr-2 h-5 w-5" />
+              Girls Party
+            </Button>
+            <Button size="lg" variant="outline" disabled className="w-full mb-1">
+              <PartyPopper className="mr-2 h-5 w-5" />
+              Student Event
+            </Button>
+            <Button size="lg" variant="outline" disabled className="w-full">
+              <PartyPopper className="mr-2 h-5 w-5" />
+              Rando Trip
+            </Button>
+          </li>
+        </ul>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden md:flex flex-col gap-2 mt-4">
+        <div className="flex gap-4">
+          <Button asChild size="lg">
+            <Link href="https://discord.com/channels/1422806103267344416/1422806103904882842" target="_blank">
+              Pour commencer clique sur ce bouton
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link href="https://discord.com/download" target="_blank">
+              <Download className="mr-2 h-5 w-5" />
+              Télécharger Discord
+            </Link>
+          </Button>
+        </div>
+        <div className="flex gap-4 mt-2">
+          <Button size="lg" variant="outline" disabled>
+            <PartyPopper className="mr-2 h-5 w-5" />
+            Girls Party
+          </Button>
+          <Button size="lg" variant="outline" disabled>
+            <PartyPopper className="mr-2 h-5 w-5" />
+            Student Event
+          </Button>
+          <Button size="lg" variant="outline" disabled>
+            <PartyPopper className="mr-2 h-5 w-5" />
+            Rando Trip
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
-
-
-// Composant principal (App) qui simule la page entière et gère l'état
-// Ce composant ne correspond pas à votre fichier, mais il est nécessaire pour tester la fonctionnalité ici.
-const App = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 font-sans">
-      
-      {/* Sidebar - Fixe sur mobile (hidden/shown), relative sur desktop (toujours visible) */}
-      <AppSidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
-      />
-
-      {/* Contenu principal / Menu du tableau de bord */}
-      <main className="flex-1 p-4 md:p-8">
-        {/* Le DashboardMenu est utilisé ici */}
-        <DashboardMenu 
-          isSidebarOpen={isSidebarOpen} 
-          onToggleSidebar={toggleSidebar} 
-        />
-        
-        <div className="mt-8 p-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Contenu Principal</h2>
-            <p className="text-gray-600">
-                La barre latérale est visible sur les grands écrans. Sur les petits écrans (mobile), utilisez le bouton "Afficher le menu" pour la faire apparaître.
-            </p>
-        </div>
-      </main>
-
-    </div>
-  );
-};
-
-export default App;
