@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
 import { Menu, X, Download, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AppSidebar } from "@/components/app-sidebar";
 
 interface DashboardMenuProps {
   ftsLogoUrl?: string | StaticImageData; // <-- Problème ici
@@ -13,7 +12,6 @@ interface DashboardMenuProps {
 
 export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleMenu = () => setIsOpen(prev => !prev);
 
   const mobileMenuClasses = `absolute top-full left-0 w-64 bg-white shadow-lg p-4 z-50 md:hidden ${
@@ -51,18 +49,6 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
             </Button>
           </li>
 
-<li>
-  <Button
-    onClick={() => setIsSidebarOpen(true)}
-    size="lg"
-    variant="secondary"
-    className="w-full"
-  >
-    <Menu className="mr-2 h-5 w-5" />
-    Voir toutes les rubriques
-  </Button>
-</li>
-
 {/* Logo FTST */}
 <li className="flex justify-center mt-2">
   {ftsLogoUrl && (
@@ -96,12 +82,6 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
           </li>
         </ul>
       </div>
-
-      {/* SIDEBAR MOBILE */}
-<AppSidebar
-  isOpen={isSidebarOpen}
-  onClose={() => setIsSidebarOpen(false)}
-/>
 
       {/* DESKTOP */}
       <div className="hidden md:flex flex-col gap-2 mt-4">
