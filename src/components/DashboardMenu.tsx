@@ -51,7 +51,7 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
             </Button>
           </li>
 
-          <li>
+<li>
   <Button
     onClick={() => setIsSidebarOpen(true)}
     size="lg"
@@ -98,11 +98,10 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
       </div>
 
       {/* SIDEBAR MOBILE */}
-        <AppSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          ftsLogoUrl={ftsLogoUrl}
-      />
+<AppSidebar
+  isOpen={isSidebarOpen}
+  onClose={() => setIsSidebarOpen(false)}
+/>
 
       {/* DESKTOP */}
       <div className="hidden md:flex flex-col gap-2 mt-4">
