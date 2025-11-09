@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Download, PartyPopper, Menu, X } from 'lucide-react';
 
-// Composant Simulé de la Barre Latérale (Ceci représente le contenu de src/components/app-sidebar.tsx)
+// Composant Simulé de la Barre Latérale (Ceci serait votre src/components/app-sidebar.tsx)
+// Il est rendu par le composant App ci-dessous.
 const AppSidebar = ({ isOpen, onClose }) => {
   const sidebarClasses = `
     fixed inset-y-0 left-0 w-64 bg-white shadow-2xl z-40 p-6 
@@ -50,7 +51,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
               <a
                 href={item.href}
                 className="block p-3 text-gray-700 font-semibold rounded-lg hover:bg-indigo-200 hover:text-indigo-700 transition duration-150 ease-in-out"
-                onClick={onClose} // Ferme le menu après un clic sur mobile
+                onClick={onClose} 
               >
                 {item.name}
               </a>
@@ -62,12 +63,14 @@ const AppSidebar = ({ isOpen, onClose }) => {
   );
 };
 
-// Composant DashboardMenu (basé sur votre structure fournie)
-// Note: Les props ftsLogoUrl et StaticImageData ne sont pas utilisées/disponibles dans cet environnement.
-const DashboardMenu = ({ isSidebarOpen, onToggleSidebar }) => {
-  
-  // Composant helper pour simuler les composants Link et Button externes
-  const ButtonLink = ({ children, href, variant = 'primary', className = '' }) => (
+
+// ------------------------------------------------------------------
+// C'est le composant principal de votre requête, exporté comme une fonction nommée.
+// Cela corrige l'erreur: 'DashboardMenu' is not exported from './DashboardMenu'
+// ------------------------------------------------------------------
+
+// Composant helper pour simuler les composants Link et Button externes
+const ButtonLink = ({ children, href, variant = 'primary', className = '' }) => (
     <a href={href} target="_blank" className={`
       w-full md:w-auto text-center px-6 py-3 rounded-xl font-semibold transition shadow-md flex items-center justify-center text-lg
       ${variant === 'primary' 
@@ -75,21 +78,25 @@ const DashboardMenu = ({ isSidebarOpen, onToggleSidebar }) => {
         : variant === 'outline' 
         ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
         : variant === 'secondary'
-        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' // Correspond à votre variant="secondary"
+        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
         : ''
       }
       ${className}
     `}>
       {children}
     </a>
-  );
+);
 
-  const ButtonDisabled = ({ children }) => (
+const ButtonDisabled = ({ children }) => (
     <button disabled className="w-full md:w-auto text-center px-6 py-3 rounded-xl font-semibold transition shadow-md bg-white text-gray-400 border border-gray-200 cursor-not-allowed flex items-center justify-center text-lg">
         {children}
     </button>
-  );
+);
 
+
+// Utilisation d'un export nommé pour correspondre à votre import { DashboardMenu }
+export function DashboardMenu({ isSidebarOpen, onToggleSidebar }) {
+  
   return (
     <div className="relative w-full">
       {/* BOUTONS TOUJOURS VISIBLES (mobile + desktop) */}
@@ -126,9 +133,6 @@ const DashboardMenu = ({ isSidebarOpen, onToggleSidebar }) => {
             </>
           )}
         </button>
-
-        {/* Note: Sur desktop, le bouton de toggle est masqué car la sidebar est toujours visible. */}
-        {/* Si vous voulez que ce bouton soit visible même sur desktop, retirez la classe md:hidden ci-dessus. */}
       </div>
 
       {/* ÉVÉNEMENTS DÉSACTIVÉS */}
@@ -148,9 +152,11 @@ const DashboardMenu = ({ isSidebarOpen, onToggleSidebar }) => {
       </div>
     </div>
   );
-};
+}
+
 
 // Composant principal (App) qui simule la page entière et gère l'état
+// Ce composant ne correspond pas à votre fichier, mais il est nécessaire pour tester la fonctionnalité ici.
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -169,6 +175,7 @@ const App = () => {
 
       {/* Contenu principal / Menu du tableau de bord */}
       <main className="flex-1 p-4 md:p-8">
+        {/* Le DashboardMenu est utilisé ici */}
         <DashboardMenu 
           isSidebarOpen={isSidebarOpen} 
           onToggleSidebar={toggleSidebar} 
@@ -177,8 +184,7 @@ const App = () => {
         <div className="mt-8 p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Contenu Principal</h2>
             <p className="text-gray-600">
-                Ceci est l'espace où le contenu principal de votre tableau de bord s'affichera. 
-                Redimensionnez l'écran ou ouvrez la prévisualisation sur mobile pour voir le bouton de menu fonctionner.
+                La barre latérale est visible sur les grands écrans. Sur les petits écrans (mobile), utilisez le bouton "Afficher le menu" pour la faire apparaître.
             </p>
         </div>
       </main>
