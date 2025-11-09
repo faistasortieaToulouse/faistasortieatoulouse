@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image, { StaticImageData } from "next/image";
 import { Download, PartyPopper, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AppSidebar } from "@/components/AppSidebar";
+import { StaticImageData } from "next/image";
 
 interface DashboardMenuProps {
   ftsLogoUrl?: string | StaticImageData;
@@ -12,7 +13,6 @@ interface DashboardMenuProps {
 
 export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const toggleMenu = () => setIsMenuOpen(prev => !prev);
 
   return (
     <div className="relative w-full">
@@ -34,65 +34,26 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
           </Link>
         </Button>
 
-        {/* BOUTON POUR AFFICHER LE MENU */}
+        {/* BOUTON POUR AFFICHER LA SIDEBAR MOBILE */}
         <Button
-          onClick={toggleMenu}
+          onClick={() => setIsMenuOpen(true)}
           size="lg"
           variant="secondary"
           className="w-full md:hidden"
         >
-          {isMenuOpen ? (
-            <>
-              <X className="mr-2 h-5 w-5" />
-              Fermer le menu
-            </>
-          ) : (
-            <>
-              <Menu className="mr-2 h-5 w-5" />
-              Afficher le menu
-            </>
-          )}
+          <Menu className="mr-2 h-5 w-5" />
+          Afficher le menu
         </Button>
       </div>
 
-      {/* MENU DÉROULANT MOBILE */}
-      {isMenuOpen && (
-        <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md md:hidden">
-          {/* Logo FTST */}
-          {ftsLogoUrl && (
-            <div className="flex justify-center mb-4">
-              <div className="w-10 h-10 relative">
-                <Image
-                  src={ftsLogoUrl}
-                  alt="Logo FTST"
-                  fill
-                  style={{ objectFit: "contain" }}
-                  sizes="40px"
-                  unoptimized
-                />
-              </div>
-            </div>
-          )}
+      {/* SIDEBAR MOBILE */}
+      <AppSidebar
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        ftsLogoUrl={ftsLogoUrl}
+      />
 
-          {/* Événements désactivés */}
-          <div className="flex flex-col gap-2">
-            <Button size="lg" variant="outline" disabled className="w-full">
-              <PartyPopper className="mr-2 h-5 w-5" />
-              Girls Party
-            </Button>
-            <Button size="lg" variant="outline" disabled className="w-full">
-              <PartyPopper className="mr-2 h-5 w-5" />
-              Student Event
-            </Button>
-            <Button size="lg" variant="outline" disabled className="w-full">
-              <PartyPopper className="mr-2 h-5 w-5" />
-              Rando Trip
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* VERSION DESKTOP */}
+      {/* RUBRIQUES VERSION DESKTOP */}
       <div className="hidden md:flex flex-col gap-2 mt-4">
         <div className="flex gap-4">
           <Button size="lg" variant="outline" disabled>
