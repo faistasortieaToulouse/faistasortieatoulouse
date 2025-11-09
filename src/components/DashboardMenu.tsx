@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
-import { Menu, X, Download, PartyPopper } from "lucide-react";
+import { Menu, X, Download, PartyPopper, MessageCircle } from "lucide-react"; // 👈 Ajout de l’icône WhatsApp
 import { Button } from "@/components/ui/button";
 
 interface DashboardMenuProps {
-  ftsLogoUrl?: string | StaticImageData; // <-- Problème ici
+  ftsLogoUrl?: string | StaticImageData;
 }
 
 export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
@@ -31,15 +31,22 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
         </button>
       </div>
 
+      {/* MOBILE MENU */}
       <div className={mobileMenuClasses}>
         <ul className="flex flex-col gap-2">
+          {/* Bouton principal */}
           <li>
             <Button asChild size="lg" className="w-full">
-              <Link href="https://discord.com/channels/1422806103267344416/1422806103904882842" target="_blank">
+              <Link
+                href="https://discord.com/channels/1422806103267344416/1422806103904882842"
+                target="_blank"
+              >
                 Pour commencer clique sur ce bouton
               </Link>
             </Button>
           </li>
+
+          {/* Télécharger Discord */}
           <li>
             <Button asChild size="lg" variant="outline" className="w-full">
               <Link href="https://discord.com/download" target="_blank">
@@ -49,21 +56,31 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
             </Button>
           </li>
 
-{/* Logo FTST */}
-<li className="flex justify-center mt-2">
-  {ftsLogoUrl && (
-    <div className="w-10 h-10 md:w-12 md:h-12 relative">
-      <Image
-        src={ftsLogoUrl}
-        alt="Logo FTST"
-        fill
-        style={{ objectFit: "contain" }}
-        sizes="40px"
-        unoptimized // <--- AJOUTEZ CETTE LIGNE
-      />
-    </div>
-  )}
-</li>
+          {/* WhatsApp */}
+          <li>
+            <Button asChild size="lg" variant="outline" className="w-full bg-green-50 hover:bg-green-100 text-green-700">
+              <Link href="https://chat.whatsapp.com/DTtPXJb8Z787JDhyjeRS6S" target="_blank">
+                <MessageCircle className="mr-2 h-5 w-5 text-green-600" />
+                Rejoindre le groupe WhatsApp
+              </Link>
+            </Button>
+          </li>
+
+          {/* Logo FTST */}
+          <li className="flex justify-center mt-2">
+            {ftsLogoUrl && (
+              <div className="w-10 h-10 md:w-12 md:h-12 relative">
+                <Image
+                  src={ftsLogoUrl}
+                  alt="Logo FTST"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  sizes="40px"
+                  unoptimized
+                />
+              </div>
+            )}
+          </li>
 
           {/* Événements désactivés */}
           <li className="mt-2">
@@ -87,17 +104,30 @@ export function DashboardMenu({ ftsLogoUrl }: DashboardMenuProps) {
       <div className="hidden md:flex flex-col gap-2 mt-4">
         <div className="flex gap-4">
           <Button asChild size="lg">
-            <Link href="https://discord.com/channels/1422806103267344416/1422806103904882842" target="_blank">
+            <Link
+              href="https://discord.com/channels/1422806103267344416/1422806103904882842"
+              target="_blank"
+            >
               Pour commencer clique sur ce bouton
             </Link>
           </Button>
+
           <Button asChild size="lg" variant="outline">
             <Link href="https://discord.com/download" target="_blank">
               <Download className="mr-2 h-5 w-5" />
               Télécharger Discord
             </Link>
           </Button>
+
+          {/* WhatsApp (desktop) */}
+          <Button asChild size="lg" variant="outline" className="bg-green-50 hover:bg-green-100 text-green-700">
+            <Link href="https://chat.whatsapp.com/DTtPXJb8Z787JDhyjeRS6S" target="_blank">
+              <MessageCircle className="mr-2 h-5 w-5 text-green-600" />
+              Rejoindre le groupe WhatsApp
+            </Link>
+          </Button>
         </div>
+
         <div className="flex gap-4 mt-2">
           <Button size="lg" variant="outline" disabled>
             <PartyPopper className="mr-2 h-5 w-5" />
