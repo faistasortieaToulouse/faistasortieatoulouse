@@ -9,6 +9,13 @@ import { Map, LifeBuoy } from "lucide-react";
 // Les imports suivants sont commentés car ils ne sont pas définis dans cet environnement
 // import { SidebarTrigger } from "@/components/ui/sidebar";
 // import GoogleTranslate from '@/components/GoogleTranslate';
+import { StaticImageData } from "next/image";
+
+interface AppSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  ftsLogoUrl?: string | StaticImageData;
+}
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -33,7 +40,7 @@ const EXTERNAL_LOGO = "https://firebasestorage.googleapis.com/v0/b/tolosaamicals
 // Le chemin local est celui qui fonctionne sur ordinateur
 const LOCAL_LOGO = "/icons/faistasortielogo192OK.png"; 
 
-export function AppSidebar() {
+export function AppSidebar({ isOpen, onClose, ftsLogoUrl }: AppSidebarProps) {
   const [logoSrc, setLogoSrc] = useState(EXTERNAL_LOGO);
   const [collapsed, setCollapsed] = useState(false);
 
