@@ -4,279 +4,294 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
 const LANGS = [
-    { code: 'fr', label: 'Français' },
-    { code: 'de', label: 'Allemand' },
-    { code: 'en', label: 'Anglais' },
-    { code: 'ar', label: 'Arabe' },
-    { code: 'zh-CN', label: 'Chinois (simpl.)' },
-    { code: 'es', label: 'Espagnol' },
-    { code: 'it', label: 'Italien' },
-    { code: 'ja', label: 'Japonais' },
-    { code: 'pt', label: 'Portugais' },
-    { code: 'ru', label: 'Russe' },
-    { code: 'tr', label: 'Turc' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Allemand' },
+  { code: 'en', label: 'Anglais' },
+  { code: 'ar', label: 'Arabe' },
+  { code: 'zh-CN', label: 'Chinois (simpl.)' },
+  { code: 'es', label: 'Espagnol' },
+  { code: 'it', label: 'Italien' },
+  { code: 'ja', label: 'Japonais' },
+  { code: 'pt', label: 'Portugais' },
+  { code: 'ru', label: 'Russe' },
+  { code: 'tr', label: 'Turc' },
 ];
 
-// Langues supplémentaires uniquement (exclues de LANGS)
 const EXTRA_LANGS = [
-    { code: 'eu', label: 'Basque' },
-    { code: 'ko', label: 'Coréen' },
-    { code: 'fa', label: 'Farci' },
-    { code: 'el', label: 'Grec' },
-    { code: 'hi', label: 'Hindi' },
-    { code: 'id', label: 'Indonésien' },
-    { code: 'nl', label: 'Néerlandais' },
-    { code: 'oc', label: 'Occitan' },
-    { code: 'pl', label: 'Polonais' },
-    { code: 'ro', label: 'Roumain' },
-    { code: 'sv', label: 'Suédois' },
-    { code: 'th', label: 'Thaïlandais' },
-    { code: 'vi', label: 'Vietnamien' },
+  { code: 'eu', label: 'Basque' },
+  { code: 'ko', label: 'Coréen' },
+  { code: 'fa', label: 'Farci' },
+  { code: 'el', label: 'Grec' },
+  { code: 'hi', label: 'Hindi' },
+  { code: 'id', label: 'Indonésien' },
+  { code: 'nl', label: 'Néerlandais' },
+  { code: 'oc', label: 'Occitan' },
+  { code: 'pl', label: 'Polonais' },
+  { code: 'ro', label: 'Roumain' },
+  { code: 'sv', label: 'Suédois' },
+  { code: 'th', label: 'Thaïlandais' },
+  { code: 'vi', label: 'Vietnamien' },
 ];
 
 function setCookie(name: string, value: string, days?: number) {
-    if (typeof document === 'undefined') return;
-    
-    // Liste des domaines à cibler
-    const domains = [
-        document.location.hostname, // Domaine actuel (ex: www.faistasortieatoulouse.online)
-        '.' + document.location.hostname, // Domaine actuel avec point
-        '.faistasortieatoulouse.online', // Domaine racine (pour couvrir www. et l'absence de www.)
-    ];
+  if (typeof document === 'undefined') return;
 
-    let cookie = `${name}=${value};path=/;`;
-    if (days) {
-        const d = new Date();
-        d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-        cookie += `expires=${d.toUTCString()};`;
-    }
+  const domains = [
+    document.location.hostname,
+    '.' + document.location.hostname,
+    '.faistasortieatoulouse.online',
+  ];
 
-    // Tenter de définir le cookie sur tous les domaines potentiels
-    domains.forEach(domain => {
-        document.cookie = `${cookie}domain=${domain};`;
-    });
+  let cookie = `${name}=${value};path=/;`;
+  if (days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    cookie += `expires=${d.toUTCString()};`;
+  }
+
+  domains.forEach(domain => {
+    document.cookie = `${cookie}domain=${domain};`;
+  });
 }
 
 function getCookie(name: string) {
-    if (typeof document === 'undefined') return null;
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? decodeURIComponent(match[2]) : null;
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 function deleteCookie(name: string) {
-    if (typeof document === 'undefined') return;
+  if (typeof document === 'undefined') return;
 
-    // Liste des domaines à cibler pour la suppression
-    const domains = [
-        document.location.hostname, 
-        '.' + document.location.hostname,
-        '.faistasortieatoulouse.online',
-    ];
-    
-    // Le cookie de suppression (date expirée)
-    const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
-    
-    // Tenter de supprimer le cookie sur tous les domaines potentiels
-    domains.forEach(domain => {
-        document.cookie = `${expiredCookie}domain=${domain};`;
-    });
+  const domains = [
+    document.location.hostname,
+    '.' + document.location.hostname,
+    '.faistasortieatoulouse.online',
+  ];
+
+  const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
+
+  domains.forEach(domain => {
+    document.cookie = `${expiredCookie}domain=${domain};`;
+  });
 }
 
 export default function GoogleTranslateCustom() {
-    const [selectedLang, setSelectedLang] = useState('fr');
-    const [scriptReady, setScriptReady] = useState(false);
-    const [showExtra, setShowExtra] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('fr');
+  const [scriptReady, setScriptReady] = useState(false);
+  const [showExtra, setShowExtra] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
-    useEffect(() => {
-        const cookie = getCookie('googtrans');
-        const currentLang = cookie?.split('/')[2];
+  useEffect(() => {
+    const cookie = getCookie('googtrans');
+    const currentLang = cookie?.split('/')[2];
 
-        // Maintien de la vérification initiale
-        if (!cookie || !currentLang) {
-            // S'assurer que le cookie est défini sur 'fr' par défaut au premier chargement
-            setCookie('googtrans', '/fr/fr', 7);
-        }
+    if (!cookie || !currentLang) {
+      setCookie('googtrans', '/fr/fr', 7);
+    }
 
-        setSelectedLang(currentLang || 'fr');
-        setScriptReady(true);
+    setSelectedLang(currentLang || 'fr');
+    setScriptReady(true);
 
-        // Code pour masquer la bannière, conservé ici
-        const interval = setInterval(() => {
-            const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
-            if (bannerFrame) {
-                bannerFrame.style.height = '20px';
-                bannerFrame.style.minHeight = '20px';
-                bannerFrame.style.maxHeight = '20px';
-                bannerFrame.style.overflow = 'hidden';
-                bannerFrame.style.position = 'fixed';
-                bannerFrame.style.bottom = '0';
-                bannerFrame.style.top = 'auto';
-                bannerFrame.style.zIndex = '9999';
-            }
-        }, 500);
+    const interval = setInterval(() => {
+      const bannerFrame = document.querySelector('iframe.goog-te-banner-frame') as HTMLIFrameElement | null;
+      if (bannerFrame) {
+        bannerFrame.style.height = '20px';
+        bannerFrame.style.minHeight = '20px';
+        bannerFrame.style.maxHeight = '20px';
+        bannerFrame.style.overflow = 'hidden';
+        bannerFrame.style.position = 'fixed';
+        bannerFrame.style.bottom = '0';
+        bannerFrame.style.top = 'auto';
+        bannerFrame.style.zIndex = '9999';
+      }
+    }, 500);
 
-        return () => clearInterval(interval);
-    }, []);
+    return () => clearInterval(interval);
+  }, []);
 
-
-const changeLang = (lang: string) => {
+  const changeLang = (lang: string) => {
     if (lang === selectedLang) return;
 
     if (lang === 'fr') {
-        // 1. Tenter la suppression agressive du cookie (méthode de secours)
-        deleteCookie('googtrans'); 
-        deleteCookie('googtrans_save'); 
+      deleteCookie('googtrans');
+      deleteCookie('googtrans_save');
 
-        // 2. 🛑 NOUVEAU : Tentative de réinitialisation via la fonction interne de Google Translate.
-        // Cible la traduction de la langue actuellement sélectionnée vers la langue d'origine (fr).
-        const currentTranslation = getCookie('googtrans'); 
-        const sourceLang = currentTranslation ? currentTranslation.split('/')[1] : 'fr';
-        
-        if (typeof (window as any).doGTranslate === 'function') {
-            // Forcer la traduction vers la langue source pour annuler
-            (window as any).doGTranslate(sourceLang + '|fr');
-        } else {
-             // Utiliser l'astuce du fragment d'URL pour la désactivation (méthode de secours)
-             window.location.hash = '#googtrans(fr|fr)'; 
-        }
+      const currentTranslation = getCookie('googtrans');
+      const sourceLang = currentTranslation ? currentTranslation.split('/')[1] : 'fr';
 
-        // 3. CLÉ : Nettoyer l'historique/URL sans recharger
-        // Ceci enlève le #googtrans(...) sans redémarrer le cycle de traduction.
-        const cleanUrl = window.location.href.split('#')[0];
-        window.history.pushState('', document.title, cleanUrl);
+      if (typeof (window as any).doGTranslate === 'function') {
+        (window as any).doGTranslate(sourceLang + '|fr');
+      } else {
+        window.location.hash = '#googtrans(fr|fr)';
+      }
 
-        // 4. Mettre à jour l'état local pour refléter 'fr'
-        setSelectedLang('fr');
-        
-        // 5. Recharger après un court délai pour que l'API ait le temps de réagir au doGTranslate
-        setTimeout(() => {
-            window.location.reload();
-        }, 50); 
-        
+      const cleanUrl = window.location.href.split('#')[0];
+      window.history.pushState('', document.title, cleanUrl);
+
+      setSelectedLang('fr');
+      setTimeout(() => {
+        window.location.reload();
+      }, 50);
     } else {
-        // Définir le cookie si on traduit vers une autre langue.
-        const val = `/fr/${lang}`;
-        setCookie('googtrans', val, 7);
-        window.location.reload();
+      const val = `/fr/${lang}`;
+      setCookie('googtrans', val, 7);
+      window.location.reload();
     }
-    
-    // Si ce n'est pas le retour au français, on recharge au-dessus.
+
     if (lang !== 'fr') {
-        window.location.reload();
+      window.location.reload();
     }
-};
+  };
 
-    return (
+  return (
+    <>
+      <style jsx global>{`
+        .goog-te-banner-frame.skiptranslate,
+        body > .skiptranslate,
+        iframe.goog-te-banner-frame,
+        iframe#\\:1\\.container {
+          display: none !important;
+          visibility: hidden !important;
+          height: 0 !important;
+        }
+        body {
+          top: 0px !important;
+          position: relative !important;
+          margin-bottom: 20px !important;
+        }
+        .goog-te-overlay,
+        .goog-logo-link,
+        .goog-te-gadget-icon,
+        .goog-te-menu-value,
+        .goog-te-combo {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        .goog-te-gadget {
+          font-size: 0 !important;
+        }
+      `}</style>
+
+      <div id="google_translate_element" style={{ display: 'none' }} />
+
+      {scriptReady && (
         <>
-            <style jsx global>{`
-                .goog-te-banner-frame.skiptranslate,
-                body > .skiptranslate,
-                iframe.goog-te-banner-frame,
-                iframe#\\:1\\.container {
-                    display: none !important;
-                    visibility: hidden !important;
-                    height: 0 !important;
-                }
-                body {
-                    top: 0px !important;
-                    position: relative !important;
-                    margin-bottom: 20px !important;
-                }
-                .goog-te-overlay,
-                .goog-logo-link,
-                .goog-te-gadget-icon,
-                .goog-te-menu-value,
-                .goog-te-combo {
-                    display: none !important;
-                    visibility: hidden !important;
-                }
-                .goog-te-gadget {
-                    font-size: 0 !important;
-                }
-            `}</style>
+          <Script
+            src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+            strategy="afterInteractive"
+          />
 
-            <div id="google_translate_element" style={{ display: 'none' }} />
-
-            {scriptReady && (
-                <>
-                    <Script
-                        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-                        strategy="afterInteractive"
-                    />
-                    
-                    <Script id="google-translate-init" strategy="afterInteractive">
-                        {`
-                            function googleTranslateElementInit() {
-                                new google.translate.TranslateElement({
-                                    pageLanguage: 'fr',
-                                    autoDisplay: false,
-                                    // 🚨 AJOUTEZ CETTE LIGNE 🚨
-                                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                                }, 'google_translate_element');
-                            }
-                        `}
-                    </Script>
-                </>
-            )}
-
-            <div className="google-translate-custom flex flex-wrap items-center gap-2 mt-4">
-                <select
-                    id="my-gg-select"
-                    onChange={(e) => changeLang(e.target.value)}
-                    value={selectedLang}
-                    aria-label="Sélectionner une langue"
-                    className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
-                >
-                    <option value="" disabled>Choisis ta langue</option>
-                    {LANGS.map(lang => (
-                        <option key={lang.code} value={lang.code}>
-                            {lang.label}
-                        </option>
-                    ))}
-                </select>
-
-                {selectedLang !== 'fr' && (
-                    <button
-                        onClick={() => changeLang('fr')}
-                        className="px-2 py-1 text-sm rounded bg-muted hover:bg-muted/80 transition-colors"
-                    >
-                        Revenir au français
-                    </button>
-                )}
-
-                <button
-                    onClick={() => setShowExtra(!showExtra)}
-                    className="text-sm underline text-primary"
-                >
-                    {showExtra ? 'Masquer les autres langues' : 'Afficher d’autres langues'}
-                </button>
-            </div>
-
-            {showExtra && (
-                <select
-                    onChange={(e) => changeLang(e.target.value)}
-                    value={selectedLang}
-                    aria-label="Sélectionner une langue supplémentaire"
-                    className="mt-2 px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
-                >
-                    <option value="" disabled>Choisis une langue supplémentaire</option>
-                    {EXTRA_LANGS.map(lang => (
-                        <option key={lang.code} value={lang.code}>
-                            {lang.label}
-                        </option>
-                    ))}
-                </select>
-            )}
-
-            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-                <img
-                    src="https://www.gstatic.com/images/branding/product/1x/translate_24dp.png"
-                    alt="Google Translate"
-                    width={16}
-                    height={16}
-                />
-                <span>Traduction fournie par Google Translate</span>
-            </div>
+          <Script id="google-translate-init" strategy="afterInteractive">
+            {`
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'fr',
+                  autoDisplay: false,
+                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element');
+              }
+            `}
+          </Script>
         </>
-    );
+      )}
+
+      <div className="google-translate-custom flex flex-wrap items-center gap-2 mt-4">
+        <select
+          id="my-gg-select"
+          onChange={(e) => changeLang(e.target.value)}
+          value={selectedLang}
+          aria-label="Sélectionner une langue"
+          className="px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
+        >
+          <option value="" disabled>Choisis ta langue</option>
+          {LANGS.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
+        </select>
+
+        {selectedLang !== 'fr' && (
+          <button
+            onClick={() => changeLang('fr')}
+            className="px-2 py-1 text-sm rounded bg-muted hover:bg-muted/80 transition-colors"
+          >
+            Revenir au français
+          </button>
+        )}
+
+        <button
+          onClick={() => setShowExtra(!showExtra)}
+          className="text-sm underline text-primary"
+        >
+          {showExtra ? 'Masquer les autres langues' : 'Afficher d’autres langues'}
+        </button>
+      </div>
+
+      {showExtra && (
+        <select
+          onChange={(e) => changeLang(e.target.value)}
+          value={selectedLang}
+          aria-label="Sélectionner une langue supplémentaire"
+          className="mt-2 px-2 py-1 rounded border shadow-sm bg-card hover:bg-muted/70 transition-colors"
+        >
+          <option value="" disabled>Choisis une langue supplémentaire</option>
+          {EXTRA_LANGS.map(lang => (
+            <option key={lang.code} value={lang.code}>
+              {lang.label}
+            </option>
+          ))}
+        </select>
+      )}
+
+      <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+        <img
+          src="https://www.gstatic.com/images/branding/product/1x/translate_24dp.png"
+          alt="Google Translate"
+          width={16}
+          height={16}
+        />
+        <span>Traduction fournie par Google Translate</span>
+      </div>
+
+      {/* === Bloc d’aide utilisateur === */}
+      <div className="mt-4 text-xs text-muted-foreground">
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-primary underline text-sm"
+        >
+          {showHelp ? 'Masquer l’aide' : 'Besoin d’aide ?'}
+        </button>
+
+        {showHelp && (
+          <div className="mt-3 space-y-2 bg-muted/40 p-3 rounded-xl border border-muted shadow-sm leading-relaxed text-sm">
+            <p>
+              🧹 <strong>Si la traduction reste bloquée</strong>, supprime le cookie du site&nbsp;
+              <code className="px-1 bg-card rounded">faistasortieatoulouse.online</code>.
+            </p>
+
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                <strong>Chrome / Edge :</strong> clique sur le 🔒 à gauche de l’adresse →
+                <em> Cookies et données de site</em> → supprime <em>faistasortieatoulouse.online</em>.
+              </li>
+              <li>
+                <strong>Firefox :</strong> 🔒 → <em>Effacer les cookies et données du site</em>.
+              </li>
+              <li>
+                <strong>Safari :</strong> Réglages → Confidentialité → Gérer les données → cherche le site → Supprimer.
+              </li>
+            </ul>
+
+            <p>
+              🌍 <strong>Depuis la barre Google Translate :</strong> clique sur ⚙️ →
+              <em> Afficher la page originale</em>.  
+              Si cela ne suffit pas, supprime le cookie comme ci-dessus.
+            </p>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
