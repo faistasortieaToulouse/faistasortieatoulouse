@@ -35,20 +35,17 @@ const EXTRA_LANGS = [
 
 function setCookie(name: string, value: string, days?: number) {
   if (typeof document === 'undefined') return;
-
   const domains = [
     document.location.hostname,
     '.' + document.location.hostname,
     '.faistasortieatoulouse.online',
   ];
-
   let cookie = `${name}=${value};path=/;`;
   if (days) {
     const d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
     cookie += `expires=${d.toUTCString()};`;
   }
-
   domains.forEach(domain => {
     document.cookie = `${cookie}domain=${domain};`;
   });
@@ -62,15 +59,12 @@ function getCookie(name: string) {
 
 function deleteCookie(name: string) {
   if (typeof document === 'undefined') return;
-
   const domains = [
     document.location.hostname,
     '.' + document.location.hostname,
     '.faistasortieatoulouse.online',
   ];
-
   const expiredCookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;`;
-
   domains.forEach(domain => {
     document.cookie = `${expiredCookie}domain=${domain};`;
   });
@@ -80,7 +74,7 @@ export default function GoogleTranslateCustom() {
   const [selectedLang, setSelectedLang] = useState('fr');
   const [scriptReady, setScriptReady] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false); // ✅ Nouveau : état pour la modale d’aide
 
   useEffect(() => {
     const cookie = getCookie('googtrans');
@@ -130,18 +124,14 @@ export default function GoogleTranslateCustom() {
       window.history.pushState('', document.title, cleanUrl);
 
       setSelectedLang('fr');
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+      setTimeout(() => window.location.reload(), 50);
     } else {
       const val = `/fr/${lang}`;
       setCookie('googtrans', val, 7);
       window.location.reload();
     }
 
-    if (lang !== 'fr') {
-      window.location.reload();
-    }
+    if (lang !== 'fr') window.location.reload();
   };
 
   return (
@@ -181,7 +171,6 @@ export default function GoogleTranslateCustom() {
             src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
             strategy="afterInteractive"
           />
-
           <Script id="google-translate-init" strategy="afterInteractive">
             {`
               function googleTranslateElementInit() {
@@ -227,6 +216,14 @@ export default function GoogleTranslateCustom() {
         >
           {showExtra ? 'Masquer les autres langues' : 'Afficher d’autres langues'}
         </button>
+
+        {/* Bouton d’aide */}
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="text-sm underline text-primary ml-auto"
+        >
+          ❓ Besoin d’aide ?
+        </button>
       </div>
 
       {showExtra && (
@@ -255,43 +252,50 @@ export default function GoogleTranslateCustom() {
         <span>Traduction fournie par Google Translate</span>
       </div>
 
-      {/* === Bloc d’aide utilisateur === */}
-      <div className="mt-4 text-xs text-muted-foreground">
-        <button
-          onClick={() => setShowHelp(!showHelp)}
-          className="text-primary underline text-sm"
+      {/* ✅ Modale d’aide (popup) */}
+      {helpOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center"
+          onClick={() => setHelpOpen(false)}
         >
-          {showHelp ? 'Masquer l’aide' : 'Besoin d’aide ?'}
-        </button>
+          <div
+            className="bg-background text-foreground p-5 rounded-2xl shadow-xl max-w-md w-[90%] relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setHelpOpen(false)}
+              className="absolute top-2 right-3 text-lg font-bold text-muted-foreground hover:text-foreground"
+            >
+              ×
+            </button>
 
-        {showHelp && (
-          <div className="mt-3 space-y-2 bg-muted/40 p-3 rounded-xl border border-muted shadow-sm leading-relaxed text-sm">
-            <p>
-              🧹 <strong>Si la traduction reste bloquée</strong>, supprime le cookie du site&nbsp;
-              <code className="px-1 bg-card rounded">faistasortieatoulouse.online</code>.
+            <h3 className="text-lg font-semibold mb-2">🧭 Aide : Réinitialiser Google Translate</h3>
+            <p className="mb-2">
+              Si la traduction reste bloquée, supprime le cookie du site 
+              <code className="px-1 bg-muted rounded">faistasortieatoulouse.online</code>.
             </p>
 
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-1 mb-3">
               <li>
-                <strong>Chrome / Edge :</strong> clique sur le 🔒 à gauche de l’adresse →
-                <em> Cookies et données de site</em> → supprime <em>faistasortieatoulouse.online</em>.
+                <strong>Chrome / Edge :</strong> 🔒 à gauche de l’adresse →
+                <em> Cookies et données de site</em> → Supprimer <em>faistasortieatoulouse.online</em>.
               </li>
               <li>
                 <strong>Firefox :</strong> 🔒 → <em>Effacer les cookies et données du site</em>.
               </li>
               <li>
-                <strong>Safari :</strong> Réglages → Confidentialité → Gérer les données → cherche le site → Supprimer.
+                <strong>Safari :</strong> Réglages → Confidentialité → Gérer les données → Supprimer le site.
               </li>
             </ul>
 
             <p>
-              🌍 <strong>Depuis la barre Google Translate :</strong> clique sur ⚙️ →
+              🌍 <strong>Depuis la barre Google Translate :</strong> clique sur ⚙️ → 
               <em> Afficher la page originale</em>.  
-              Si cela ne suffit pas, supprime le cookie comme ci-dessus.
+              Si ça ne suffit pas, supprime le cookie comme ci-dessus.
             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
