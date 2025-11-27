@@ -30,7 +30,7 @@ export async function GET() {
 
     // --- EVENTS PRIVÉS (nécessite BOT TOKEN)
     const eventsRes = await fetch(
-      `https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/events?with_user_count=true`,
+      ``https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/scheduled-events?with_user_count=true``,
       {
         headers: {
           Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
